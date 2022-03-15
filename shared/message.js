@@ -7,7 +7,7 @@ export const messageTypeMediaGroup = 'MEDIA_GROUP';
 
 const defaultFilename = 'bill.pdf';
 
-export function format(messages) {
+export function format(messages, DEBUG) {
   const mediaGroup = messages
     .filter((message) => message.fileBuffer?.length > 0)
     .map((message) => ({
@@ -21,9 +21,10 @@ export function format(messages) {
   const mediaMessages = [{ type: messageTypeMediaGroup, data: mediaGroup }];
 
   const total = getTotal(messages.map((message) => message.value || 0));
+
   const text = [
     `Счета за период: ${getPeriodString()}`, 
-    ...messages.map((message) => message.text), 
+    ...messages.map((message) => message.text + (DEBUG && message.error ? '\n' + JSON.stringify(message.error) : '' )),
     `Всего: ${total}₽`
   ].join('\n');
 
@@ -37,6 +38,6 @@ export function format(messages) {
   return [...textMessages, ...mediaMessages];
 }
 
-export function getErrorMessage(prefix, error) {
-   return prefix + ': Что-то пошло не так 💩' + (process.env.DEBUG ? '\n' + JSON.stringify(error) : '')
+export function getErrorMessage(prefix) {
+   return prefix + ': Что-то пошло не так 💩';
 }

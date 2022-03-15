@@ -17,7 +17,8 @@ if (token === undefined) {
   throw new Error('Telegram Bot token is missing!');
 }
 
-const DEBUG = process.env.DEBUG;
+let DEBUG = false;
+
 const bot = new Telegraf(process.env.BOT_TOKEN);
   // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
@@ -26,7 +27,7 @@ process.once('SIGTERM', () => bot.stop('SIGTERM'));
 async function callback(ctx) {
     try {
       ctx.reply('⏳ Wait for it...');
-      const messages = await getValues(ctx);
+      const messages = await getValues();
       messages.forEach((message) => {
         const { type, ...payload } = message;
         switch (type) {
@@ -58,7 +59,7 @@ async function getValues() {
   const waterValues = await water.fetch();
   const electricityValues = await electricity.fetch();
 
-  const formatted = format([waterValues, electricityValues]);
+  const formatted = format([waterValues, electricityValues], DEBUG);
   
   return messages.concat(formatted);
 }
@@ -71,6 +72,11 @@ export async function start() {
 
   bot.command('?', callback);
   bot.hears('?', callback);
+  bot.hears('debug', (ctx) => {
+    DEBUG = true;
+    await callback(ctx);
+    DEBUG = false;
+  })
 }
 
 export async function handleUpdate(message) {

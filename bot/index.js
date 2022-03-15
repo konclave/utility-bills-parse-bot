@@ -72,11 +72,11 @@ export async function start() {
 
   bot.command('?', callback);
   bot.hears('?', callback);
-  bot.hears('debug', (ctx) => {
+  bot.hears('debug', async (ctx) => {
     DEBUG = true;
     await callback(ctx);
     DEBUG = false;
-  })
+  });
 }
 
 export async function handleUpdate(message) {

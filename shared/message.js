@@ -36,3 +36,7 @@ export function format(messages) {
 
   return [...textMessages, ...mediaMessages];
 }
+
+export function getErrorMessage(prefix, error) {
+   return prefix + ': Что-то пошло не так 💩' + (process.env.DEBUG ? '\n' + JSON.stringify(error) : '')
+}

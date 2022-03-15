@@ -6,6 +6,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
+    - uses: thedoctor0/zip-release@master
+      with: 
+        type: 'zip'
+        filename: './dist/release.zip'
+        exclusions: '*.git* /*node_modules/* .editorconfig .prettierignore .prettierrc.json Makefile pnpm-lock.yaml'
     - uses: goodsmileduck/yandex-serverless-action@v1
       with:
         token: ${{ secrets.YC_TOKEN }}
@@ -14,5 +19,5 @@ jobs:
         memory: '128'
         entrypoint: 'index.handler'
         environment: LOGIN=9990000083,PASSWORD=Neh6zN@aLe,MOSENERGO_LOGIN=vianomore@gmail.com,MOSENERGO_PASSWORD=Mr7RSxPS2mi7dcCV,MOSENERGO_ACCOUNT=2361244,MOSENERGO_ID_KNG=147616,MOSENERGO_NM_ABN=173,BOT_TOKEN=5254661965:AAHXJYHgHbavZzc2OskkUsUdhTyZmV63xJs,BOT_HOOK_PATH=/how-much,YANDEX_HOOK_URL=https://d5dvbvaselvn2d30mv6v.apigw.yandexcloud.net/how-much&drop_pending_updates=true
-        source: '.'
+        source: './dist/release.zip'
         execution_timeout: 30

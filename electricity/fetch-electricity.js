@@ -28,7 +28,7 @@ export async function fetch() {
   try {
     const { session } = await login(username, password);
   } catch (error) {
-    throw new Error(error);
+    throw error;
   }
   const { vl_params } = await fetchPdfRequestParams(session);
   const pdf = await fetchPdf(vl_params);
@@ -64,7 +64,7 @@ async function login(username, password) {
     const response = await client(options);
     return response.data.data[0];
   } catch (e) {
-    throw new Error(e);
+    throw e;
   }
 }
 
@@ -92,8 +92,7 @@ async function fetchPdfRequestParams(session) {
     const response = await client(options);
     return response.data.data[0];
   } catch (e) {
-    console.log(e);
-    throw new Error(e);
+    throw e;
   }
 }
 
@@ -122,6 +121,6 @@ async function fetchPdf(dataJson) {
     const response = await client(options);
     return response.data;
   } catch (e) {
-    throw new Error(e);
+    throw e;
   }
 }

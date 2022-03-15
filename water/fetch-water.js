@@ -53,8 +53,8 @@ async function login(username, password) {
   try {
     const response = await client(options);
     return response.data;
-  } catch (e) {
-    throw new Error(e);
+  } catch (error) {
+    throw error;
   }
 }
 
@@ -87,7 +87,7 @@ async function fetchPdf(username, data) {
   try {
     const response = await client(options);
     return response.data;
-  } catch (e) {
-    throw new Error(e);
+  } catch (error) {
+    throw error;
   }
 }

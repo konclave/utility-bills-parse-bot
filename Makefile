@@ -1,13 +1,15 @@
 SHELL = /bin/bash
 include .env
 
+.PHONY: deploy
+deploy: pack register deploy-yc
+
 .PHONY: upload
 upload:
 	aws lambda update-function-code --zip-file fileb://bill-parser.zip --function-name GetExpensesTelegramBot
 
 .PHONY: pack
-pack:
-	rm ./bill-parser.zip
+pack: cleanup
 	zip -r9q bill-parser.zip ./
 
 .PHONY: status
@@ -29,9 +31,9 @@ deploy-yc:
 		--environment PASSWORD=$(PASSWORD) \
 		--environment MOSENERGO_LOGIN=$(MOSENERGO_LOGIN) \
 		--environment MOSENERGO_PASSWORD=$(MOSENERGO_PASSWORD) \
-		--environment MOSENERGO_ACCOUNT=$(MOSENERGO_ACCOUNT)
-		--environment MOSENERGO_ID_KNG=$(MOSENERGO_ID_KNG)
-		--environment MOSENERGO_NM_ABN=$(MOSENERGO_NM_ABN)
+		--environment MOSENERGO_ACCOUNT=$(MOSENERGO_ACCOUNT) \
+		--environment MOSENERGO_ID_KNG=$(MOSENERGO_ID_KNG) \
+		--environment MOSENERGO_NM_ABN=$(MOSENERGO_NM_ABN) \
 		--environment BOT_TOKEN=$(BOT_TOKEN) \
 		--environment BOT_HOOK_PATH=$(BOT_HOOK_PATH) \
 		--environment REQUEST_TIMEOUT=5000 \

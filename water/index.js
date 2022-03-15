@@ -1,6 +1,6 @@
 import { fetch as fetchWater } from './fetch-water.js';
 import { parse } from './parse-water.js';
-import { getErrorMessage } from '../shared/messages.js';
+import { getErrorMessage } from '../shared/message.js';
 
 export async function fetch() {
   try {

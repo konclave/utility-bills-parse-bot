@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "uvu shared _tests_"
   },
   "author": "",
   "license": "ISC",
@@ -19,6 +19,7 @@
   "type": "module",
   "devDependencies": {
     "nodemon": "^2.0.15",
-    "prettier": "^2.5.1"
+    "prettier": "^2.5.1",
+    "uvu": "^0.5.3"
   }
 }

@@ -13,7 +13,7 @@ jobs:
         runtime: 'nodejs16'
         memory: '128'
         entrypoint: 'index.handler'
-        environment: LOGIN=9990000083,PASSWORD=Neh6zN@aLe,MOSENERGO_LOGIN=vianomore@gmail.com,MOSENERGO_PASSWORD=Mr7RSxPS2mi7dcCV,MOSENERGO_ACCOUNT=2361244,MOSENERGO_ID_KNG=147616,MOSENERGO_NM_ABN=173,BOT_TOKEN=5254661965:AAHXJYHgHbavZzc2OskkUsUdhTyZmV63xJs,BOT_HOOK_PATH=/how-much,YANDEX_HOOK_URL=https://d5dvbvaselvn2d30mv6v.apigw.yandexcloud.net/how-much&drop_pending_updates=true
+        environment: LOGIN=${{ secrets.LOGIN }},PASSWORD=${{ secrets.PASSWORD }},MOSENERGO_LOGIN=${{ secrets.MOSENERGO_LOGIN }},MOSENERGO_PASSWORD=${{MOSENERGO_PASSWORD}},MOSENERGO_ACCOUNT=${{MOSENERGO_ACCOUNT}},MOSENERGO_ID_KNG=${{MOSENERGO_ID_KNG}},MOSENERGO_NM_ABN=${{MOSENERGO_NM_ABN}},BOT_TOKEN=${{BOT_TOKEN}},BOT_HOOK_PATH=${{BOT_HOOK_PATH}},YANDEX_HOOK_URL=${{YANDEX_HOOK_URL}}
         source: '.'
         exclude: '.git'
         execution_timeout: 30

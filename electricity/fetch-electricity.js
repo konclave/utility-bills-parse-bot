@@ -1,5 +1,4 @@
 import axios from 'axios';
-import cheerio from 'cheerio';
 import { getFetchPeriod } from '../shared/period.js';
 
 const client = axios.create({
@@ -26,13 +25,19 @@ export async function fetch() {
     throw new Error('Password is missing!');
   }
   try {
-    const { session } = await login(username, password);
+    const loginData = await login(username, password);
+    const { session } = loginData;
+
+    if (session === undefined) {
+      throw new Error(loginData.nm_result);
+    }
+
+    const { vl_params } = await fetchPdfRequestParams(session);
+    const pdf = await fetchPdf(vl_params);
+    return pdf;
   } catch (error) {
     throw error;
   }
-  const { vl_params } = await fetchPdfRequestParams(session);
-  const pdf = await fetchPdf(vl_params);
-  return pdf;
 }
 
 async function login(username, password) {
@@ -59,13 +64,8 @@ async function login(username, password) {
       Referer: 'https://my.mosenergosbyt.ru/auth',
     },
   };
-
-  try {
-    const response = await client(options);
-    return response.data.data[0];
-  } catch (e) {
-    throw e;
-  }
+  const loginResponse = await client(options);
+  return loginResponse.data.data[0];
 }
 
 async function fetchPdfRequestParams(session) {
@@ -87,13 +87,8 @@ async function fetchPdfRequestParams(session) {
       Referer: `https://my.mosenergosbyt.ru/accounts/${process.env.MOSENERGO_ACCOUNT}/events/all-events`,
     },
   };
-
-  try {
-    const response = await client(options);
-    return response.data.data[0];
-  } catch (e) {
-    throw e;
-  }
+  const response = await client(options);
+  return response.data.data[0];
 }
 
 async function fetchPdf(dataJson) {
@@ -117,10 +112,6 @@ async function fetchPdf(dataJson) {
     responseEncoding: 'binary',
   };
 
-  try {
-    const response = await client(options);
-    return response.data;
-  } catch (e) {
-    throw e;
-  }
+  const response = await client(options);
+  return response.data;
 }

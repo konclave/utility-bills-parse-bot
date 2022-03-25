@@ -13,7 +13,7 @@ jobs:
         runtime: 'nodejs16'
         memory: '128'
         entrypoint: 'index.handler'
-        environment: LOGIN=${{ secrets.LOGIN }},PASSWORD=${{ secrets.PASSWORD }},MOSENERGO_LOGIN=${{ secrets.MOSENERGO_LOGIN }},MOSENERGO_PASSWORD=${{MOSENERGO_PASSWORD}},MOSENERGO_ACCOUNT=${{MOSENERGO_ACCOUNT}},MOSENERGO_ID_KNG=${{MOSENERGO_ID_KNG}},MOSENERGO_NM_ABN=${{MOSENERGO_NM_ABN}},BOT_TOKEN=${{BOT_TOKEN}},BOT_HOOK_PATH=${{BOT_HOOK_PATH}},YANDEX_HOOK_URL=${{YANDEX_HOOK_URL}}
+        environment: LOGIN=${{ secrets.LOGIN }},PASSWORD=${{ secrets.PASSWORD }},MOSENERGO_LOGIN=${{ secrets.MOSENERGO_LOGIN }},MOSENERGO_PASSWORD=${{ secrets.MOSENERGO_PASSWORD }},MOSENERGO_ACCOUNT=${{ secrets.MOSENERGO_ACCOUNT }},MOSENERGO_ID_KNG=${{ secrets.MOSENERGO_ID_KNG}},MOSENERGO_NM_ABN=${{secrets.MOSENERGO_NM_ABN}},BOT_TOKEN=${{secrets.BOT_TOKEN}},BOT_HOOK_PATH=${{secrets.BOT_HOOK_PATH}},YANDEX_HOOK_URL=${{secrets.YANDEX_HOOK_URL}}
         source: '.'
         exclude: '.git'
         execution_timeout: 30

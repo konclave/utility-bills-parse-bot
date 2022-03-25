@@ -1,6 +1,13 @@
+import dotenv from 'dotenv';
 import * as bot from './bot/index.js';
 
-bot.start();
+dotenv.config();
+
+if (process.env.NODE_ENV === 'development') {
+  bot.getValues();
+} else {
+  bot.start();
+}
 
 export const handler = async function (event, context) {
   const message = JSON.parse(event.body);

@@ -53,7 +53,7 @@ async function callback(ctx) {
     }    
 }
 
-async function getValues() {
+export async function getValues() {
   const messages = [];
   
   const waterValues = await water.fetch();

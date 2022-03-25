@@ -1,5 +1,4 @@
 import { getStringsFromPdf } from '../shared/parse-pdf.js';
-import { getTotal } from '../shared/calculations.js';
 
 export async function parse(binary) {
   if (binary.length === 0) {

@@ -6,23 +6,23 @@ deploy: pack register deploy-yc
 
 .PHONY: upload
 upload:
-	aws lambda update-function-code --zip-file fileb://bill-parser.zip --function-name GetExpensesTelegramBot
+	@aws lambda update-function-code --zip-file fileb://bill-parser.zip --function-name GetExpensesTelegramBot
 
 .PHONY: pack
 pack: cleanup
-	zip -r9q bill-parser.zip ./
+	@zip -r9q bill-parser.zip ./
 
 .PHONY: status
 status:	
-	curl "https://api.telegram.org/bot$(BOT_TOKEN)/getwebhookinfo" | json_pp
+	@curl "https://api.telegram.org/bot$(BOT_TOKEN)/getwebhookinfo" | json_pp
 
 .PHONY: register
 register:
-	curl "https://api.telegram.org/bot$(BOT_TOKEN)/setWebHook?url=$(YANDEX_HOOK_URL)"
+	@curl "https://api.telegram.org/bot$(BOT_TOKEN)/setWebHook?url=$(YANDEX_HOOK_URL)"
 
 .PHONY: deploy-yc
 deploy-yc:
-	yc serverless function version create \
+	@yc serverless function version create \
 		--function-id $(YC_LAMBDA_ID) \
 		--runtime nodejs16 \
 		--entrypoint index.handler \
@@ -41,4 +41,9 @@ deploy-yc:
 
 .PHONY: cleanup
 cleanup:
-		rm ./bill-parser.zip
+		@rm ./bill-parser.zip
+
+.PHONY: update-github-secrets
+update-github-secrets:
+	@gh secret set --env-file .env && \
+  	echo "✅ Github action secrets updated"

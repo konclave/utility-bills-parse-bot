@@ -16,5 +16,5 @@ export function getFetchPeriod(type) {
 }
 
 function getMonth(now) {
-  return now.getMonth() === 0 ? '12' : String(now.getMonth()).padStart(2, 0);
+  return now.getMonth() === 0 ? '12' : String(now.getMonth()).padStart(2, '0');
 }

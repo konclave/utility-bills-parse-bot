@@ -17,6 +17,7 @@ jobs:
         source: '.'
         exclude: '.git'
         execution_timeout: 30
+        service_account: ${{ secrets.YC_SERVICE_ACCOUNT_ID }}
     - uses: goodsmileduck/yandex-serverless-action@v1
       with:
         token: ${{ secrets.YC_TOKEN }}
@@ -28,3 +29,4 @@ jobs:
         source: '.'
         exclude: '.git'
         execution_timeout: 30
+        service_account: ${{ secrets.YC_SERVICE_ACCOUNT_ID }}

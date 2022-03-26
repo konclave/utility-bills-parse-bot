@@ -13,16 +13,7 @@ import * as electricity from '../electricity/index.js';
 dotenv.config();
 
 const token = process.env.BOT_TOKEN;
-if (token === undefined) {
-  throw new Error('Telegram Bot token is missing!');
-}
-
 let DEBUG = false;
-
-const bot = new Telegraf(process.env.BOT_TOKEN);
-  // Enable graceful stop
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
 async function callback(ctx) {
     try {
@@ -65,6 +56,14 @@ export async function getValues() {
 }
 
 export async function start() {
+  if (token === undefined) {
+    throw new Error('Telegram Bot token is missing!');
+  }
+  const bot = new Telegraf(process.env.BOT_TOKEN);
+  // Enable graceful stop
+  process.once('SIGINT', () => bot.stop('SIGINT'));
+  process.once('SIGTERM', () => bot.stop('SIGTERM'));
+
   bot.start((ctx) => {
     let message = `Please use the /? command to receive a bill`;
     ctx.reply(message);

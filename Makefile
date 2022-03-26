@@ -27,6 +27,7 @@ deploy-yc:
 		--runtime nodejs16 \
 		--entrypoint index.handler \
 		--execution-timeout 45s \
+		--service-account-id $(YC_SERVICE_ACCOUNT_ID)\
 		--environment LOGIN=$(LOGIN) \
 		--environment PASSWORD=$(PASSWORD) \
 		--environment MOSENERGO_LOGIN=$(MOSENERGO_LOGIN) \
@@ -37,6 +38,16 @@ deploy-yc:
 		--environment BOT_TOKEN=$(BOT_TOKEN) \
 		--environment BOT_HOOK_PATH=$(BOT_HOOK_PATH) \
 		--environment REQUEST_TIMEOUT=5000 \
+		--source-path ./bill-parser.zip
+	@yc serverless function version create \
+		--function-id $(YC_STORE_LAMBDA_ID) \
+		--runtime nodejs16 \
+		--entrypoint index.storeHandler \
+		--execution-timeout 45s \
+		--service-account-id $(YC_SERVICE_ACCOUNT_ID)\
+		--environment YC_REGION=ru-central1 \
+		--environment YC_S3_ACCESS_KEY=YCAJEtcsytDcii7NoxCNv3ckw \
+		--environment YC_S3_SECRET_ACCESS_KEY=YCPL0uOUJ1O3KIAf0I7CbZpvwnM2VIiURaaPSy1h \
 		--source-path ./bill-parser.zip
 
 .PHONY: cleanup

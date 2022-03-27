@@ -60,7 +60,7 @@ async function login(username, password) {
 
 function getPdfRequestParams(html) {
   const $ = cheerio.load(html);
-  const $form = $('#billings > table tr:nth-child(2) > td:last-child > form');
+  const $form = $('#billings > table input[type="submit"]:not(:disabled)').parent();
   const tt = $('input[name="tt"]', $form).attr('value');
   const period = getFetchPeriod('water');
   const params = new URLSearchParams();

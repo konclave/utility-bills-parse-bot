@@ -21,6 +21,10 @@
   "devDependencies": {
     "nodemon": "^2.0.15",
     "prettier": "^2.5.1",
+    "simple-git-hooks": "^2.7.0",
     "uvu": "^0.5.3"
+  },
+  "simple-git-hooks": {
+    "pre-push": "make update-github-secrets"
   }
 }

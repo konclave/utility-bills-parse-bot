@@ -8,6 +8,7 @@ specifiers:
   nodemon: ^2.0.15
   pdfreader: ^1.2.14
   prettier: ^2.5.1
+  simple-git-hooks: ^2.7.0
   telegraf: ^4.7.0
   uvu: ^0.5.3
 
@@ -22,6 +23,7 @@ dependencies:
 devDependencies:
   nodemon: 2.0.15
   prettier: 2.5.1
+  simple-git-hooks: 2.7.0
   uvu: 0.5.3
 
 packages:
@@ -1753,6 +1755,12 @@ packages:
 
   /signal-exit/3.0.7:
     resolution: {integrity: sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==}
+    dev: true
+
+  /simple-git-hooks/2.7.0:
+    resolution: {integrity: sha512-nQe6ASMO9zn5/htIrU37xEIHGr9E6wikXelLbOeTcfsX2O++DHaVug7RSQoq+kO7DvZTH37WA5gW49hN9HTDmQ==}
+    hasBin: true
+    requiresBuild: true
     dev: true
 
   /string-width/4.2.3:

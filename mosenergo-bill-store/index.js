@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand  } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand  } from '@aws-sdk/client-s3';
 import axios from 'axios';
 import dotenv from 'dotenv';
 import { getPeriodString } from '../shared/period.js';
@@ -6,12 +6,14 @@ import { getPeriodString } from '../shared/period.js';
 dotenv.config();
 
 const region = process.env['YC_REGION'];
+const bucketName = process.env['YC_S3_BUCKET'];
 const s3Client = new S3Client({
   region,
   credentials: {
     accessKeyId: process.env['YC_S3_ACCESS_KEY'],
     secretAccessKey: process.env['YC_S3_SECRET_ACCESS_KEY'],
-  }
+  },
+  endpoint: 'https://storage.yandexcloud.net',
 });
 
 const client = axios.create({
@@ -26,7 +28,7 @@ export async function webhookCallbak(event) {
   const data = JSON.parse(event.body);
   const { mail_attachments_0: attachmentUrl } = data;
 
-  const pdf = downloadInvoice(attachmentUrl);
+  const pdf = await downloadInvoice(attachmentUrl);
   const filename = getPeriodString() + '.pdf';
 
   await purgeStorage();
@@ -47,7 +49,7 @@ async function downloadInvoice(url) {
 
 async function store(pdf, filename) {
   const params = {
-    Bucket: 'electricity_invoices',
+    Bucket: bucketName,
     Key: filename,
     Body: pdf,
   };
@@ -61,18 +63,17 @@ async function store(pdf, filename) {
 
 async function purgeStorage() {
   const params = {
-    Bucket: 'electricity_invoices',
+    Bucket: bucketName,
   }
   const data = await s3Client.send(new ListObjectsV2Command(params));
-  const objects = [];
-  for(var k in data){
-    objects.push({Key : data[k].fileName});
+  const objects = data.Contents?.map(({ Key}) => ({ Key }));
+  if (objects?.length) {
+    const options = {
+      Bucket: bucketName,
+      Delete: {
+        Objects: objects
+      }
+    };
+    await s3Client.send(new DeleteObjectsCommand(options));
   }
-  const options = {
-    Bucket: process.env.AWS_BUCKET,
-    Delete: {
-      Objects: objects
-    }
-  };
-  await s3Client.send(new DeleteObjectCommand(options));
 }

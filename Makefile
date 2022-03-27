@@ -36,7 +36,7 @@ status:
 .PHONY: register
 # target: register – register Telegram bot webhook
 register:
-	@curl "https://api.telegram.org/bot$(BOT_TOKEN)/setWebHook?url=$(YANDEX_HOOK_URL)$(BOT_HOOK_PATH)"
+	@curl "https://api.telegram.org/bot$(BOT_TOKEN)/setWebHook?url=$(YANDEX_HOOK_URL)$(BOT_HOOK_PATH)&drop_pending_updates=true"
 
 .PHONY: deploy-yc
 # target: deploy-yc – deploy existing archive to Yandex Cloud

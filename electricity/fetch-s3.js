@@ -33,7 +33,16 @@ async function getS3Object(s3Client) {
       Bucket: bucketName,
       Key: filename,
     };
-    return s3Client.send(new GetObjectCommand(params));
+    const data = await s3Client.send(new GetObjectCommand(params));
+    return new Promise((resolve) => {
+      const bufs = [];
+      data.Body.on('data', (chunk) => {
+        bufs.push(chunk);
+      });
+      data.Body.on('end', () => {
+        resolve(Buffer.concat(bufs));
+      });
+    });
   }
   return [];
 }

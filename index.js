@@ -5,11 +5,11 @@ import { webhookCallbak } from './mosenergo-bill-store/index.js';
 dotenv.config();
 
 if (process.env.NODE_ENV === 'development') {
-  bot.getValues();
+  await bot.getValues();
 }
 
 export const handler = async function (event) {
-  bot.start();
+  await bot.start();
   const message = JSON.parse(event.body);
   await bot.handleUpdate(message);
   return {

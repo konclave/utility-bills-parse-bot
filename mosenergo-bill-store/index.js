@@ -1,7 +1,7 @@
 import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand  } from '@aws-sdk/client-s3';
 import axios from 'axios';
 import dotenv from 'dotenv';
-import { getPeriodString } from '../shared/period.js';
+import { getCurrentPeriodFilename } from '../shared/period.js';
 
 dotenv.config();
 
@@ -29,7 +29,7 @@ export async function webhookCallbak(event) {
   const { mail_attachments_0: attachmentUrl } = data;
 
   const pdf = await downloadInvoice(attachmentUrl);
-  const filename = getPeriodString() + '.pdf';
+  const filename = getCurrentPeriodFilename();
 
   await purgeStorage();
   await store(pdf, filename);

@@ -18,3 +18,7 @@ export function getFetchPeriod(type) {
 function getMonth(now) {
   return now.getMonth() === 0 ? '12' : String(now.getMonth()).padStart(2, '0');
 }
+
+export function getCurrentPeriodFilename() {
+  return getPeriodString() + '.pdf';
+}

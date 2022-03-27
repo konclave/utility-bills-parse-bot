@@ -1,5 +1,8 @@
 import axios from 'axios';
 import { getFetchPeriod } from '../shared/period.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const client = axios.create({
   baseURL: 'https://my.mosenergosbyt.ru',

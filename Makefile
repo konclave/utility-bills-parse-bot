@@ -1,26 +1,45 @@
 SHELL = /bin/bash
 include .env
 
+# ============================
+# Auxiliary targets.
+# ============================
+.PHONY: help
+help:
+	@echo
+	@egrep "^\s*#\s*target\s*:\s*" [Mm]akefile \
+	| sed "s/^\s*#\s*target\s*:\s*//g"
+	@echo
+
+all: help
+	@:
+
 .PHONY: deploy
+# target: deploy – archive source code, register Telegram bot webhook and deploy archive to Yandex Cloud Functions
 deploy: pack register deploy-yc
 
 .PHONY: upload
+# target: uplaod – upload existing archive to AWS Lambda
 upload:
 	@aws lambda update-function-code --zip-file fileb://bill-parser.zip --function-name GetExpensesTelegramBot
 
 .PHONY: pack
+# target: pack – archive sources
 pack: cleanup
 	@zip -r9q bill-parser.zip ./
 
 .PHONY: status
+# target: status – print Telegram bot status
 status:	
 	@curl "https://api.telegram.org/bot$(BOT_TOKEN)/getwebhookinfo" | json_pp
 
 .PHONY: register
+# target: register – register Telegram bot webhook
 register:
 	@curl "https://api.telegram.org/bot$(BOT_TOKEN)/setWebHook?url=$(YANDEX_HOOK_URL)"
 
 .PHONY: deploy-yc
+# target: deploy-yc – deploy existing archive to Yandex Cloud
 deploy-yc:
 	@yc serverless function version create \
 		--function-id $(YC_LAMBDA_ID) \
@@ -52,10 +71,12 @@ deploy-yc:
 		--source-path ./bill-parser.zip
 
 .PHONY: cleanup
+# target: cleanup – remove archive file
 cleanup:
 		@rm ./bill-parser.zip
 
 .PHONY: update-github-secrets
+# target: update-github-secrets – update Github secrets from .env file
 update-github-secrets:
 	@gh secret set --env-file .env && \
   	echo "✅ Github action secrets updated"

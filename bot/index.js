@@ -14,6 +14,7 @@ dotenv.config();
 
 const token = process.env.BOT_TOKEN;
 let DEBUG = false;
+let bot = null;
 
 async function callback(ctx) {
     try {
@@ -59,7 +60,7 @@ export async function start() {
   if (token === undefined) {
     throw new Error('Telegram Bot token is missing!');
   }
-  const bot = new Telegraf(process.env.BOT_TOKEN);
+  bot = new Telegraf(process.env['BOT_TOKEN']);
   // Enable graceful stop
   process.once('SIGINT', () => bot.stop('SIGINT'));
   process.once('SIGTERM', () => bot.stop('SIGTERM'));
@@ -79,5 +80,8 @@ export async function start() {
 }
 
 export async function handleUpdate(message) {
+  if (bot === null) {
+    return;
+  }
   return bot.handleUpdate(message);
 }

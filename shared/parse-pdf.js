@@ -8,9 +8,9 @@ export async function getStringsFromPdf(binary) {
 async function readPdfToArray(buffer) {
   return new Promise((resolve, reject) => {
     const pdfArray = new Array();
-    new PdfReader().parseBuffer(buffer, function (err, item) {
+    new PdfReader().parseBuffer(buffer,  (err, item) => {
       if (err) {
-        return onError(err);
+        reject(err);
       }
       if (!item) {
         resolve(pdfArray);

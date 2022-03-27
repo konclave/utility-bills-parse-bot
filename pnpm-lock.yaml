@@ -6,7 +6,7 @@ specifiers:
   cheerio: ^1.0.0-rc.10
   dotenv: ^16.0.0
   nodemon: ^2.0.15
-  pdfreader: ^1.2.14
+  pdfreader: ^1.4.0
   prettier: ^2.5.1
   simple-git-hooks: ^2.7.0
   telegraf: ^4.7.0
@@ -17,7 +17,7 @@ dependencies:
   axios: 0.25.0
   cheerio: 1.0.0-rc.10
   dotenv: 16.0.0
-  pdfreader: 1.2.14
+  pdfreader: 1.4.0
   telegraf: 4.7.0
 
 devDependencies:
@@ -1628,8 +1628,8 @@ packages:
       - '@xmldom/xmldom'
       - yargs
 
-  /pdfreader/1.2.14:
-    resolution: {integrity: sha512-JNmvCXSzF6/TYRs/Lo8P4QaHESB234Aw+8rKTX6I+LjjOGSDoxEuaJEVrrdLJJzfl9n4UPszxd96kwbAAzT6vA==}
+  /pdfreader/1.4.0:
+    resolution: {integrity: sha512-TwUnslc/P38HSscepFl7zrSgJnzj+fUW+Wd4Cze9VBMC0yArlPVXcK4afqSWkJ840xiFQJI08rgaRgApzULfiw==}
     dependencies:
       pdf2json: 1.2.5
     dev: false

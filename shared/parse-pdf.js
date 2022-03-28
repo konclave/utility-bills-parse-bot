@@ -7,7 +7,7 @@ export async function getStringsFromPdf(binary) {
 
 async function readPdfToArray(buffer) {
   return new Promise((resolve, reject) => {
-    pdfParser.pdf2json(bytes, (error, pdf) => {
+    pdfParser.pdf2json(buffer, (error, pdf) => {
       if (error != null) {
         reject(error);
       } else {
@@ -15,8 +15,4 @@ async function readPdfToArray(buffer) {
       }
     });
   });
-}
-
-function onError(error) {
-  console.error(error);
 }

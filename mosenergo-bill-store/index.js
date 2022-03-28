@@ -88,7 +88,7 @@ async function getFilename(pdf) {
     const [month, year] = periodString.split(' ');
     const monthNum = getMonthByRusTitle(month);
     const date = new Date(year, monthNum, 1, 0, 0, 0, 0);
-    return date.getMonth() + 1 + '.' + date.getFullYear();
+    return String(date.getMonth() + 1).padStart(2, '0') + '.' + date.getFullYear() + '.pdf';
   }
 }
 
@@ -102,7 +102,7 @@ function getFilenamesToKeep(filename) {
       prevMonth += 12;
       prevYear -= 1;
     }
-    keep.push(`${prevMonth}.${prevYear}.pdf`);
+    keep.push(`${String(prevMonth).padStart(2, '0')}.${prevYear}.pdf`);
   }
   return keep;
 }

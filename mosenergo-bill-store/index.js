@@ -6,6 +6,8 @@ import { getPeriodString, getMonthByRusTitle } from "../shared/period.js";
 
 dotenv.config();
 
+const KEEP_INVOICES_NUMBER = 2;
+
 const region = process.env['YC_REGION'];
 const bucketName = process.env['YC_S3_BUCKET'];
 const s3Client = new S3Client({
@@ -31,7 +33,7 @@ export async function webhookCallbak(event) {
 
   const pdf = await downloadInvoice(attachmentUrl);
   const filename = await getFilename(pdf);
-  await purgeStorage();
+  await purgeStorage(filename);
   await store(pdf, filename);
 }
 
@@ -60,17 +62,18 @@ async function store(pdf, filename) {
   }
 }
 
-async function purgeStorage() {
+async function purgeStorage(filename) {
   const params = {
     Bucket: bucketName,
   }
   const data = await s3Client.send(new ListObjectsV2Command(params));
   const objects = data.Contents?.map(({ Key}) => ({ Key }));
+  const keep = getFilenamesToKeep(filename);
   if (objects?.length) {
     const options = {
       Bucket: bucketName,
       Delete: {
-        Objects: objects
+        Objects: objects.filter((object) => !keep.includes(object))
       }
     };
     await s3Client.send(new DeleteObjectsCommand(options));
@@ -85,6 +88,21 @@ async function getFilename(pdf) {
     const [month, year] = periodString.split(' ');
     const monthNum = getMonthByRusTitle(month);
     const date = new Date(year, monthNum, 1, 0, 0, 0, 0);
-    return getPeriodString(date);
+    return date.getMonth() + 1 + '.' + date.getFullYear();
   }
+}
+
+function getFilenamesToKeep(filename) {  
+  const [month, year] = filename.split('.');
+  const keep = [];
+  for (let i = 1; i <= KEEP_INVOICES_NUMBER; i++) {
+    let prevMonth = month - 1;
+    let prevYear = year;
+    if (prevMonth < 1) {
+      prevMonth += 12;
+      prevYear -= 1;
+    }
+    keep.push(`${prevMonth}.${prevYear}.pdf`);
+  }
+  return keep;
 }

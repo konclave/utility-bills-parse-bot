@@ -1,4 +1,4 @@
-import { PdfReader } from 'pdfreader';
+import pdfParser from 'pdf-parser';
 
 export async function getStringsFromPdf(binary) {
   const buffer = new Buffer.from(binary);
@@ -7,16 +7,11 @@ export async function getStringsFromPdf(binary) {
 
 async function readPdfToArray(buffer) {
   return new Promise((resolve, reject) => {
-    const pdfArray = new Array();
-    new PdfReader().parseBuffer(buffer,  (err, item) => {
-      if (err) {
-        reject(err);
-      }
-      if (!item) {
-        resolve(pdfArray);
-      }
-      if (item?.text) {
-        pdfArray.push(item.text);
+    pdfParser.pdf2json(bytes, (error, pdf) => {
+      if (error != null) {
+        reject(error);
+      } else {
+        resolve(pdf.pages.flatMap((page) => page.texts.map(({text}) => text)));
       }
     });
   });

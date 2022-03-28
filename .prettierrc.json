@@ -4,7 +4,8 @@
     {
       "files": ["**/*.css", "**/*.scss", "**/*.html"],
       "options": {
-        "singleQuote": false
+        "singleQuote": false,
+        "bracketSpacing": true
       }
     }
   ]

@@ -1,7 +1,8 @@
 import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand  } from '@aws-sdk/client-s3';
 import axios from 'axios';
 import dotenv from 'dotenv';
-import { getCurrentPeriodFilename } from '../shared/period.js';
+import { getStringsFromPdf } from '../shared/parse-pdf.js';
+import { getPeriodString, getMonthByRusTitle } from "../shared/period.js";
 
 dotenv.config();
 
@@ -29,8 +30,7 @@ export async function webhookCallbak(event) {
   const { mail_attachments_0: attachmentUrl } = data;
 
   const pdf = await downloadInvoice(attachmentUrl);
-  const filename = getCurrentPeriodFilename();
-
+  const filename = await getFilename(pdf);
   await purgeStorage();
   await store(pdf, filename);
 }
@@ -54,8 +54,7 @@ async function store(pdf, filename) {
     Body: pdf,
   };
   try {
-    const results = await s3Client.send(new PutObjectCommand(params));
-    return results; // For unit tests.
+    return await s3Client.send(new PutObjectCommand(params));
   } catch (err) {
     console.log("Error", err);
   }
@@ -75,5 +74,17 @@ async function purgeStorage() {
       }
     };
     await s3Client.send(new DeleteObjectsCommand(options));
+  }
+}
+
+async function getFilename(pdf) {
+  const strings = await getStringsFromPdf(pdf);
+  const index = strings.findIndex((entry) => entry.includes('Сумма к оплате за'));
+  if (index > -1) {
+    const periodString = strings[index + 1];
+    const [month, year] = periodString.split(' ');
+    const monthNum = getMonthByRusTitle(month);
+    const date = new Date(year, monthNum, 1, 0, 0, 0, 0);
+    return getPeriodString(date);
   }
 }

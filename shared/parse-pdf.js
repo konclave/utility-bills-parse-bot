@@ -8,10 +8,18 @@ export async function getStringsFromPdf(binary) {
 async function readPdfToArray(buffer) {
   return new Promise((resolve, reject) => {
     pdfParser.pdf2json(buffer, (error, pdf) => {
-      if (error != null) {
+      if (error !== null) {
         reject(error);
       } else {
-        resolve(pdf.pages.flatMap((page) => page.texts.map(({text}) => text)));
+        resolve(
+          pdf.pages.flatMap(
+            (page) => page.texts.map(
+              ({text}) => text
+            )
+          ).filter(
+            (entry) => Boolean(entry.trim())
+          )
+        );
       }
     });
   });

@@ -29,9 +29,10 @@ const client = axios.create({
 
 export async function webhookCallbak(event) {
   const data = JSON.parse(event.body);
-  const { mail_attachments_0: attachmentUrl } = data;
-
-  const pdf = await downloadInvoice(attachmentUrl);
+  const { invoicelink_url } = data;
+  const parsedUrl = new URL(invoicelink_url)
+  const invoiceUrl = parsedUrl.searchParams.get('args');
+  const pdf = await downloadInvoice(invoiceUrl);
   const filename = await getFilename(pdf);
   await purgeStorage(filename);
   await store(pdf, filename);

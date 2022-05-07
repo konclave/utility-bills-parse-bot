@@ -36,7 +36,13 @@ status:
 .PHONY: register
 # target: register – register Telegram bot webhook
 register:
-	@curl "https://api.telegram.org/bot$(BOT_TOKEN)/setWebHook?url=$(YANDEX_HOOK_URL)$(BOT_HOOK_PATH)&drop_pending_updates=true"
+	@curl "https://api.telegram.org/bot$(BOT_TOKEN)/setWebHook?url=$(YANDEX_HOOK_URL)$(BOT_HOOK_PATH)&drop_pending_updates=True"
+
+.PHONY: unregister
+# target: unregister – delete Telegram bot webhook
+unregister:
+	@curl "https://api.telegram.org/bot$(BOT_TOKEN)/deleteWebHook?url=$(YANDEX_HOOK_URL)$(BOT_HOOK_PATH)&drop_pending_updates=True"
+
 
 .PHONY: deploy-yc
 # target: deploy-yc – deploy existing archive to Yandex Cloud

@@ -79,7 +79,8 @@ deploy-yc:
 .PHONY: cleanup
 # target: cleanup – remove archive file
 cleanup:
-		@rm ./bill-parser.zip
+	@rm -f ./bill-parser.zip
+	@rm -rf node_modules
 
 .PHONY: update-github-secrets
 # target: update-github-secrets – update Github secrets from .env file

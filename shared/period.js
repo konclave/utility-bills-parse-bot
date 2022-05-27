@@ -19,8 +19,8 @@ function getMonth(now) {
   return now.getMonth() === 0 ? '12' : String(now.getMonth()).padStart(2, '0');
 }
 
-export function getCurrentPeriodFilename() {
-  return getPeriodString() + '.pdf';
+export function getCurrentPeriodFilename(prefix = '') {
+  return prefix + getPeriodString() + '.pdf';
 }
 
 export function getMonthByRusTitle(monthStr) {

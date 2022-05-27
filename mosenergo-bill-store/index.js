@@ -1,23 +1,12 @@
-import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand  } from '@aws-sdk/client-s3';
 import axios from 'axios';
 import dotenv from 'dotenv';
 import { getStringsFromPdf } from '../shared/parse-pdf.js';
 import { getPeriodString, getMonthByRusTitle } from "../shared/period.js";
+import * as S3 from '../shared/s3.js';
 
 dotenv.config();
 
 const KEEP_INVOICES_NUMBER = 2;
-
-const region = process.env['YC_REGION'];
-const bucketName = process.env['YC_S3_BUCKET'];
-const s3Client = new S3Client({
-  region,
-  credentials: {
-    accessKeyId: process.env['YC_S3_ACCESS_KEY'],
-    secretAccessKey: process.env['YC_S3_SECRET_ACCESS_KEY'],
-  },
-  endpoint: 'https://storage.yandexcloud.net',
-});
 
 const client = axios.create({
   headers: {
@@ -27,15 +16,18 @@ const client = axios.create({
   timeout: process.env.REQUEST_TIMEOUT || 0,
 });
 
-export async function webhookCallbak(event) {
+export async function webhookCallback(event) {
   const data = JSON.parse(event.body);
   const { invoicelink_url } = data;
   const parsedUrl = new URL(invoicelink_url)
   const invoiceUrl = parsedUrl.searchParams.get('args');
   const pdf = await downloadInvoice(invoiceUrl);
   const filename = await getFilename(pdf);
+  if (!filename) {
+    return new Error('Cannot get the filename from the PDF: ' + invoicelink_url);
+  }
   await purgeStorage(filename);
-  await store(pdf, filename);
+  await S3.store(pdf, filename);
 }
 
 async function downloadInvoice(url) {
@@ -50,50 +42,43 @@ async function downloadInvoice(url) {
   return response.data;
 }
 
-async function store(pdf, filename) {
-  const params = {
-    Bucket: bucketName,
-    Key: filename,
-    Body: pdf,
-  };
-  try {
-    return await s3Client.send(new PutObjectCommand(params));
-  } catch (err) {
-    console.log("Error", err);
-  }
-}
-
 async function purgeStorage(filename) {
-  const params = {
-    Bucket: bucketName,
-  }
-  const data = await s3Client.send(new ListObjectsV2Command(params));
-  const objects = data.Contents?.map(({ Key}) => ({ Key }));
   const keep = getFilenamesToKeep(filename);
-  if (objects?.length) {
-    const options = {
-      Bucket: bucketName,
-      Delete: {
-        Objects: objects.filter((object) => !keep.includes(object))
-      }
-    };
-    await s3Client.send(new DeleteObjectsCommand(options));
-  }
+  const predicate = (object) => !keep.includes(object);
+  S3.purge(predicate);
 }
 
 async function getFilename(pdf) {
+  const parsed = await getMonthYearFromPDF(pdf);
+  if (parsed === null) {
+    return '';
+  }
+  const { month, year, prefix = '' } = parsed;
+  const monthNum = getMonthByRusTitle(month);
+  const date = new Date(year, monthNum, 1, 0, 0, 0, 0);
+  return prefix + String(date.getMonth() + 1).padStart(2, '0') + '-' + date.getFullYear() + '.pdf';
+}
+
+async function getMonthYearFromPDF(pdf) {
   const strings = await getStringsFromPdf(pdf);
-  const index = strings.findIndex((entry) => entry.includes('Сумма к оплате за'));
+  let index = strings.findIndex((entry) => entry.includes('Сумма к оплате за'));
   if (index > -1) {
     const periodString = strings[index + 1];
     const [month, year] = periodString.split(' ');
-    const monthNum = getMonthByRusTitle(month);
-    const date = new Date(year, monthNum, 1, 0, 0, 0, 0);
-    return String(date.getMonth() + 1).padStart(2, '0') + '.' + date.getFullYear() + '.pdf';
+    return { month, year, prefix: 'electricity-' };
   }
+
+  index = strings.findIndex((entry) => entry.includes('суда'));
+  if (index > -1) {
+    const month = strings[index - 9];
+    const year = strings[index - 8].trim();
+    return { month, year, prefix: 'water-' };
+  }
+
+  return null;
 }
 
-function getFilenamesToKeep(filename) {  
+function getFilenamesToKeep(filename) {
   const [month, year] = filename.split('.');
   const keep = [];
   for (let i = 1; i <= KEEP_INVOICES_NUMBER; i++) {

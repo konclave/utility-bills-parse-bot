@@ -1,6 +1,7 @@
 import axios from 'axios';
 import cheerio from 'cheerio';
-import { getFetchPeriod } from '../shared/period.js';
+import { getFetchPeriod, getCurrentPeriodFilename } from '../shared/period.js';
+import * as S3 from '../shared/s3.js';
 
 const client = axios.create({
   baseURL: 'https://lk.myuk.ru',
@@ -17,6 +18,14 @@ const client = axios.create({
 });
 
 export async function fetch() {
+  const filename = getCurrentPeriodFilename('water-');
+
+  try {
+    return await S3.fetch(filename);
+  } catch (e) {
+
+  }
+
   const username = process.env.LOGIN;
   const password = process.env.PASSWORD;
   if (!username) {
@@ -28,6 +37,9 @@ export async function fetch() {
   const accountHtml = await login(username, password);
   const params = getPdfRequestParams(accountHtml);
   const pdf = await fetchPdf(username, params);
+
+  await S3.store(pdf, filename);
+
   return pdf;
 }
 

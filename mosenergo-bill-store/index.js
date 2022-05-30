@@ -3,8 +3,8 @@ import dotenv from 'dotenv';
 import { getStringsFromPdf } from '../shared/parse-pdf.js';
 import { getPeriodString, getMonthByRusTitle } from "../shared/period.js";
 import * as S3 from '../shared/s3.js';
-import filenamePrefix as electricityPrefix from '../electricity';
-import filenamePrefix as waterPrefix from '../water';
+import { filenamePrefix as electricityPrefix } from '../electricity/fetch-electricity.js';
+import { filenamePrefix as waterPrefix } from '../water/fetch-water.js';
 
 dotenv.config();
 

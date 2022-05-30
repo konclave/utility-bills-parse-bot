@@ -1,5 +1,5 @@
 import { getStringsFromPdf } from '../shared/parse-pdf.js';
-import { filenamePrefix } from './fetch-electricity';
+import { filenamePrefix } from './fetch-electricity.js';
 
 export async function parse(binary) {
   if (binary === null || binary.length === 0) {

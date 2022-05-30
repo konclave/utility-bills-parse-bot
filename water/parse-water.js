@@ -1,6 +1,6 @@
 import { getTotal } from '../shared/calculations.js';
 import { getStringsFromPdf } from '../shared/parse-pdf.js';
-import { filenamePrefix } from './fetch-water';
+import { filenamePrefix } from './fetch-water.js';
 
 function parseWaterBill(text) {
   const result = [

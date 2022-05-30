@@ -1,6 +1,6 @@
 import axios from 'axios';
 import cheerio from 'cheerio';
-import { getFetchPeriod, getCurrentPeriodFilename } from '../shared/period.js';
+import { getMonth, getCurrentPeriodFilename } from '../shared/period.js';
 import * as S3 from '../shared/s3.js';
 
 const client = axios.create({
@@ -73,7 +73,7 @@ function getPdfRequestParams(html) {
   const $ = cheerio.load(html);
   const $form = $('#billings > table input[type="submit"]:not(:disabled)').parent();
   const tt = $('input[name="tt"]', $form).attr('value');
-  const period = getFetchPeriod('water');
+  const period = getFetchPeriod();
   const params = new URLSearchParams();
   params.append('dt', period);
   params.append('tt', tt);
@@ -101,4 +101,12 @@ async function fetchPdf(username, data) {
   } catch (error) {
     throw error;
   }
+}
+
+function getFetchPeriod() {
+  const now = new Date();
+  const month = getMonth(now);
+
+  return `${month}-${now.getFullYear()}`;
+
 }

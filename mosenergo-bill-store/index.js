@@ -8,7 +8,7 @@ import { filenamePrefix as waterPrefix } from '../water/fetch-water.js';
 
 dotenv.config();
 
-const KEEP_INVOICES_NUMBER = 2;
+const KEEP_INVOICES_NUMBER = 3;
 
 const client = axios.create({
   headers: {
@@ -83,23 +83,23 @@ async function getMonthYearFromPDF(pdf) {
 function getFilenamesToKeep(filename) {
   const prefixes = [waterPrefix, electricityPrefix];
 
-  const chunks = filename.split('-');
-  const year = chunks[chunks.length - 1];
-  const month = chunks[chunks.length - 2];
+  const chunks = filename.split('.')[0].split('-');
+  const year = Number(chunks[chunks.length - 1]);
+  const month = Number(chunks[chunks.length - 2]);
 
   const keep = [];
 
-  for (let i = 1; i <= KEEP_INVOICES_NUMBER; i++) {
-    let prevMonth = month - 1;
+  for (let i = 0; i < KEEP_INVOICES_NUMBER; i++) {
+    let prevMonth = month - i;
     let prevYear = year;
     if (prevMonth < 1) {
       prevMonth += 12;
       prevYear -= 1;
     }
 
-    prefixes.forEach((prefix) => {
+    for (let prefix of prefixes) {
       keep.push(`${prefix}${String(prevMonth).padStart(2, '0')}-${prevYear}.pdf`);
-    });
+    }
   }
 
   return keep;

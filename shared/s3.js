@@ -43,7 +43,7 @@ export async function fetch(filename) {
     });
   }
 
-  return null;
+  return Buffer.concat([]);
 }
 
 

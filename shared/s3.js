@@ -45,7 +45,7 @@ async function getS3Object(s3Client, filename) {
       });
     });
   }
-  return [];
+  return null;
 }
 
 

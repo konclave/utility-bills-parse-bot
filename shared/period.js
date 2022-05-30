@@ -1,6 +1,6 @@
 export function getPeriodString() {
   const now = new Date();
-  return `${getMonth(now)}.${now.getFullYear()}`;
+  return `${getMonth(now)}-${now.getFullYear()}`;
 }
 
 export function getFetchPeriod(type) {

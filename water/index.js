@@ -1,4 +1,4 @@
-import { fetch as fetchWater } from './fetch-water.js';
+import { fetch as fetchWater, filenamePrefix } from './fetch-water.js';
 import { parse } from './parse-water.js';
 import { getErrorMessage } from '../shared/message.js';
 
@@ -10,3 +10,5 @@ export async function fetch() {
     return { text: getErrorMessage('💧'), error };
   }
 }
+
+export filenamePrefix;

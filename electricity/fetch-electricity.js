@@ -5,6 +5,8 @@ import { getCurrentPeriodFilename, getMonth } from '../shared/period.js';
 
 dotenv.config();
 
+export const filenamePrefix = 'electricity-';
+
 const client = axios.create({
   baseURL: 'https://my.mosenergosbyt.ru',
   withCredentials: true,
@@ -21,7 +23,7 @@ const client = axios.create({
 
 export async function fetch() {
 
-  const filename = getCurrentPeriodFilename('electricity-');
+  const filename = getCurrentPeriodFilename(filenamePrefix);
   return await S3.fetch(filename); // Fetch from the Object Storage
 
   const username = process.env.MOSENERGO_LOGIN;

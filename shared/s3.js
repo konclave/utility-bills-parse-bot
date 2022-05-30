@@ -6,12 +6,6 @@ dotenv.config();
 const region = process.env['YC_REGION'];
 const bucketName = process.env['YC_S3_BUCKET'];
 
-export async function fetch(filename) {
-  const s3Client = getS3Client();
-  const result = await getS3Object(s3Client, filename);
-  return result;
-}
-
 function getS3Client() {
   const region = process.env['YC_REGION'];
   const s3Client = new S3Client({
@@ -25,10 +19,13 @@ function getS3Client() {
   return s3Client;
 }
 
-async function getS3Object(s3Client, filename) {
+export async function fetch(filename) {
   const bucketName = process.env['YC_S3_BUCKET'];
+  const s3Client = getS3Client();
+
   const listResponse = await s3Client.send(new ListObjectsV2Command({ Bucket: bucketName}));
   const hasFile = listResponse.Contents?.some(({ Key}) => Key === filename);
+
   if (hasFile) {
     const params = {
       Bucket: bucketName,
@@ -45,6 +42,7 @@ async function getS3Object(s3Client, filename) {
       });
     });
   }
+
   return null;
 }
 

@@ -21,7 +21,7 @@ export async function fetch() {
   const filename = getCurrentPeriodFilename('water-');
 
   const persisted = await S3.fetch(filename);
-  if (persisted) {
+  if (persisted?.length) {
     return persisted;
   }
 

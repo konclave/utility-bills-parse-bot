@@ -20,9 +20,9 @@ const client = axios.create({
 export async function fetch() {
   const filename = getCurrentPeriodFilename('water-');
 
-  const pdf = await S3.fetch(filename);
-  if (pdf) {
-    return pdf;
+  const persisted = await S3.fetch(filename);
+  if (persisted) {
+    return persisted;
   }
 
   const username = process.env.LOGIN;

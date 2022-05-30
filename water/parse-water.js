@@ -1,5 +1,6 @@
 import { getTotal } from '../shared/calculations.js';
 import { getStringsFromPdf } from '../shared/parse-pdf.js';
+import { filenamePrefix } from './fetch-water';
 
 function parseWaterBill(text) {
   const result = [
@@ -74,7 +75,7 @@ export async function parse(binary) {
   return {
     text: `💧: ${total} ₽\n(${intermediate})`,
     value: total,
-    fileTitle: 'water-bill.pdf',
+    fileTitle: filenamePrefix + 'bill.pdf',
     fileBuffer: binary,
   };
 }

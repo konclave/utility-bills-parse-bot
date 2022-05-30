@@ -17,8 +17,10 @@ const client = axios.create({
   timeout: process.env.REQUEST_TIMEOUT || 0,
 });
 
+export const filenamePrefix = 'water-';
+
 export async function fetch() {
-  const filename = getCurrentPeriodFilename('water-');
+  const filename = getCurrentPeriodFilename(filenamePrefix);
 
   const persisted = await S3.fetch(filename);
   if (persisted?.length) {

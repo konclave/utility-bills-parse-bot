@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getFetchPeriod } from '../shared/period.js';
+import { getMonth } from '../shared/period.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -72,7 +72,7 @@ async function login(username, password) {
 }
 
 async function fetchPdfRequestParams(session) {
-  const period = getFetchPeriod('electricity');
+  const period = getFetchPeriod();
   const data = new URLSearchParams();
   data.append('dt_period', period);
   data.append('kd_provider', 1);
@@ -117,4 +117,11 @@ async function fetchPdf(dataJson) {
 
   const response = await client(options);
   return response.data;
+}
+
+function getFetchPeriod() {
+  const now = new Date();
+  const month = getMonth(now);
+
+  return `${now.getFullYear()}-${month}-01 00:00:00`;
 }

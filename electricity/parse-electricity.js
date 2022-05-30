@@ -1,7 +1,7 @@
 import { getStringsFromPdf } from '../shared/parse-pdf.js';
 
 export async function parse(binary) {
-  if (binary.length === 0) {
+  if (binary === null || binary.length === 0) {
     return { text: '⚡️: Счёта пока что нет 🙁' };
   }
   const strings = await getStringsFromPdf(binary);

@@ -82,8 +82,13 @@ async function getMonthYearFromPDF(pdf) {
 
 function getFilenamesToKeep(filename) {
   const prefixes = [waterPrefix, electricityPrefix];
-  const [month, year] = filename.split('.');
+
+  const chunks = filename.split('-');
+  const year = chunks[chunks.length - 1];
+  const month = chunks[chunks.length - 2];
+
   const keep = [];
+
   for (let i = 1; i <= KEEP_INVOICES_NUMBER; i++) {
     let prevMonth = month - 1;
     let prevYear = year;
@@ -96,5 +101,6 @@ function getFilenamesToKeep(filename) {
       keep.push(`${prefix}${String(prevMonth).padStart(2, '0')}-${prevYear}.pdf`);
     });
   }
+
   return keep;
 }

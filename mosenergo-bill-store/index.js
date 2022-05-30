@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import { getStringsFromPdf } from '../shared/parse-pdf.js';
 import { getPeriodString, getMonthByRusTitle } from "../shared/period.js";
 import * as S3 from '../shared/s3.js';
+import filenamePrefix as electricityPrefix from '../electricity';
+import filenamePrefix as waterPrefix from '../water';
 
 dotenv.config();
 
@@ -65,20 +67,21 @@ async function getMonthYearFromPDF(pdf) {
   if (index > -1) {
     const periodString = strings[index + 1];
     const [month, year] = periodString.split(' ');
-    return { month, year, prefix: 'electricity-' };
+    return { month, year, prefix: electricityPrefix };
   }
 
   index = strings.findIndex((entry) => entry.includes('суда'));
   if (index > -1) {
     const month = strings[index - 9];
     const year = strings[index - 8].trim();
-    return { month, year, prefix: 'water-' };
+    return { month, year, prefix: waterPrefix };
   }
 
   return null;
 }
 
 function getFilenamesToKeep(filename) {
+  const prefixes = [waterPrefix, electricityPrefix];
   const [month, year] = filename.split('.');
   const keep = [];
   for (let i = 1; i <= KEEP_INVOICES_NUMBER; i++) {
@@ -88,7 +91,10 @@ function getFilenamesToKeep(filename) {
       prevMonth += 12;
       prevYear -= 1;
     }
-    keep.push(`${String(prevMonth).padStart(2, '0')}.${prevYear}.pdf`);
+
+    prefixes.forEach((prefix) => {
+      keep.push(`${prefix}${String(prevMonth).padStart(2, '0')}-${prevYear}.pdf`);
+    });
   }
   return keep;
 }

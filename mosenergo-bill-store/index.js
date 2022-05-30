@@ -46,7 +46,7 @@ async function downloadInvoice(url) {
 
 async function purgeStorage(filename) {
   const keep = getFilenamesToKeep(filename);
-  const predicate = (object) => !keep.includes(object);
+  const predicate = (object) => !keep.includes(object['Key']);
   S3.purge(predicate);
 }
 

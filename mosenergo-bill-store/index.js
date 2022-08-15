@@ -8,8 +8,6 @@ import { filenamePrefix as waterPrefix } from '../water/fetch-water.js';
 
 dotenv.config();
 
-const KEEP_INVOICES_NUMBER = 3;
-
 const client = axios.create({
   headers: {
     'User-Agent':
@@ -25,7 +23,7 @@ export async function webhookCallback(event) {
   const invoiceUrl = parsedUrl.searchParams.get('args');
   const pdf = await downloadInvoice(invoiceUrl);
 
-  const filename = await getFilenameFromPdf(pdf);
+  const filename = await getFilenameFromPdf(pdf, electricityPrefix);
   if (!filename) {
     return new Error(
       'Cannot get the filename from the PDF: ' + invoicelink_url

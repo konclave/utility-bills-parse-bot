@@ -12,6 +12,8 @@ dotenv.config();
 const region = process.env['YC_REGION'];
 const bucketName = process.env['YC_S3_BUCKET'];
 
+const KEEP_INVOICES_NUMBER = 3;
+
 function getS3Client() {
   const region = process.env['YC_REGION'];
   const s3Client = new S3Client({
@@ -117,5 +119,5 @@ function getFilenamesToKeep(filename, prefixes) {
 export async function purgeStorage(filename, prefixes) {
   const keep = getFilenamesToKeep(filename, prefixes);
   const predicate = (object) => !keep.includes(object['Key']);
-  return S3.purge(predicate);
+  return purge(predicate);
 }

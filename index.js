@@ -5,7 +5,12 @@ import { webhookCallback } from './mosenergo-bill-store/index.js';
 dotenv.config();
 
 if (process.env.NODE_ENV === 'development') {
-  webhookCallback({ body: JSON.stringify({ invoicelink_url: 'https://some.url?args=http://localhost:8000/water-bill.pdf' })});
+  webhookCallback({
+    body: JSON.stringify({
+      invoicelink_url:
+        'https://some.url?args=http://localhost:8000/water-bill.pdf',
+    }),
+  });
 }
 
 export const handler = async function (event) {

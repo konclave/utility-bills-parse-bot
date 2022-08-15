@@ -4,7 +4,7 @@ import {
   messageTypeText,
   messageTypeFile,
   messageTypeMediaGroup,
-  format
+  format,
 } from '../shared/message.js';
 
 import * as water from '../water/index.js';
@@ -17,32 +17,31 @@ let DEBUG = false;
 let bot = null;
 
 async function callback(ctx) {
-    try {
-      ctx.reply('⏳ Wait for it...');
-      const messages = await getValues();
-      messages.forEach((message) => {
-        const { type, ...payload } = message;
-        switch (type) {
-          case messageTypeText:
-            ctx.reply(payload.data);
-            break;
-          case messageTypeFile:
-            ctx.replyWithDocument(payload.data);
-            break;
-          case messageTypeMediaGroup:
-            ctx.replyWithMediaGroup(payload.data);
-            break;
-          default:
-            ctx.reply(JSON.stringify(message));
-        }
-      });
-      
-    } catch (error) {
-      ctx.reply('💥 Ошибка. Не удалось получить данные.');
-      if (DEBUG) {
-        ctx.reply(JSON.stringify(error));
+  try {
+    ctx.reply('⏳ Wait for it...');
+    const messages = await getValues();
+    messages.forEach((message) => {
+      const { type, ...payload } = message;
+      switch (type) {
+        case messageTypeText:
+          ctx.reply(payload.data);
+          break;
+        case messageTypeFile:
+          ctx.replyWithDocument(payload.data);
+          break;
+        case messageTypeMediaGroup:
+          ctx.replyWithMediaGroup(payload.data);
+          break;
+        default:
+          ctx.reply(JSON.stringify(message));
       }
-    }    
+    });
+  } catch (error) {
+    ctx.reply('💥 Ошибка. Не удалось получить данные.');
+    if (DEBUG) {
+      ctx.reply(JSON.stringify(error));
+    }
+  }
 }
 
 export async function getValues() {

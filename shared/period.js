@@ -12,7 +12,7 @@ export function getCurrentPeriodFilename(prefix = '') {
 }
 
 export function getMonthByRusTitle(monthStr) {
-  switch(monthStr.toLowerCase()) {
+  switch (monthStr.toLowerCase()) {
     case 'январь':
       return 0;
     case 'февраль':

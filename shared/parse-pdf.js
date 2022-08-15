@@ -1,7 +1,5 @@
 import pdfParser from 'pdf-parser';
 import { getMonthByRusTitle } from './period.js';
-import { filenamePrefix as electricityPrefix } from '../electricity/fetch-electricity.js';
-import { filenamePrefix as waterPrefix } from '../water/fetch-water.js';
 
 export async function getStringsFromPdf(binary) {
   const buffer = new Buffer.from(binary);
@@ -24,12 +22,8 @@ async function readPdfToArray(buffer) {
   });
 }
 
-export async function getFilenameFromPdf(pdf, type = 'electricity') {
-  if (type !== 'electricity') {
-    throw new Error('Unknown invoice type: ' + type);
-  }
-
-  const parsed = await getMonthYearFromPDF(pdf, type);
+export async function getFilenameFromPdf(pdf, filenamePrefix) {
+  const parsed = await getMonthYearFromPDF(pdf, filenamePrefix);
   if (parsed === null) {
     return '';
   }
@@ -45,32 +39,20 @@ export async function getFilenameFromPdf(pdf, type = 'electricity') {
   );
 }
 
-async function getMonthYearFromPDF(pdf, type) {
-  if (type !== 'electricity' || type !== 'water') {
-    throw new Error('Unknown invoice type: ' + type);
+async function getMonthYearFromPDF(pdf, prefix) {
+  const strings = await getStringsFromPdf(pdf);
+  let index = strings.findIndex((entry) => entry.includes('Сумма к оплате за'));
+  if (index > -1) {
+    const periodString = strings[index + 1];
+    const [month, year] = periodString.split(' ');
+    return { month, year, prefix };
   }
 
-  if (type === 'electricity') {
-    const strings = await getStringsFromPdf(pdf);
-    let index = strings.findIndex((entry) =>
-      entry.includes('Сумма к оплате за')
-    );
-    if (index > -1) {
-      const periodString = strings[index + 1];
-      const [month, year] = periodString.split(' ');
-      return { month, year, prefix: electricityPrefix };
-    }
-    throw new Error('Cannot extract filename from PDF of type: ' + type);
-  }
-
-  if (type === 'water') {
-    let index = strings.findIndex((entry) => entry.includes('суда'));
-    if (index > -1) {
-      const month = strings[index - 9];
-      const year = strings[index - 8].trim();
-      return { month, year, prefix: waterPrefix };
-    }
-    throw new Error('Cannot extract filename from PDF of type: ' + type);
+  index = strings.findIndex((entry) => entry.includes('суда'));
+  if (index > -1) {
+    const month = strings[index - 9];
+    const year = strings[index - 8].trim();
+    return { month, year, prefix };
   }
 
   return null;

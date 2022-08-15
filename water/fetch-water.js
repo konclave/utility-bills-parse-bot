@@ -39,6 +39,7 @@ export async function fetch() {
   const params = getPdfRequestParams(accountHtml);
   const pdf = await fetchPdf(username, params);
 
+  await S3.purgeStorage(filename, [filenamePrefix]);
   await S3.store(pdf, filename);
 
   return pdf;
@@ -73,7 +74,9 @@ async function login(username, password) {
 
 function getPdfRequestParams(html) {
   const $ = cheerio.load(html);
-  const $form = $('#billings > table input[type="submit"]:not(:disabled)').parent();
+  const $form = $(
+    '#billings > table input[type="submit"]:not(:disabled)'
+  ).parent();
   const tt = $('input[name="tt"]', $form).attr('value');
   const period = getFetchPeriod();
   const params = new URLSearchParams();
@@ -110,5 +113,4 @@ function getFetchPeriod() {
   const month = getMonth(now);
 
   return `${month}-${now.getFullYear()}`;
-
 }

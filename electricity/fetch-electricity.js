@@ -2,6 +2,7 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 import * as S3 from '../shared/s3.js';
 import { getCurrentPeriodFilename, getMonth } from '../shared/period.js';
+import { getFilenameFromPdf } from '../shared/parse-pdf.js';
 
 dotenv.config();
 
@@ -22,7 +23,6 @@ const client = axios.create({
 });
 
 export async function fetch() {
-
   const filename = getCurrentPeriodFilename(filenamePrefix);
   const fromStorage = await S3.fetch(filename); // Fetch from the Object Storage
 
@@ -48,6 +48,14 @@ export async function fetch() {
 
     const { vl_params } = await fetchPdfRequestParams(session);
     const pdf = await fetchPdf(vl_params);
+
+    const filename = await getFilenameFromPdf(pdf);
+    if (!filename) {
+      return new Error('Cannot get the filename from the PDF');
+    }
+    await S3.purgeStorage(filename, [filenamePrefix]);
+    await S3.store(pdf, filename);
+
     return pdf;
   } catch (error) {
     throw error;
@@ -87,7 +95,10 @@ async function fetchPdfRequestParams(session) {
   const data = new URLSearchParams();
   data.append('dt_period', period);
   data.append('kd_provider', 1);
-  data.append('vl_provider', `{"id_kng": ${process.env.MOSENERGO_ID_KNG}, "nm_abn": ${process.env.MOSENERGO_NM_ABN}}`);
+  data.append(
+    'vl_provider',
+    `{"id_kng": ${process.env.MOSENERGO_ID_KNG}, "nm_abn": ${process.env.MOSENERGO_NM_ABN}}`
+  );
   data.append('plugin', 'bytProxy');
   data.append('proxyquery', 'GetPrintBillLink');
 

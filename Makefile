@@ -87,3 +87,8 @@ cleanup:
 update-github-secrets:
 	@gh secret set --env-file .env && \
   	echo "✅ Github action secrets updated"
+
+.PHONY: dev
+# target: start development server
+dev:
+	@NODE_ENV=development nodemon index.js

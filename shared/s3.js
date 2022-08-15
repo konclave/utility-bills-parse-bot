@@ -118,6 +118,8 @@ function getFilenamesToKeep(filename, prefixes) {
 
 export async function purgeStorage(filename, prefixes) {
   const keep = getFilenamesToKeep(filename, prefixes);
-  const predicate = (object) => !keep.includes(object['Key']);
+  const predicate = (object) =>
+    prefixes.some((prefix) => object['Key'].startsWith(prefix)) &&
+    !keep.includes(object['Key']);
   return purge(predicate);
 }

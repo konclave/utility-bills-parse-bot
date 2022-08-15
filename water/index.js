@@ -6,7 +6,7 @@ export async function fetch() {
   try {
     const pdf = await fetchWater();
     return await parse(pdf);
-  } catch(error) {
+  } catch (error) {
     return { text: getErrorMessage('💧'), error };
   }
 }

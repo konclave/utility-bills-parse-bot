@@ -26,7 +26,7 @@ export async function fetch() {
   const filename = getCurrentPeriodFilename(filenamePrefix);
   const fromStorage = await S3.fetch(filename); // Fetch from the Object Storage
 
-  if (fromStorage) {
+  if (fromStorage?.length) {
     return fromStorage;
   }
 
@@ -49,7 +49,7 @@ export async function fetch() {
     const { vl_params } = await fetchPdfRequestParams(session);
     const pdf = await fetchPdf(vl_params);
 
-    const filename = await getFilenameFromPdf(pdf);
+    const filename = await getFilenameFromPdf(pdf, filenamePrefix);
     if (!filename) {
       return new Error('Cannot get the filename from the PDF');
     }

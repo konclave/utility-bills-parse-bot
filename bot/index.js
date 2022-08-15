@@ -46,14 +46,10 @@ async function callback(ctx) {
 }
 
 export async function getValues() {
-  const messages = [];
-  
   const waterValues = await water.fetch();
   const electricityValues = await electricity.fetch();
 
-  const formatted = format([waterValues, electricityValues], DEBUG);
-  
-  return messages.concat(formatted);
+  return format([waterValues, electricityValues], DEBUG);
 }
 
 export async function start() {

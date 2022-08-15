@@ -24,7 +24,11 @@ const client = axios.create({
 export async function fetch() {
 
   const filename = getCurrentPeriodFilename(filenamePrefix);
-  return await S3.fetch(filename); // Fetch from the Object Storage
+  const fromStorage = await S3.fetch(filename); // Fetch from the Object Storage
+
+  if (fromStorage) {
+    return fromStorage;
+  }
 
   const username = process.env.MOSENERGO_LOGIN;
   const password = process.env.MOSENERGO_PASSWORD;

@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - uses: goodsmileduck/yandex-serverless-action@v1
+      - uses: goodsmileduck/yandex-serverless-action@v2
         with:
           token: ${{ secrets.YC_TOKEN }}
           function_id: ${{ secrets.YC_STORE_LAMBDA_ID }}
@@ -18,7 +18,7 @@ jobs:
           exclude: '.git'
           execution_timeout: 30
           service_account: ${{ secrets.YC_SERVICE_ACCOUNT_ID }}
-      - uses: goodsmileduck/yandex-serverless-action@v1
+      - uses: goodsmileduck/yandex-serverless-action@v2
         with:
           token: ${{ secrets.YC_TOKEN }}
           function_id: ${{ secrets.YC_LAMBDA_ID }}

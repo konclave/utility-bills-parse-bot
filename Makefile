@@ -72,8 +72,8 @@ deploy-yc:
 		--service-account-id $(YC_SERVICE_ACCOUNT_ID)\
 		--environment YC_REGION=ru-central1 \
 		--environment YC_S3_BUCKET=electricity-invoices \
-		--environment YC_S3_ACCESS_KEY=YCAJEtcsytDcii7NoxCNv3ckw \
-		--environment YC_S3_SECRET_ACCESS_KEY=YCPL0uOUJ1O3KIAf0I7CbZpvwnM2VIiURaaPSy1h \
+		--environment YC_S3_ACCESS_KEY=$(YC_S3_ACCESS_KEY) \
+		--environment YC_S3_SECRET_ACCESS_KEY=$(YC_S3_SECRET_ACCESS_KEY) \
 		--source-path ./bill-parser.zip
 
 .PHONY: cleanup

@@ -63,13 +63,8 @@ async function login(username, password) {
     data: params,
     url: '/login',
   };
-
-  try {
-    const response = await client(options);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const { data } = await client(options);
+  return data;
 }
 
 function getPdfRequestParams(html) {
@@ -99,11 +94,12 @@ async function fetchPdf(username, data) {
     data,
     url: '/invoice',
   };
-
+  
   try {
-    const response = await client(options);
-    return response.data;
+    const { data } = await client(options);
+    return data;
   } catch (error) {
+    console.log(JSON.stringify({origin: '💧 fetch pdf', error}));
     throw error;
   }
 }

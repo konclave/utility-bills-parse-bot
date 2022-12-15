@@ -1,5 +1,6 @@
 import axios from 'axios';
 import cheerio from 'cheerio';
+import https from 'https';
 import { getMonth, getCurrentPeriodFilename } from '../shared/period.js';
 import * as S3 from '../shared/s3.js';
 
@@ -15,6 +16,9 @@ const client = axios.create({
     Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
   },
   timeout: process.env.REQUEST_TIMEOUT || 0,
+  httpsAgent: new https.Agent({
+    rejectUnauthorized: false
+  }),
 });
 
 export const filenamePrefix = 'water-';

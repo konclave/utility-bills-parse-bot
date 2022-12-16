@@ -7,7 +7,7 @@ export async function parse(binary) {
   }
   const strings = await getStringsFromPdf(binary);
   const value = parseBill(strings);
-
+  
   return {
     text: `⚡️: ${value} ₽`,
     value,
@@ -17,8 +17,10 @@ export async function parse(binary) {
 }
 
 function parseBill(strings) {
-  const idx = strings.indexOf(
-    'Начислено за электроэнергию в расчётном периоде: '
-  );
-  return Number(strings[idx + 1].replace(',', '.'));
+  const idxDay = strings.indexOf('ЭЛЕКТРИЧЕСТВО ДЕНЬ') + 5;
+  const dayBill = Number(strings[idxDay].replace(',', '.'));
+  const idxNight = strings.indexOf('ЭЛЕКТРИЧЕСТВО НОЧЬ') + 5;
+  const nightBill = Number(strings[idxNight].replace(',', '.'));
+  const summary = dayBill + nightBill;
+  return summary;
 }

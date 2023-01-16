@@ -6,12 +6,14 @@ specifiers:
   '@vercel/ncc': ^0.36.0
   '@yandex-cloud/nodejs-sdk': ^2.3.2
   archiver: ^5.3.1
+  glob: ^8.1.0
 
 dependencies:
   '@actions/core': 1.10.0
   '@aws-sdk/client-s3': 3.245.0
   '@yandex-cloud/nodejs-sdk': 2.3.2
   archiver: 5.3.1
+  glob: 8.1.0
 
 devDependencies:
   '@vercel/ncc': 0.36.0
@@ -1339,6 +1341,17 @@ packages:
       minimatch: 3.1.2
       once: 1.4.0
       path-is-absolute: 1.0.1
+    dev: false
+
+  /glob/8.1.0:
+    resolution: {integrity: sha512-r8hpEjiQEYlF2QU0df3dS+nxxSIreXQS1qRhMJM0Q5NDdR386C7jb7Hwwod8Fgiuex+k0GFjgft18yvxm5XoCQ==}
+    engines: {node: '>=12'}
+    dependencies:
+      fs.realpath: 1.0.0
+      inflight: 1.0.6
+      inherits: 2.0.4
+      minimatch: 5.1.4
+      once: 1.4.0
     dev: false
 
   /graceful-fs/4.2.10:

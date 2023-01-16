@@ -1,10 +1,14 @@
 export function getPeriodString() {
   const now = new Date();
-  return `${getMonth(now)}-${now.getFullYear()}`;
+  return `${getMonth(now)}-${getYear(now)}`;
 }
 
 export function getMonth(now) {
   return now.getMonth() === 0 ? '12' : String(now.getMonth()).padStart(2, '0');
+}
+
+export function getYear(now) {
+  return now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
 }
 
 export function getCurrentPeriodFilename(prefix = '') {

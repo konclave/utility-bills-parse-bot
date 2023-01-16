@@ -208,24 +208,27 @@ async function zipDirectory(inputs) {
           if (err.code === 'ENOENT') {
             core.warning(err);
           } else {            
+            core.error(err);
             throw err;
           }
         });
 
-      // good practice to catch this error explicitly
       archive.on('error', function(err) {
+        core.error(err);
         throw err;
       });
 
         archive.pipe(bufferStream);
 
-        await archive
+        archive
             .glob("**", {
                 cwd: inputs.source,
                 dot: true,
                 ignore: parseIgnoreGlobPatterns(inputs.sourceIgnore)
-            })
-            .finalize();
+            });
+        core.info("Archive setup");
+
+        await archive.finalize();
 
         core.info("Archive finalized");
 

@@ -202,7 +202,20 @@ async function zipDirectory(inputs) {
         const bufferStream = new PassThrough();
 
         const archive = archiver("zip", { zlib: { level: 9 } });
-        core.info("Archive initialize @@@");
+        core.info("Archive initialize");
+
+        archive.on('warning', function(err) {
+          if (err.code === 'ENOENT') {
+            core.warning(err);
+          } else {            
+            throw err;
+          }
+        });
+
+      // good practice to catch this error explicitly
+      archive.on('error', function(err) {
+        throw err;
+      });
 
         archive.pipe(bufferStream);
 

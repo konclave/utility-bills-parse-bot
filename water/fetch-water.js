@@ -1,7 +1,7 @@
 import axios from 'axios';
 import cheerio from 'cheerio';
 import https from 'https';
-import { getMonth, getCurrentPeriodFilename } from '../shared/period.js';
+import { getMonth, getCurrentPeriodFilename, getYear } from '../shared/period.js';
 import * as S3 from '../shared/s3.js';
 
 const client = axios.create({
@@ -26,9 +26,13 @@ export const filenamePrefix = 'water-';
 export async function fetch() {
   const filename = getCurrentPeriodFilename(filenamePrefix);
 
-  const persisted = await S3.fetch(filename);
-  if (persisted?.length) {
-    return persisted;
+  try {
+    const persisted = await S3.fetch(filename);
+    if (persisted?.length) {
+      return persisted;
+    }
+  } catch (e) {
+    console.log('[water] failed to fetch persisted pdf from cloud storage:', JSON.stringify(e.message))
   }
 
   const username = process.env.LOGIN;
@@ -43,8 +47,12 @@ export async function fetch() {
   const params = getPdfRequestParams(accountHtml);
   const pdf = await fetchPdf(username, params);
 
-  await S3.purgeStorage(filename, [filenamePrefix]);
-  await S3.store(pdf, filename);
+  try {
+    await S3.purgeStorage(filename, [filenamePrefix]);
+    await S3.store(pdf, filename);
+  } catch (e) {
+    console.log('[water] failed to store pdf in cloud storage:', JSON.stringify(e.message))
+  }
 
   return pdf;
 }
@@ -98,12 +106,12 @@ async function fetchPdf(username, data) {
     data,
     url: '/invoice',
   };
-  
+
   try {
     const { data } = await client(options);
     return data;
   } catch (error) {
-    console.log(JSON.stringify({origin: '💧 fetch pdf', error}));
+    console.log(JSON.stringify({ origin: '💧 fetch pdf', error }));
     throw error;
   }
 }
@@ -111,6 +119,7 @@ async function fetchPdf(username, data) {
 function getFetchPeriod() {
   const now = new Date();
   const month = getMonth(now);
+  const year = getYear(now);
 
-  return `${month}-${now.getFullYear()}`;
+  return `${month}-${year}`;
 }

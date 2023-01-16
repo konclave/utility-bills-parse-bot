@@ -1,7 +1,7 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
 import * as S3 from '../shared/s3.js';
-import { getCurrentPeriodFilename, getMonth } from '../shared/period.js';
+import { getCurrentPeriodFilename, getMonth, getYear } from '../shared/period.js';
 import { getFilenameFromPdf } from '../shared/parse-pdf.js';
 
 dotenv.config();
@@ -24,10 +24,14 @@ const client = axios.create({
 
 export async function fetch() {
   const filename = getCurrentPeriodFilename(filenamePrefix);
-  const fromStorage = await S3.fetch(filename); // Fetch from the Object Storage
 
-  if (fromStorage?.length) {
-    return fromStorage;
+  try {
+    const fromStorage = await S3.fetch(filename); // Fetch from the Object Storage
+    if (fromStorage?.length) {
+      return fromStorage;
+    }
+  } catch (e) {
+    console.log('[electricity] failed to fetch persisted pdf from cloud storage:', JSON.stringify(e.message))
   }
 
   const username = process.env.MOSENERGO_LOGIN;
@@ -38,28 +42,29 @@ export async function fetch() {
   if (!password) {
     throw new Error('Password is missing!');
   }
-  try {
-    const loginData = await login(username, password);
-    const { session } = loginData;
 
-    if (session === undefined) {
-      throw new Error(loginData.nm_result);
-    }
+  const loginData = await login(username, password);
+  const { session } = loginData;
 
-    const { vl_params } = await fetchPdfRequestParams(session);
-    const pdf = await fetchPdf(vl_params);
-
-    const filename = await getFilenameFromPdf(pdf, filenamePrefix);
-    if (!filename) {
-      return new Error('Cannot get the filename from the PDF');
-    }
-    await S3.purgeStorage(filename, [filenamePrefix]);
-    await S3.store(pdf, filename);
-
-    return pdf;
-  } catch (error) {
-    throw error;
+  if (session === undefined) {
+    throw new Error(loginData.nm_result);
   }
+
+  const { vl_params } = await fetchPdfRequestParams(session);
+  const pdf = await fetchPdf(vl_params);
+
+  const pdfFilename = await getFilenameFromPdf(pdf, filenamePrefix);
+  if (!pdfFilename) {
+    return new Error('Cannot get the filename from the PDF');
+  }
+
+  try {
+    await S3.purgeStorage(pdfFilename, [filenamePrefix]);
+    await S3.store(pdf, pdfFilename);
+  } catch (e) {
+    console.log('[electricity] failed to store pdf in cloud storage:', JSON.stringify(e.message))
+  }
+  return pdf;
 }
 
 async function login(username, password) {
@@ -144,6 +149,7 @@ async function fetchPdf(dataJson) {
 function getFetchPeriod() {
   const now = new Date();
   const month = getMonth(now);
+  const year = getYear(now);
 
-  return `${now.getFullYear()}-${month}-01 00:00:00`;
+  return `${year}-${month}-01 00:00:00`;
 }

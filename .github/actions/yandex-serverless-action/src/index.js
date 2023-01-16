@@ -202,7 +202,7 @@ async function zipDirectory(inputs) {
         const bufferStream = new PassThrough();
 
         const archive = archiver("zip", { zlib: { level: 9 } });
-        core.info("Archive initialize");
+        core.info("Archive initialize @@@");
 
         archive.pipe(bufferStream);
 

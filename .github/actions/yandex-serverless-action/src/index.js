@@ -160,7 +160,9 @@ async function createFunctionVersion(session, targetFunction, fileContents, inpu
             request.content = fileContents;
 
         // Create new version
-        const operation = await functionService.createVersion(request);
+        const operation = await functionService.createVersion(request, (err, operation) => {
+          core.info(`@@@ ${JSON.stringify(err, null, 2)}, ${JSON.stringify(operation, null, 2)}`)  
+        });
 
         core.info(`Operation complete: ${JSON.stringify(operation)}`);
 

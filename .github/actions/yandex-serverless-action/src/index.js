@@ -3,7 +3,6 @@ import * as core from "@actions/core";
 import { PassThrough, Stream } from "stream";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { Session, cloudApi, serviceClients } from "@yandex-cloud/nodejs-sdk";
-import * as glob from 'glob';
 
 import archiver from "archiver";
 
@@ -163,7 +162,7 @@ async function createFunctionVersion(session, targetFunction, fileContents, inpu
         // Create new version
         const operation = await functionService.createVersion(request);
 
-        core.info("Operation complete");
+        core.info(`Operation complete: ${JSON.stringify(operation)}`);
 
         handleOperationError(operation);
     }
@@ -203,7 +202,7 @@ async function zipDirectory(inputs) {
         const bufferStream = new PassThrough();
 
         const archive = archiver("zip", { zlib: { level: 9 } });
-        core.info(`Archive initialize: ${inputs.source}`);
+        core.info(`Archive initialize`);
 
         archive.on('warning', (err) => {
           if (err.code === 'ENOENT') {
@@ -219,29 +218,7 @@ async function zipDirectory(inputs) {
           throw err;
         });
 
-        archive.on('progress', ({ entries }) => {
-          core.info(`Arhive in progress: ${entries.processed} of ${entries.total} files`);
-        })
-
-        archive.on('end', () => {
-          core.info('End');
-        });
-        archive.on('close', () => {
-          core.info('Close');
-        });
-        archive.on('finish', () => {
-          core.info('Finish');
-        });
-
         archive.pipe(bufferStream);
-
-        glob("**", {
-                cwd: inputs.source,
-                dot: true,
-                ignore: parseIgnoreGlobPatterns(inputs.sourceIgnore)
-            }, function(err, files) {
-            core.info(files);
-        });
 
         archive
             .glob("**", {
@@ -250,8 +227,6 @@ async function zipDirectory(inputs) {
                 ignore: parseIgnoreGlobPatterns(inputs.sourceIgnore)
             });
         
-
-
         await archive.finalize();
 
         core.info("Archive finalized");

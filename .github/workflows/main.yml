@@ -7,7 +7,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Install pdf store function
-        uses: ./.github/actions/yandex-serverless-action
+        uses: goodsmileduck/yandex-serverless-action@v1
         with:
           token: ${{ secrets.YC_TOKEN }}
           function_id: ${{ secrets.YC_STORE_LAMBDA_ID }}
@@ -20,7 +20,7 @@ jobs:
           execution_timeout: 30
           service_account: ${{ secrets.YC_SERVICE_ACCOUNT_ID }}
       - name: Install bot function
-        uses: ./.github/actions/yandex-serverless-action
+        uses: goodsmileduck/yandex-serverless-action@v1
         with:
           token: ${{ secrets.YC_TOKEN }}
           function_id: ${{ secrets.YC_LAMBDA_ID }}

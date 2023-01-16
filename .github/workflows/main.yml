@@ -16,7 +16,7 @@ jobs:
           entrypoint: 'index.storeHandler'
           environment: YC_REGION=${{ secrets.YC_REGION }},YC_S3_ACCESS_KEY=${{ secrets.YC_S3_ACCESS_KEY }},YC_S3_SECRET_ACCESS_KEY=${{ secrets.YC_S3_SECRET_ACCESS_KEY }},YC_S3_BUCKET=${{ secrets.YC_S3_BUCKET }},REQUEST_TIMEOUT=${{ secrets.REQUEST_TIMEOUT }}
           source: '.'
-          exclude: '.git,node_modules,.github'
+          exclude: '.git/**,.github/**'
           execution_timeout: 30
           service_account: ${{ secrets.YC_SERVICE_ACCOUNT_ID }}
       - name: Install bot function
@@ -29,6 +29,6 @@ jobs:
           entrypoint: 'index.handler'
           environment: LOGIN=${{ secrets.LOGIN }},PASSWORD=${{ secrets.PASSWORD }},MOSENERGO_LOGIN=${{ secrets.MOSENERGO_LOGIN }},MOSENERGO_PASSWORD=${{ secrets.MOSENERGO_PASSWORD }},MOSENERGO_ACCOUNT=${{ secrets.MOSENERGO_ACCOUNT }},MOSENERGO_ID_KNG=${{ secrets.MOSENERGO_ID_KNG}},MOSENERGO_NM_ABN=${{secrets.MOSENERGO_NM_ABN}},BOT_TOKEN=${{secrets.BOT_TOKEN}},BOT_HOOK_PATH=${{secrets.BOT_HOOK_PATH}},YANDEX_HOOK_URL=${{secrets.YANDEX_HOOK_URL}},YC_SERVICE_ACCOUNT_ID=${{secrets.YC_SERVICE_ACCOUNT_ID}},YC_REGION=${{ secrets.YC_REGION }},YC_S3_ACCESS_KEY=${{ secrets.YC_S3_ACCESS_KEY }},YC_S3_SECRET_ACCESS_KEY=${{ secrets.YC_S3_SECRET_ACCESS_KEY }},YC_S3_BUCKET=${{ secrets.YC_S3_BUCKET }},REQUEST_TIMEOUT=${{ secrets.REQUEST_TIMEOUT }}
           source: '.'
-          exclude: '.git,node_modules,.github'
+          exclude: '.git/**,.github/**'
           execution_timeout: 30
           service_account: ${{ secrets.YC_SERVICE_ACCOUNT_ID }}

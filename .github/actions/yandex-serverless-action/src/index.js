@@ -204,7 +204,7 @@ async function zipDirectory(inputs) {
         const archive = archiver("zip", { zlib: { level: 9 } });
         core.info("Archive initialize");
 
-        archive.on('warning', function(err) {
+        archive.on('warning', (err) => {
           if (err.code === 'ENOENT') {
             core.warning(err);
           } else {            
@@ -213,10 +213,24 @@ async function zipDirectory(inputs) {
           }
         });
 
-      archive.on('error', function(err) {
-        core.error(err);
-        throw err;
-      });
+        archive.on('error', (err) => {
+          core.error(err);
+          throw err;
+        });
+
+        archive.on('progress', ({ entries }) => {
+          core.info(`Arhive in progress: ${entries.processed} of ${entries.total} files`);
+        })
+
+        archive.on('end', () => {
+          core.info('End');
+        });
+        archive.on('close', () => {
+          core.info('Close');
+        });
+        archive.on('finish', () => {
+          core.info('Finish');
+        });
 
         archive.pipe(bufferStream);
 
@@ -226,7 +240,8 @@ async function zipDirectory(inputs) {
                 dot: true,
                 ignore: parseIgnoreGlobPatterns(inputs.sourceIgnore)
             });
-        core.info("Archive setup");
+        
+
 
         await archive.finalize();
 

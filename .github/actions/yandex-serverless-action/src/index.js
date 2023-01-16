@@ -37,7 +37,7 @@ async function run() {
         // Initialize SDK with your token
         const session = new Session({ oauthToken: inputs.token });
 
-        await tryStoreObjectInBucket(inputs, fileContents);
+        // await tryStoreObjectInBucket(inputs, fileContents);
 
         const functionObject = await getFunctionById(session, inputs);
 
@@ -237,7 +237,7 @@ async function zipDirectory(inputs) {
         if (!buffer)
             throw Error("Failed to initialize Buffer");
 
-        core.info("Buffer object created");
+        core.info(`Buffer object created ${buffer}`);
 
         return buffer;
     }

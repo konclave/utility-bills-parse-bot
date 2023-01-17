@@ -6,6 +6,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+      - name: Set outputs
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Install pdf store function
         uses: yc-actions/yc-sls-function@v2
         with:
@@ -26,7 +29,7 @@ jobs:
             package.json
             package-lock.json
           tags: |
-            ${{ github.sha }}
+            ${{ steps.vars.outputs.sha_short }}
       - name: Install bot function
         uses: yc-actions/yc-sls-function@v2
         with:
@@ -58,4 +61,4 @@ jobs:
             YC_S3_BUCKET=${{ secrets.YC_S3_BUCKET }}
             REQUEST_TIMEOUT=${{ secrets.REQUEST_TIMEOUT }}
           tags: |
-            ${{ github.sha }}  
+            ${{ steps.vars.outputs.sha_short }}

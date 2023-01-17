@@ -10,6 +10,7 @@ jobs:
         uses: yc-actions/yc-sls-function@v2
         with:
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+          folder-id: ${{ secrets.YC_FOLDER_ID }}
           function-name: ${{ secrets.YC_STORE_LAMBDA_ID }}
           runtime: 'nodejs16'
           entrypoint: 'index.storeHandler'
@@ -28,6 +29,7 @@ jobs:
         uses: yc-actions/yc-sls-function@v2
         with:
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+          folder-id: ${{ secrets.YC_FOLDER_ID }}
           function-name: ${{ secrets.YC_LAMBDA_ID }}
           runtime: 'nodejs16'
           entrypoint: 'index.handler'

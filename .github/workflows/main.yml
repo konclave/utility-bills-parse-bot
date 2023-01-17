@@ -40,6 +40,7 @@ jobs:
           runtime: 'nodejs16'
           entrypoint: 'index.handler'
           memory: '128Mb'
+          execution-timeout: 10
           include: |
             ./src
             index.js

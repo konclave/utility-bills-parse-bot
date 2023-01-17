@@ -29,7 +29,7 @@ jobs:
             package.json
             package-lock.json
           tags: |
-            ${{ steps.vars.outputs.sha_short }}
+            v-${{ steps.vars.outputs.sha_short }}
       - name: Install bot function
         uses: yc-actions/yc-sls-function@v2
         with:
@@ -61,4 +61,4 @@ jobs:
             YC_S3_BUCKET=${{ secrets.YC_S3_BUCKET }}
             REQUEST_TIMEOUT=${{ secrets.REQUEST_TIMEOUT }}
           tags: |
-            ${{ steps.vars.outputs.sha_short }}
+            v-${{ steps.vars.outputs.sha_short }}

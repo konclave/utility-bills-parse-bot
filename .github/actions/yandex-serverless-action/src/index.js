@@ -2,7 +2,7 @@ import * as core from "@actions/core";
 
 import { PassThrough, Stream } from "stream";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { Session, cloudApi, serviceClients } from "@yandex-cloud/nodejs-sdk";
+import { Session, cloudApi, serviceClients, waitForOperation } from "@yandex-cloud/nodejs-sdk";
 import * as glob from 'glob';
 
 import archiver from "archiver";
@@ -38,7 +38,7 @@ async function run() {
         // Initialize SDK with your token
         const session = new Session({ oauthToken: inputs.token });
 
-        // await tryStoreObjectInBucket(inputs, fileContents);
+        await tryStoreObjectInBucket(inputs, fileContents);
 
         const functionObject = await getFunctionById(session, inputs);
 
@@ -162,10 +162,11 @@ async function createFunctionVersion(session, targetFunction, fileContents, inpu
 
         // Create new version
         const operation = await functionService.createVersion(request);
+        const result = await waitForOperation(operation, session);
 
-        core.info(`Operation complete: ${JSON.stringify(operation, null, 2)}`);
+        core.info(`Operation completed`);
 
-        handleOperationError(operation);
+        handleOperationError(result);
     }
     catch(error) {
         console.error('@@@', error)

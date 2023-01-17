@@ -17,9 +17,9 @@ export async function parse(binary) {
 }
 
 function parseBill(strings) {
-  const idxDay = strings.indexOf('(Т1) день') + 4;
+  const idxDay = strings.indexOf(' (Т1) день') + 4;
   const dayBill = Number(strings[idxDay].replace(',', '.'));
-  const idxNight = strings.indexOf('(Т2) ночь') + 4;
+  const idxNight = strings.indexOf(' (Т2) ночь') + 4;
   const nightBill = Number(strings[idxNight].replace(',', '.'));
   const summary = dayBill + nightBill;
   return summary;

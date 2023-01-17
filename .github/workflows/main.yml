@@ -31,12 +31,6 @@ jobs:
           function-name: ${{ secrets.YC_LAMBDA_ID }}
           runtime: 'nodejs16'
           entrypoint: 'index.handler'
-          environment: |
-            YC_REGION=${{ secrets.YC_REGION }}
-            YC_S3_ACCESS_KEY=${{ secrets.YC_S3_ACCESS_KEY }}
-            YC_S3_SECRET_ACCESS_KEY=${{ secrets.YC_S3_SECRET_ACCESS_KEY }}
-            YC_S3_BUCKET=${{ secrets.YC_S3_BUCKET }}
-            REQUEST_TIMEOUT=${{ secrets.REQUEST_TIMEOUT }}
           memory: '128Mb'
           include: |
             ./src

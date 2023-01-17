@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
-import * as bot from './bot/index.js';
-import { webhookCallback } from './mosenergo-bill-store/index.js';
+import * as bot from './src/bot/index.js';
+import { webhookCallback } from './src/mosenergo-bill-store/index.js';
 
 dotenv.config();
 

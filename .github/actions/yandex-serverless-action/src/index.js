@@ -3,6 +3,7 @@ import * as core from "@actions/core";
 import { PassThrough, Stream } from "stream";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { Session, cloudApi, serviceClients } from "@yandex-cloud/nodejs-sdk";
+import * as glob from 'glob';
 
 import archiver from "archiver";
 
@@ -226,6 +227,14 @@ async function zipDirectory(inputs) {
                 dot: true,
                 ignore: parseIgnoreGlobPatterns(inputs.sourceIgnore)
             });
+
+        glob("**", {
+                cwd: inputs.source,
+                dot: true,
+                ignore: parseIgnoreGlobPatterns(inputs.sourceIgnore)
+            }, (err, files) => {
+              core.info(`${JSON.stringify(files)}`)
+            })    
         
         await archive.finalize();
 

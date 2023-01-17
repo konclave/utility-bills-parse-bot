@@ -24,8 +24,6 @@ jobs:
             ./src
             package.json
             package-lock.json
-          tags: |
-            ${{ GITHUB_SHA::6 }}
       - name: Install bot function
         uses: yc-actions/yc-sls-function@v2
         with:
@@ -44,8 +42,6 @@ jobs:
             ./src
             package.json
             package-lock.json
-          tags: |
-            ${{ GITHUB_SHA::6 }}
           environment: |
             LOGIN=${{ secrets.LOGIN }}
             PASSWORD=${{ secrets.PASSWORD }}

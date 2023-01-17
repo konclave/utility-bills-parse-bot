@@ -26,6 +26,7 @@ jobs:
           memory: '128Mb'
           include: |
             ./src
+            index.js
             package.json
             package-lock.json
           tags: |
@@ -41,6 +42,7 @@ jobs:
           memory: '128Mb'
           include: |
             ./src
+            index.js
             package.json
             package-lock.json
           environment: |

@@ -91,4 +91,4 @@ update-github-secrets:
 .PHONY: dev
 # target: start development server
 dev:
-	@NODE_ENV=development nodemon index.js
+	@NODE_ENV=development nodemon src/index.js

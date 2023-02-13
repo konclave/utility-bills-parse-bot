@@ -7,7 +7,7 @@ export async function parse(binary) {
   }
   const strings = await getStringsFromPdf(binary);
   const value = parseBill(strings);
-  
+
   return {
     text: `⚡️: ${value} ₽`,
     value,
@@ -17,9 +17,27 @@ export async function parse(binary) {
 }
 
 function parseBill(strings) {
-  const idxDay = strings.indexOf(' (Т1) день') + 4;
+  let dayMarker = '';
+  let nightMarker = '';
+  let dayOffset = 0;
+  let nightOffset = 0;
+
+  if (strings.indexOf('ЕДИНЫЙ ПЛАТЕЖНЫЙ ДОКУМЕНТ') !== -1) {
+    // Счёт от МосОблЕИРЦ
+    dayMarker = 'ЭЛЕКТРИЧЕСТВО ДЕНЬ';
+    dayOffset = 5;
+    nightMarker = 'ЭЛЕКТРИЧЕСТВО НОЧЬ';
+    nightOffset = 5;
+  } else {
+    dayMarker = ' (Т1) день';
+    dayOffset = 4;
+    nightMarker = ' (Т2) ночь';
+    nightOffset = 4;
+  }
+
+  const idxDay = strings.indexOf(dayMarker) + dayOffset;
   const dayBill = Number(strings[idxDay].replace(',', '.'));
-  const idxNight = strings.indexOf(' (Т2) ночь') + 4;
+  const idxNight = strings.indexOf(nightMarker) + nightOffset;
   const nightBill = Number(strings[idxNight].replace(',', '.'));
   const summary = dayBill + nightBill;
   return summary;

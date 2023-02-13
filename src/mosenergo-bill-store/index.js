@@ -1,6 +1,6 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
-import { getFilenameFromPdf } from '../shared/parse-pdf.js';
+import { getFilenameFromPdf, getStringsFromPdf } from '../shared/parse-pdf.js';
 
 import * as S3 from '../shared/s3.js';
 import { filenamePrefix as electricityPrefix } from '../electricity/fetch-electricity.js';
@@ -23,6 +23,11 @@ export async function webhookCallback(event) {
   const invoiceUrl = parsedUrl.searchParams.get('args');
   const pdf = await downloadInvoice(invoiceUrl);
 
+  const isTgk = await isTrehgorka(pdf);
+  if (!isTgk) {
+    return;
+  }
+
   const filename = await getFilenameFromPdf(pdf, electricityPrefix);
   if (!filename) {
     return new Error(
@@ -32,6 +37,11 @@ export async function webhookCallback(event) {
 
   await S3.purgeStorage(filename, [waterPrefix, electricityPrefix]);
   await S3.store(pdf, filename);
+}
+
+async function isTrehgorka(pdf) {
+  const strings = await getStringsFromPdf(pdf);
+  return strings.some((entry) => entry.includes('КУТУЗОВСКАЯ УЛ.'));
 }
 
 async function downloadInvoice(url) {

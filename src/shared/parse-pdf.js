@@ -41,6 +41,7 @@ export async function getFilenameFromPdf(pdf, filenamePrefix) {
 
 async function getMonthYearFromPDF(pdf, prefix) {
   const strings = await getStringsFromPdf(pdf);
+
   let index = strings.findIndex((entry) => entry.includes('Сумма к оплате за'));
   if (index > -1) {
     const periodString = strings[index + 1];
@@ -52,6 +53,14 @@ async function getMonthYearFromPDF(pdf, prefix) {
   if (index > -1) {
     const month = strings[index - 9];
     const year = strings[index - 8].trim();
+    return { month, year, prefix };
+  }
+
+  const periodString = strings.find((entry) =>
+    entry.includes('ЖИЛИЩНО-КОММУНАЛЬНЫЕ И ИНЫЕ УСЛУГИ ЗА')
+  );
+  if (periodString) {
+    const [month, year] = periodString.trim().split(' ').slice(-3);
     return { month, year, prefix };
   }
 

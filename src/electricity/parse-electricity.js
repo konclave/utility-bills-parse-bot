@@ -29,16 +29,17 @@ function parseBill(strings) {
     nightMarker = 'ЭЛЕКТРИЧЕСТВО НОЧЬ';
     nightOffset = 5;
   } else {
-    dayMarker = ' (Т1) день';
-    dayOffset = 4;
-    nightMarker = ' (Т2) ночь';
-    nightOffset = 4;
+    dayMarker = ' (Т2) ночь';
+    dayOffset = -1;
+    nightMarker = 'Начислено за электроэнергию в расчётном периоде: ';
+    nightOffset = -1;
   }
 
   const idxDay = strings.indexOf(dayMarker) + dayOffset;
   const dayBill = Number(strings[idxDay].replace(',', '.'));
   const idxNight = strings.indexOf(nightMarker) + nightOffset;
   const nightBill = Number(strings[idxNight].replace(',', '.'));
-  const summary = dayBill + nightBill;
+  const summary = (dayBill * 100 + nightBill * 100) / 100;
+
   return summary;
 }

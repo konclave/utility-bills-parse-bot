@@ -15,7 +15,7 @@ jobs:
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
           folder-id: ${{ secrets.YC_FOLDER_ID }}
           function-name: ${{ secrets.YC_STORE_LAMBDA_ID }}
-          runtime: 'nodejs16'
+          runtime: 'nodejs18'
           entrypoint: 'index.storeHandler'
           environment: |
             YC_REGION=${{ secrets.YC_REGION }}
@@ -37,7 +37,7 @@ jobs:
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
           folder-id: ${{ secrets.YC_FOLDER_ID }}
           function-name: ${{ secrets.YC_LAMBDA_ID }}
-          runtime: 'nodejs16'
+          runtime: 'nodejs18'
           entrypoint: 'index.handler'
           memory: '128Mb'
           execution-timeout: 10

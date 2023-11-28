@@ -19,7 +19,7 @@ all: help
 deploy: pack register deploy-yc
 
 .PHONY: upload
-# target: uplaod – upload existing archive to AWS Lambda
+# target: upload – upload existing archive to AWS Lambda
 upload:
 	@aws lambda update-function-code --zip-file fileb://bill-parser.zip --function-name GetExpensesTelegramBot
 

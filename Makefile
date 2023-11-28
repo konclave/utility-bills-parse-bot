@@ -30,7 +30,7 @@ pack: cleanup
 
 .PHONY: status
 # target: status – print Telegram bot status
-status:	
+status:
 	@curl "https://api.telegram.org/bot$(BOT_TOKEN)/getwebhookinfo" | json_pp
 
 .PHONY: register
@@ -89,6 +89,6 @@ update-github-secrets:
   	echo "✅ Github action secrets updated"
 
 .PHONY: dev
-# target: start development server
+# target: dev - start development server
 dev:
-	@NODE_ENV=development nodemon index.js
+	@NODE_ENV=development ./node_modules/.bin/nodemon index.js

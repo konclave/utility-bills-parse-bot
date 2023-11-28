@@ -19,36 +19,30 @@ let bot = null;
 async function callback(ctx) {
   try {
     ctx.reply('⏳ Wait for it...');
-    const messages = await getValues();
-    messages.forEach((message) => {
-      const { type, ...payload } = message;
-      switch (type) {
-        case messageTypeText:
-          ctx.reply(payload.data);
-          break;
-        case messageTypeFile:
-          ctx.replyWithDocument(payload.data);
-          break;
-        case messageTypeMediaGroup:
-          ctx.replyWithMediaGroup(payload.data);
-          break;
-        default:
-          ctx.reply(JSON.stringify(message));
-      }
-    });
+    getValues(ctx);
   } catch (error) {
-    ctx.reply('💥 Ошибка. Не удалось получить данные.');
-    if (DEBUG) {
-      ctx.reply(JSON.stringify(error));
-    }
+    handleError(error, ctx);
   }
 }
 
-export async function getValues() {
-  const waterValues = await water.fetch();
-  const electricityValues = await electricity.fetch();
+export function getValues(ctx) {
+  water
+    .fetch()
+    .then((message) => {
+      return processMessage(message, ctx);
+    })
+    .catch((error) => {
+      handleError(error, ctx);
+    });
 
-  return format([waterValues, electricityValues], DEBUG);
+  electricity
+    .fetch()
+    .then((message) => {
+      return processMessage(message, ctx);
+    })
+    .catch((error) => {
+      handleError(error, ctx);
+    });
 }
 
 export async function start() {
@@ -79,4 +73,29 @@ export async function handleUpdate(message) {
     return;
   }
   return bot.handleUpdate(message);
+}
+
+function processMessage(message, ctx) {
+  const [formatted] = format([message], DEBUG);
+  const { type, ...payload } = formatted;
+  switch (type) {
+    case messageTypeText:
+      ctx.reply(payload.data);
+      break;
+    case messageTypeFile:
+      ctx.replyWithDocument(payload.data);
+      break;
+    case messageTypeMediaGroup:
+      ctx.replyWithMediaGroup(payload.data);
+      break;
+    default:
+      ctx.reply(JSON.stringify(formatted));
+  }
+}
+
+function handleError(error, ctx) {
+  ctx.reply('💥 Ошибка. Не удалось получить данные.');
+  if (DEBUG) {
+    ctx.reply(JSON.stringify(error));
+  }
 }

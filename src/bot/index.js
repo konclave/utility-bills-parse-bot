@@ -16,12 +16,12 @@ const token = process.env.BOT_TOKEN;
 let DEBUG = false;
 let bot = null;
 
-async function callback(ctx) {
+function callback(ctx) {
   try {
     ctx.reply('⏳ Wait for it...');
     getValues(ctx);
   } catch (error) {
-    handleError(error, ctx);
+    return handleError(error, ctx);
   }
 }
 
@@ -32,7 +32,7 @@ export function getValues(ctx) {
       return processMessage(message, ctx);
     })
     .catch((error) => {
-      handleError(error, ctx);
+      return handleError(error, ctx);
     });
 
   electricity
@@ -41,7 +41,7 @@ export function getValues(ctx) {
       return processMessage(message, ctx);
     })
     .catch((error) => {
-      handleError(error, ctx);
+      return handleError(error, ctx);
     });
 }
 
@@ -80,22 +80,19 @@ function processMessage(message, ctx) {
   const { type, ...payload } = formatted;
   switch (type) {
     case messageTypeText:
-      ctx.reply(payload.data);
-      break;
+      return ctx.reply(payload.data);
     case messageTypeFile:
-      ctx.replyWithDocument(payload.data);
-      break;
+      return ctx.replyWithDocument(payload.data);
     case messageTypeMediaGroup:
-      ctx.replyWithMediaGroup(payload.data);
-      break;
+      return ctx.replyWithMediaGroup(payload.data);
     default:
-      ctx.reply(JSON.stringify(formatted));
+      return ctx.reply(JSON.stringify(formatted));
   }
 }
 
-function handleError(error, ctx) {
-  ctx.reply('💥 Ошибка. Не удалось получить данные.');
+async function handleError(error, ctx) {
+  await ctx.reply('💥 Ошибка. Не удалось получить данные.');
   if (DEBUG) {
-    ctx.reply(JSON.stringify(error));
+    await ctx.reply(JSON.stringify(error));
   }
 }

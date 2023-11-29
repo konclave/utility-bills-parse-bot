@@ -75,9 +75,8 @@ export async function handleUpdate(message) {
   return bot.handleUpdate(message);
 }
 
-function processMessage(message, ctx) {
-  const [formatted] = format([message], DEBUG);
-  const { type, ...payload } = formatted;
+function sendMessage(message, ctx) {
+  const { type, ...payload } = message;
   switch (type) {
     case messageTypeText:
       return ctx.reply(payload.data);
@@ -88,6 +87,11 @@ function processMessage(message, ctx) {
     default:
       return ctx.reply(JSON.stringify(formatted));
   }
+}
+
+function processMessage(message, ctx) {
+  const formatted = format([message], DEBUG);
+  return Promise.all(formatted.map((message) => sendMessage(message, ctx)));
 }
 
 async function handleError(error, ctx) {

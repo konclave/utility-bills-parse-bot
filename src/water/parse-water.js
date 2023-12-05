@@ -13,12 +13,12 @@ function parseWaterBill(text) {
 }
 
 function getHotWaterLiquid(text) {
-  const sequence = ['м', '3', 'ГВС', ':', 'ХВ', 'для', 'ГВС'];
+  const sequence = ['м', '3', 'ГВС', ':', 'компонент'];
   return getValueBySequence(text, sequence);
 }
 
 function getHotWaterEnergy(text) {
-  const sequence = ['ГКал', 'ГВС', ':', 'ТЭ', 'для', 'ГВС'];
+  const sequence = ['ГКал', 'ГВС', ':', 'компонент'];
   return getValueBySequence(text, sequence);
 }
 
@@ -32,6 +32,8 @@ function getWaterDrain(text) {
   return getValueBySequence(text, sequence);
 }
 
+// Finds the sequence and then searches back from the sequence start for
+// the first NaN value and returns the first number after that value (NaN index + 1)
 function getValueBySequence(text, sequence) {
   if (!text || !sequence || sequence.length === 0) {
     return 'Not found';
@@ -56,12 +58,11 @@ function getValueBySequence(text, sequence) {
   if (idx === -1) {
     return '';
   }
-
   let i = 1;
-  while (!Number.isNaN(Number(text[idx - i])) && i < idx) {
+  while (!Number.isNaN(Number(text[idx - i].replace(' ', ''))) && i < idx) {
     i++;
   }
-  return text[idx - i + 1];
+  return text[idx - i + 1].replace(' ', '');
 }
 
 export async function parse(binary) {

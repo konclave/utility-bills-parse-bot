@@ -2,35 +2,12 @@ import { getTotal } from '../shared/calculations.js';
 import { getStringsFromPdf } from '../shared/parse-pdf.js';
 import { filenamePrefix } from './fetch-water.js';
 
-function parseWaterBill(text) {
-  const result = [
-    getHotWaterLiquid(text),
-    getHotWaterEnergy(text),
-    getColdWaterLiquid(text),
-    getWaterDrain(text),
-  ];
-  return result;
-}
-
-function getHotWaterLiquid(text) {
-  const sequence = ['м', '3', 'ГВС', ':', 'компонент'];
-  return getValueBySequence(text, sequence);
-}
-
-function getHotWaterEnergy(text) {
-  const sequence = ['ГКал', 'ГВС', ':', 'компонент'];
-  return getValueBySequence(text, sequence);
-}
-
-function getColdWaterLiquid(text) {
-  const sequence = ['м', '3', 'Холодная', 'вода'];
-  return getValueBySequence(text, sequence);
-}
-
-function getWaterDrain(text) {
-  const sequence = ['м', '3', 'Водоотведение'];
-  return getValueBySequence(text, sequence);
-}
+const waterBillConfig = [
+  { title: 'Hot water', sequence: ['м', '3', 'ГВС', ':', 'компонент'] },
+  { title: 'Hot water heating', sequence: ['ГКал', 'ГВС', ':', 'компонент'] },
+  { title: 'Cold water', sequence: ['м', '3', 'Холодная', 'вода'] },
+  { title: 'Water drain', sequence: ['м', '3', 'Водоотведение'] },
+];
 
 // Finds the sequence and then searches back from the sequence start for
 // the first NaN value and returns the first number after that value (NaN index + 1)
@@ -70,7 +47,9 @@ export async function parse(binary) {
     return { text: '💧: Счёта пока что нет 🙁' };
   }
   const strings = await getStringsFromPdf(binary);
-  const result = parseWaterBill(strings);
+  const result = waterBillConfig.map((entry) =>
+    getValueBySequence(strings, entry.sequence),
+  );
   const total = getTotal(result);
   const intermediate = result.join(' + ');
   return {

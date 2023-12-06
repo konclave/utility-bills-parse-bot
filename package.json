@@ -19,6 +19,7 @@
   },
   "type": "module",
   "devDependencies": {
+    "esmock": "^2.6.0",
     "nodemon": "^3.0.1",
     "prettier": "^3.1.0",
     "simple-git-hooks": "^2.9.0"

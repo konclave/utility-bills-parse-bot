@@ -1,11 +1,11 @@
 {
   "name": "bill-parser",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
     "start": "NODE_ENV=development nodemon index.js",
-    "test": "uvu shared _tests_"
+    "test": "node --test"
   },
   "author": "",
   "license": "ISC",
@@ -19,11 +19,9 @@
   },
   "type": "module",
   "devDependencies": {
-    "@types/node": "^20.10.0",
     "nodemon": "^3.0.1",
     "prettier": "^3.1.0",
-    "simple-git-hooks": "^2.9.0",
-    "uvu": "^0.6.0-next.1"
+    "simple-git-hooks": "^2.9.0"
   },
   "simple-git-hooks": {
     "pre-push": "make update-github-secrets"

@@ -7,47 +7,20 @@ import {
   format,
 } from '../shared/message.js';
 
-import * as water from '../water/index.js';
-import * as electricity from '../electricity/index.js';
-import { getTotal } from '../shared/calculations.js';
-
 dotenv.config();
 
 const token = process.env.BOT_TOKEN;
 let DEBUG = false;
 let bot = null;
 
-function callback(ctx) {
+async function callback(ctx) {
   try {
-    ctx.reply('⏳ Wait for it...');
-    getValues(ctx);
+    await ctx.reply('⏳ Wait for it...');
+    const { processMessage, handleError } = bindContext(ctx);
+    getValues({ processMessage, handleError });
   } catch (error) {
     return handleError(error, ctx);
   }
-}
-
-export function getValues(ctx) {
-  Promise.all([
-    (water
-      .fetch()
-      .then((message) => {
-        return processMessage(message, ctx);
-      })
-      .catch((error) => {
-        return handleError(error, ctx);
-      }),
-    electricity
-      .fetch()
-      .then((message) => {
-        return processMessage(message, ctx);
-      })
-      .catch((error) => {
-        return handleError(error, ctx);
-      })),
-  ]).then((messages) => {
-    const total = getTotal(messages.map((message) => message.value || 0));
-    return sendMessage(getTextMessage(`Всего: ${total}₽`), ctx);
-  });
 }
 
 export async function start() {
@@ -94,15 +67,22 @@ function sendMessage(message, ctx) {
   }
 }
 
-async function processMessage(message, ctx) {
+function bindContext(ctx) {
+  return {
+    processMessage: processMessage(ctx),
+    handleError: handleError(ctx),
+  };
+}
+
+const processMessage = (ctx) => async (message) => {
   const formatted = format([message], DEBUG);
   await Promise.all(formatted.map((message) => sendMessage(message, ctx)));
   return formatted;
-}
+};
 
-async function handleError(error, ctx) {
+const handleError = (ctx) => async (error) => {
   await ctx.reply('💥 Ошибка. Не удалось получить данные.');
   if (DEBUG) {
     await ctx.reply(JSON.stringify(error));
   }
-}
+};

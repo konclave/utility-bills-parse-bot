@@ -6,13 +6,6 @@ export const messageTypeMediaGroup = 'MEDIA_GROUP';
 
 const defaultFilename = 'bill.pdf';
 
-export function getTextMessage(text) {
-  return {
-    type: messageTypeText,
-    data: text,
-  };
-}
-
 export function format(messages, DEBUG) {
   if (!messages) {
     return [];
@@ -41,7 +34,12 @@ export function format(messages, DEBUG) {
     ),
   ].join('\n');
 
-  return [getTextMessage(text), ...mediaMessages];
+  const textMessage = {
+    type: messageTypeText,
+    data: text,
+  };
+
+  return [textMessage, ...mediaMessages];
 }
 
 export function getErrorMessage(prefix = '') {

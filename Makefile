@@ -49,7 +49,7 @@ unregister:
 deploy-yc:
 	@yc serverless function version create \
 		--function-id $(YC_LAMBDA_ID) \
-		--runtime nodejs16 \
+		--runtime nodejs18 \
 		--entrypoint index.handler \
 		--execution-timeout 45s \
 		--service-account-id $(YC_SERVICE_ACCOUNT_ID)\
@@ -66,7 +66,7 @@ deploy-yc:
 		--source-path ./bill-parser.zip
 	@yc serverless function version create \
 		--function-id $(YC_STORE_LAMBDA_ID) \
-		--runtime nodejs16 \
+		--runtime nodejs18 \
 		--entrypoint index.storeHandler \
 		--execution-timeout 45s \
 		--service-account-id $(YC_SERVICE_ACCOUNT_ID)\

@@ -9,6 +9,7 @@ import {
 
 import * as water from '../water/index.js';
 import * as electricity from '../electricity/index.js';
+import { getTotal } from '../shared/calculations.js';
 
 dotenv.config();
 
@@ -26,23 +27,27 @@ function callback(ctx) {
 }
 
 export function getValues(ctx) {
-  water
-    .fetch()
-    .then((message) => {
-      return processMessage(message, ctx);
-    })
-    .catch((error) => {
-      return handleError(error, ctx);
-    });
-
-  electricity
-    .fetch()
-    .then((message) => {
-      return processMessage(message, ctx);
-    })
-    .catch((error) => {
-      return handleError(error, ctx);
-    });
+  Promise.all([
+    (water
+      .fetch()
+      .then((message) => {
+        return processMessage(message, ctx);
+      })
+      .catch((error) => {
+        return handleError(error, ctx);
+      }),
+    electricity
+      .fetch()
+      .then((message) => {
+        return processMessage(message, ctx);
+      })
+      .catch((error) => {
+        return handleError(error, ctx);
+      })),
+  ]).then((messages) => {
+    const total = getTotal(messages.map((message) => message.value || 0));
+    return sendMessage(getTextMessage(`Всего: ${total}₽`), ctx);
+  });
 }
 
 export async function start() {
@@ -85,13 +90,14 @@ function sendMessage(message, ctx) {
     case messageTypeMediaGroup:
       return ctx.replyWithMediaGroup(payload.data);
     default:
-      return ctx.reply(JSON.stringify(formatted));
+      return ctx.reply(JSON.stringify(message));
   }
 }
 
-function processMessage(message, ctx) {
+async function processMessage(message, ctx) {
   const formatted = format([message], DEBUG);
-  return Promise.all(formatted.map((message) => sendMessage(message, ctx)));
+  await Promise.all(formatted.map((message) => sendMessage(message, ctx)));
+  return formatted;
 }
 
 async function handleError(error, ctx) {

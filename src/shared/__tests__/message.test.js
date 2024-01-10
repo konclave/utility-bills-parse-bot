@@ -2,7 +2,6 @@ import { describe, it } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { format, getErrorMessage, messageTypeText } from '../message.js';
 import { getPeriodString } from '../period.js';
-import { getTotal } from '../calculations.js';
 
 describe('getErrorMessage', () => {
   it('should return error message', () => {
@@ -19,15 +18,15 @@ describe('format', () => {
     assert.deepEqual(format(), []);
   });
 
-  it.skip('format should format text messages', () => {
+  it('format should format text messages', () => {
     const fixture = [
       { text: 'foo', value: 1.37 },
       { text: 'bar', value: 2.5 },
     ];
 
-    const expected = `Счета·за·период:·${getPeriodString()}\nfoo\nbar\nВсего: ${getTotal(
-      fixture.map((f) => f.value),
-    )}₽`;
-    assert.equal(format(fixture), [{ type: messageTypeText, data: expected }]);
+    const expected = `Счета за период: ${getPeriodString()}\nfoo\nbar`;
+    assert.deepEqual(format(fixture), [
+      { type: messageTypeText, data: expected },
+    ]);
   });
 });

@@ -29,8 +29,6 @@ jobs:
             index.js
             package.json
             package-lock.json
-          tags: |
-            v-${{ steps.vars.outputs.sha_short }}
       - name: Install bot function
         uses: yc-actions/yc-sls-function@v2
         with:

@@ -10,6 +10,7 @@ export function getValues({ processMessage, handleError }) {
   );
 
   Promise.all(withHandlers).then((messages) => {
+    console.log(messages);
     const total = getTotal(messages.map((message) => message.value || 0));
     return processMessage({ text: `Всего: ${total}₽` });
   });

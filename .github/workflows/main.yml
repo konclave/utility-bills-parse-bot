@@ -61,5 +61,3 @@ jobs:
             YC_S3_SECRET_ACCESS_KEY=${{ secrets.YC_S3_SECRET_ACCESS_KEY }}
             YC_S3_BUCKET=${{ secrets.YC_S3_BUCKET }}
             REQUEST_TIMEOUT=${{ secrets.REQUEST_TIMEOUT }}
-          tags: |
-            v-${{ steps.vars.outputs.sha_short }}

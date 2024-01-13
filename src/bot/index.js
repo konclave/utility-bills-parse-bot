@@ -6,6 +6,7 @@ import {
   messageTypeMediaGroup,
   format,
 } from '../shared/message.js';
+import { getValues } from './processing.js';
 
 dotenv.config();
 

@@ -1,5 +1,3 @@
-import { getPeriodString } from './period.js';
-
 export const messageTypeText = 'TEXT';
 export const messageTypeFile = 'FILE';
 export const messageTypeMediaGroup = 'MEDIA_GROUP';
@@ -26,7 +24,6 @@ export function format(messages, DEBUG) {
     : [];
 
   const text = [
-    `Счета за период: ${getPeriodString()}`,
     ...messages.map(
       (message) =>
         message.text +

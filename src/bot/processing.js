@@ -5,9 +5,15 @@ import { getTotal } from '../shared/calculations.js';
 export function getValues({ processMessage, handleError }) {
   const billPromises = [water.fetch(), electricity.fetch()];
 
-  const withHandlers = billPromises.map((promise) =>
-    promise.then(processMessage).catch(handleError),
-  );
+  const withHandlers = billPromises.map(async (promise) => {
+    try {
+      const result = await promise;
+      await processMessage(result);
+      return result;
+    } catch (error) {
+      return handleError(error);
+    }
+  });
 
   Promise.all(withHandlers).then((messages) => {
     console.log(messages);

@@ -15,8 +15,13 @@ const httpsAgent = new https.Agent({
 
 const client = axios.create({
   headers: {
-    'User-Agent':
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.2 Safari/605.1.15',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:127.0) Gecko/20100101 Firefox/127.0',
+    Host: 'my.mosenergosbyt.ru',
+    Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en,ru;q=0.5',
+    'Accept-Encoding': 'gzip, deflate, br, zstd',
+    Connection: 'keep-alive',
+    'Cache-Control': 'no-cache',
   },
   timeout: process.env.REQUEST_TIMEOUT || 0,
   httpsAgent,
@@ -24,14 +29,13 @@ const client = axios.create({
 
 export async function webhookCallback(event) {
   const data = JSON.parse(event.body);
-  const invoicelink_url = Object.values(data)[0];
+  const invoiceLinkUrl = Object.values(data)[0];
 
-  if (!invoicelink_url) {
+  if (!invoiceLinkUrl) {
     throw new Error(`Cannot parse Mailparser.io data: ${JSON.stringify(data)}`);
   }
 
-  const parsedUrl = new URL(invoicelink_url);
-  const invoiceUrl = parsedUrl.searchParams.get('args');
+  const invoiceUrl = new URL(invoiceLinkUrl);
   const pdf = await downloadInvoice(invoiceUrl);
 
   const isTgk = await isTrehgorka(pdf);
@@ -42,7 +46,7 @@ export async function webhookCallback(event) {
   const filename = await getFilenameFromPdf(pdf, electricityPrefix);
   if (!filename) {
     return new Error(
-      'Cannot get the filename from the PDF: ' + invoicelink_url,
+      'Cannot get the filename from the PDF: ' + invoiceLinkUrl,
     );
   }
 
@@ -52,7 +56,7 @@ export async function webhookCallback(event) {
 
 async function isTrehgorka(pdf) {
   const strings = await getStringsFromPdf(pdf);
-  return strings.some((entry) => entry.includes('КУТУЗОВСКАЯ УЛ.'));
+  return strings.some((entry) => entry.toUpperCase().includes('023221017850'));
 }
 
 async function downloadInvoice(url) {

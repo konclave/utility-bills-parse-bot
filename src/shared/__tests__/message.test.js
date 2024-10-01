@@ -24,7 +24,7 @@ describe('format', () => {
       { text: 'bar', value: 2.5 },
     ];
 
-    const expected = `Счета за период: ${getPeriodString()}\nfoo\nbar`;
+    const expected = `foo\nbar`;
     assert.deepEqual(format(fixture), [
       { type: messageTypeText, data: expected },
     ]);

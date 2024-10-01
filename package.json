@@ -10,17 +10,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.460.0",
-    "axios": "^1.6.2",
-    "cheerio": "^1.0.0-rc.12",
-    "dotenv": "^16.0.3",
+    "@aws-sdk/client-s3": "^3.658.1",
+    "axios": "^1.7.7",
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.4.5",
     "pdf-parser": "^1.0.5",
-    "telegraf": "^4.15.0"
+    "telegraf": "^4.16.3"
   },
   "type": "module",
   "devDependencies": {
     "esmock": "^2.6.0",
-    "nodemon": "^3.0.1",
     "prettier": "^3.1.0",
     "simple-git-hooks": "^2.9.0"
   },

@@ -67,6 +67,10 @@ async function downloadInvoice(url) {
     responseEncoding: 'binary',
   };
 
-  const response = await client(options);
-  return response.data;
+  try {
+    const response = await client(options);
+    return response.data;
+  } catch(e) {
+    throw new Error(`Failed to download invoice PDF: ${e.message}`)
+  }
 }

@@ -20,7 +20,7 @@ export const handler = async function (event) {
   await bot.handleUpdate(message);
   return {
     statusCode: 200,
-    body: '',
+    body: 'Success',
   };
 };
 

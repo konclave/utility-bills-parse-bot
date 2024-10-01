@@ -1,5 +1,5 @@
 import axios from 'axios';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 import https from 'https';
 import { getMonth, getCurrentPeriodFilename, getYear } from '../shared/period.js';
 import * as S3 from '../shared/s3.js';

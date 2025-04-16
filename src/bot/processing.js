@@ -3,7 +3,7 @@ import * as electricity from '../electricity/index.js';
 import { getTotal } from '../shared/calculations.js';
 import { getPeriodString } from '../shared/period.js';
 
-export function getValues({ processMessage, handleError }) {
+export async function getValues({ processMessage, handleError }) {
   const billPromises = [water.fetch(), electricity.fetch()];
 
   const withHandlers = billPromises.map(async (promise) => {
@@ -16,7 +16,7 @@ export function getValues({ processMessage, handleError }) {
     }
   });
 
-  Promise.all(withHandlers).then((messages) => {
+  return Promise.all(withHandlers).then((messages) => {
     const total = getTotal(messages.map((message) => message.value || 0));
     return processMessage({ text: `Всего за ${getPeriodString()}: ${total}₽` });
   });

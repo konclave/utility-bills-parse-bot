@@ -1,10 +1,11 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
 import * as S3 from '../shared/s3.js';
-import { getCurrentPeriodFilename, getMonth, getYear } from '../shared/period.js';
+import {
+  getCurrentPeriodFilename,
+  getMonth,
+  getYear,
+} from '../shared/period.js';
 import { getFilenameFromPdf } from '../shared/parse-pdf.js';
-
-dotenv.config();
 
 export const filenamePrefix = 'electricity-';
 
@@ -31,7 +32,10 @@ export async function fetch() {
       return fromStorage;
     }
   } catch (e) {
-    console.log('[electricity] failed to fetch persisted pdf from cloud storage:', JSON.stringify(e.message))
+    console.log(
+      '[electricity] failed to fetch persisted pdf from cloud storage:',
+      JSON.stringify(e.message),
+    );
   }
 
   const username = process.env.MOSENERGO_LOGIN;
@@ -47,7 +51,7 @@ export async function fetch() {
   const { session } = loginData;
 
   if (session === undefined) {
-    throw new Error(loginData.nm_result);
+    throw new Error(`Login to Mosenergosbyt failed: ${loginData.nm_result}`);
   }
 
   const { vl_params } = await fetchPdfRequestParams(session);
@@ -55,14 +59,17 @@ export async function fetch() {
 
   const pdfFilename = await getFilenameFromPdf(pdf, filenamePrefix);
   if (!pdfFilename) {
-    return new Error('Cannot get the filename from the PDF');
+    throw new Error('Cannot get the filename from the PDF');
   }
 
   try {
     await S3.purgeStorage(pdfFilename, [filenamePrefix]);
     await S3.store(pdf, pdfFilename);
   } catch (e) {
-    console.log('[electricity] failed to store pdf in cloud storage:', JSON.stringify(e.message))
+    console.log(
+      '[electricity] failed to store pdf in cloud storage:',
+      JSON.stringify(e.message),
+    );
   }
   return pdf;
 }
@@ -80,7 +87,7 @@ async function login(username, password) {
   data.append('psw', password);
   data.append(
     'vl_device_info',
-    '{"appver":"1.28.1","type":"browser","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.2 Safari/605.1.15"}'
+    '{"appver":"1.28.1","type":"browser","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.2 Safari/605.1.15"}',
   );
   const options = {
     method: 'POST',
@@ -102,7 +109,7 @@ async function fetchPdfRequestParams(session) {
   data.append('kd_provider', 1);
   data.append(
     'vl_provider',
-    `{"id_kng": ${process.env.MOSENERGO_ID_KNG}, "nm_abn": ${process.env.MOSENERGO_NM_ABN}}`
+    `{"id_kng": ${process.env.MOSENERGO_ID_KNG}, "nm_abn": ${process.env.MOSENERGO_NM_ABN}}`,
   );
   data.append('plugin', 'bytProxy');
   data.append('proxyquery', 'GetPrintBillLink');

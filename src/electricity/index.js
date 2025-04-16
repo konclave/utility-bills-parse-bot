@@ -7,7 +7,7 @@ export async function fetch() {
     const pdf = await fetchElectricity();
     return await parse(pdf);
   } catch (error) {
-    console.log(JSON.stringify({ origin: '⚡️', error }));
-    return { text: getErrorMessage('⚡️'), error };
+    console.log(JSON.stringify({ origin: '⚡️', error: error.message }));
+    return { text: getErrorMessage('⚡️'), error: error.message };
   }
 }

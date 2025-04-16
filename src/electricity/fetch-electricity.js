@@ -51,7 +51,7 @@ export async function fetch() {
   const { session } = loginData;
 
   if (session === undefined) {
-    throw new Error(loginData.nm_result);
+    throw new Error(`Login to Mosenergosbyt failed: ${loginData.nm_result}`);
   }
 
   const { vl_params } = await fetchPdfRequestParams(session);
@@ -59,7 +59,7 @@ export async function fetch() {
 
   const pdfFilename = await getFilenameFromPdf(pdf, filenamePrefix);
   if (!pdfFilename) {
-    return new Error('Cannot get the filename from the PDF');
+    throw new Error('Cannot get the filename from the PDF');
   }
 
   try {

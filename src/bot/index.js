@@ -1,28 +1,8 @@
 import { Telegraf } from 'telegraf';
-import dotenv from 'dotenv';
-import {
-  messageTypeText,
-  messageTypeFile,
-  messageTypeMediaGroup,
-  format,
-} from '../shared/message.js';
-import { getValues } from './processing.js';
-
-dotenv.config();
+import { callback } from './callback.js';
 
 const token = process.env.BOT_TOKEN;
-let DEBUG = false;
 let bot = null;
-
-async function callback(ctx) {
-  try {
-    await ctx.reply('⏳ Wait for it...');
-    const { processMessage, handleError } = bindContext(ctx);
-    getValues({ processMessage, handleError });
-  } catch (error) {
-    return handleError(error, ctx);
-  }
-}
 
 export async function start() {
   if (token === undefined) {
@@ -41,9 +21,7 @@ export async function start() {
   bot.command('?', callback);
   bot.hears('?', callback);
   bot.hears('debug', async (ctx) => {
-    DEBUG = true;
-    await callback(ctx);
-    DEBUG = false;
+    await callback(ctx, { debug: true });
   });
 }
 
@@ -53,37 +31,3 @@ export async function handleUpdate(message) {
   }
   return bot.handleUpdate(message);
 }
-
-function sendMessage(message, ctx) {
-  const { type, ...payload } = message;
-  switch (type) {
-    case messageTypeText:
-      return ctx.reply(payload.data);
-    case messageTypeFile:
-      return ctx.replyWithDocument(payload.data);
-    case messageTypeMediaGroup:
-      return ctx.replyWithMediaGroup(payload.data);
-    default:
-      return ctx.reply(JSON.stringify(message));
-  }
-}
-
-function bindContext(ctx) {
-  return {
-    processMessage: processMessage(ctx),
-    handleError: handleError(ctx),
-  };
-}
-
-const processMessage = (ctx) => async (message) => {
-  const formatted = format([message], DEBUG);
-  await Promise.all(formatted.map((message) => sendMessage(message, ctx)));
-  return formatted;
-};
-
-const handleError = (ctx) => async (error) => {
-  await ctx.reply('💥 Ошибка. Не удалось получить данные.');
-  if (DEBUG) {
-    await ctx.reply(JSON.stringify(error));
-  }
-};

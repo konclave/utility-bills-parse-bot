@@ -1,17 +1,8 @@
-import dotenv from 'dotenv';
 import * as bot from './src/bot/index.js';
-import { webhookCallback } from './src/mosenergo-bill-store/index.js';
-
-dotenv.config();
+import { startLocalServer } from './src/dev-server.js';
 
 if (process.env.NODE_ENV === 'development') {
-  // webhookCallback({
-  //   body: JSON.stringify({
-  //     invoicelink_url:
-  //       'https://some.url?args=http://localhost:8000/water-bill.pdf',
-  //   }),
-  // });
-  const messages = await bot.getValues();
+  await startLocalServer();
 }
 
 export const handler = async function (event) {

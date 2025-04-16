@@ -91,4 +91,9 @@ update-github-secrets:
 .PHONY: dev
 # target: dev - start development server
 dev:
-	@NODE_ENV=development node --watch index.js
+	npm run start
+
+.PHONY: test
+# target: test - run tests
+test:
+	npm run test

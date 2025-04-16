@@ -1,13 +1,10 @@
 import * as https from 'https';
 import axios from 'axios';
-import dotenv from 'dotenv';
 import { getFilenameFromPdf, getStringsFromPdf } from '../shared/parse-pdf.js';
 
 import * as S3 from '../shared/s3.js';
 import { filenamePrefix as electricityPrefix } from '../electricity/fetch-electricity.js';
 import { filenamePrefix as waterPrefix } from '../water/fetch-water.js';
-
-dotenv.config();
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false,
@@ -15,9 +12,11 @@ const httpsAgent = new https.Agent({
 
 const client = axios.create({
   headers: {
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:127.0) Gecko/20100101 Firefox/127.0',
+    'User-Agent':
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:127.0) Gecko/20100101 Firefox/127.0',
     Host: 'my.mosenergosbyt.ru',
-    Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    Accept:
+      'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
     'Accept-Language': 'en,ru;q=0.5',
     'Accept-Encoding': 'gzip, deflate, br, zstd',
     Connection: 'keep-alive',
@@ -45,9 +44,7 @@ export async function webhookCallback(event) {
 
   const filename = await getFilenameFromPdf(pdf, electricityPrefix);
   if (!filename) {
-    return new Error(
-      'Cannot get the filename from the PDF: ' + invoiceLinkUrl,
-    );
+    return new Error('Cannot get the filename from the PDF: ' + invoiceLinkUrl);
   }
 
   await S3.purgeStorage(filename, [waterPrefix, electricityPrefix]);
@@ -70,7 +67,7 @@ async function downloadInvoice(url) {
   try {
     const response = await client(options);
     return response.data;
-  } catch(e) {
-    throw new Error(`Failed to download invoice PDF: ${e.message}`)
+  } catch (e) {
+    throw new Error(`Failed to download invoice PDF: ${e.message}`);
   }
 }

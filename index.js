@@ -1,8 +1,5 @@
-import dotenv from 'dotenv';
 import * as bot from './src/bot/index.js';
 import { webhookCallback } from './src/mosenergo-bill-store/index.js';
-
-dotenv.config();
 
 if (process.env.NODE_ENV === 'development') {
   // webhookCallback({

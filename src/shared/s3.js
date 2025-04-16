@@ -5,9 +5,6 @@ import {
   DeleteObjectsCommand,
   GetObjectCommand,
 } from '@aws-sdk/client-s3';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const region = process.env['YC_REGION'];
 const bucketName = process.env['YC_S3_BUCKET'];
@@ -32,7 +29,7 @@ export async function fetch(filename) {
   const s3Client = getS3Client();
 
   const listResponse = await s3Client.send(
-    new ListObjectsV2Command({ Bucket: bucketName })
+    new ListObjectsV2Command({ Bucket: bucketName }),
   );
   const hasFile = listResponse.Contents?.some(({ Key }) => Key === filename);
 
@@ -108,7 +105,7 @@ function getFilenamesToKeep(filename, prefixes) {
 
     for (let prefix of prefixes) {
       keep.push(
-        `${prefix}${String(prevMonth).padStart(2, '0')}-${prevYear}.pdf`
+        `${prefix}${String(prevMonth).padStart(2, '0')}-${prevYear}.pdf`,
       );
     }
   }

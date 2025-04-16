@@ -1,5 +1,4 @@
 import { Telegraf } from 'telegraf';
-import dotenv from 'dotenv';
 import {
   messageTypeText,
   messageTypeFile,
@@ -7,8 +6,6 @@ import {
   format,
 } from '../shared/message.js';
 import { getValues } from './processing.js';
-
-dotenv.config();
 
 const token = process.env.BOT_TOKEN;
 let DEBUG = false;

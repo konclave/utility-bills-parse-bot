@@ -92,3 +92,8 @@ update-github-secrets:
 # target: dev - start development server
 dev:
 	npm run start
+
+.PHONY: test
+# target: test - run tests
+test:
+	npm run test

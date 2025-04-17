@@ -26,7 +26,7 @@ describe('format', () => {
 
     const expected = `foo\nbar`;
     assert.deepEqual(format(fixture), [
-      { type: messageTypeText, data: expected },
+      { type: messageTypeText, data: expected, values: [1.37, 2.5] },
     ]);
   });
 });

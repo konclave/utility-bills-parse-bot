@@ -97,3 +97,7 @@ dev:
 # target: test - run tests
 test:
 	npm run test
+
+.PHONY: e2e
+e2e:
+	curl -X POST -H "Content-Type: application/json" http://localhost:8000

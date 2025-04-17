@@ -1,3 +1,5 @@
+import { message } from 'telegraf/filters';
+
 export const messageTypeText = 'TEXT';
 export const messageTypeFile = 'FILE';
 export const messageTypeMediaGroup = 'MEDIA_GROUP';
@@ -9,6 +11,8 @@ export function format(messages, DEBUG) {
     return [];
   }
 
+  const values = messages.map((message) => message.value || 0);
+
   const mediaGroup = messages
     .filter((message) => message.fileBuffer?.length > 0)
     .map((message) => ({
@@ -17,6 +21,7 @@ export function format(messages, DEBUG) {
         filename: message.fileTitle || defaultFilename,
         source: message.fileBuffer,
       },
+      value: message.value,
     }));
 
   const mediaMessages = mediaGroup.length
@@ -34,6 +39,7 @@ export function format(messages, DEBUG) {
   const textMessage = {
     type: messageTypeText,
     data: text,
+    values,
   };
 
   return [textMessage, ...mediaMessages];

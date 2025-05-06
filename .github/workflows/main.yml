@@ -13,7 +13,7 @@ jobs:
         id: vars
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Install pdf store function
-        uses: yc-actions/yc-sls-function@v2
+        uses: yc-actions/yc-sls-function@v3
         with:
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
           folder-id: ${{ secrets.YC_FOLDER_ID }}
@@ -33,7 +33,7 @@ jobs:
             package.json
             package-lock.json
       - name: Install bot function
-        uses: yc-actions/yc-sls-function@v2
+        uses: yc-actions/yc-sls-function@v3
         with:
           yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
           folder-id: ${{ secrets.YC_FOLDER_ID }}

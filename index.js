@@ -1,4 +1,5 @@
 import * as bot from './src/bot/index.js';
+import { webhookCallback } from './src/mosenergo-bill-store/index.js';
 import { startLocalServer } from './src/dev-server.js';
 
 if (process.env.NODE_ENV === 'development') {
@@ -15,10 +16,10 @@ export const handler = async function (event) {
   };
 };
 
-export async function storeHandler(event) {
+export const storeHandler = async (event) => {
   await webhookCallback(event);
   return {
     statusCode: 200,
     body: 'Success',
   };
-}
+};

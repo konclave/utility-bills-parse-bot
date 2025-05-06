@@ -70,6 +70,7 @@ deploy-yc:
 		--entrypoint index.storeHandler \
 		--execution-timeout 45s \
 		--service-account-id $(YC_SERVICE_ACCOUNT_ID)\
+		--async
 		--environment YC_REGION=ru-central1 \
 		--environment YC_S3_BUCKET=electricity-invoices \
 		--environment YC_S3_ACCESS_KEY=$(YC_S3_ACCESS_KEY) \

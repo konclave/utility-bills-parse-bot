@@ -15,8 +15,8 @@ jobs:
       - name: Install pdf store function
         uses: yc-actions/yc-sls-function@v4.1.0
         with:
-          # yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-          yc-sa-id: $${ secrets.YC_SERVICE_ACCOUNT_ID }}
+          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+#          yc-sa-id: $${ secrets.YC_SERVICE_ACCOUNT_ID }}
           folder-id: ${{ secrets.YC_FOLDER_ID }}
           function-name: ${{ secrets.YC_STORE_LAMBDA_ID }}
           runtime: 'nodejs22'
@@ -38,8 +38,8 @@ jobs:
       - name: Install bot function
         uses: yc-actions/yc-sls-function@v4.1.0
         with:
-          # yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-          yc-sa-id: $${ secrets.YC_SERVICE_ACCOUNT_ID }}
+          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+          # yc-sa-id: $${ secrets.YC_SERVICE_ACCOUNT_ID }}
           folder-id: ${{ secrets.YC_FOLDER_ID }}
           function-name: ${{ secrets.YC_LAMBDA_ID }}
           runtime: 'nodejs22'

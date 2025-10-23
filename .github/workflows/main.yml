@@ -13,12 +13,13 @@ jobs:
         id: vars
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Install pdf store function
-        uses: konclave/yc-sls-function@main
+        uses: yc-actions/yc-sls-function@v4.1.0
         with:
-          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+          # yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+          yc-sa-id: $${ secrets.YC_SERVICE_ACCOUNT_ID }}
           folder-id: ${{ secrets.YC_FOLDER_ID }}
           function-name: ${{ secrets.YC_STORE_LAMBDA_ID }}
-          runtime: 'nodejs18'
+          runtime: 'nodejs22'
           entrypoint: 'index.storeHandler'
           environment: |
             YC_REGION=${{ secrets.YC_REGION }}
@@ -32,16 +33,16 @@ jobs:
             index.js
             package.json
             package-lock.json
+          async: true
           async-retries-count: 3
-          async-success-empty-target: true
-          async-failure-empty-target: true
       - name: Install bot function
-        uses: yc-actions/yc-sls-function@v3
+        uses: yc-actions/yc-sls-function@v4.1.0
         with:
-          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+          # yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+          yc-sa-id: $${ secrets.YC_SERVICE_ACCOUNT_ID }}
           folder-id: ${{ secrets.YC_FOLDER_ID }}
           function-name: ${{ secrets.YC_LAMBDA_ID }}
-          runtime: 'nodejs18'
+          runtime: 'nodejs22'
           entrypoint: 'index.handler'
           memory: '128Mb'
           execution-timeout: 10

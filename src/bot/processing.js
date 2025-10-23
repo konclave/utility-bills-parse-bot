@@ -1,10 +1,11 @@
 import * as water from '../water/index.js';
 import * as electricity from '../electricity/index.js';
+import * as mosobleirc from '../mosobleirc/index.js';
 import { getTotal } from '../shared/calculations.js';
 import { getPeriodString } from '../shared/period.js';
 
 export async function getValues({ processMessage, handleError }) {
-  const billPromises = [water.fetch(), electricity.fetch()];
+  const billPromises = [water.fetch(), electricity.fetch(), mosobleirc.fetch()];
 
   const withHandlers = billPromises.map(async (promise) =>
     promise.then(processMessage).catch(handleError),

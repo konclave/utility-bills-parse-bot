@@ -62,6 +62,10 @@ deploy-yc:
 		--environment MOSENERGO_NM_ABN=$(MOSENERGO_NM_ABN) \
 		--environment BOT_TOKEN=$(BOT_TOKEN) \
 		--environment BOT_HOOK_PATH=$(BOT_HOOK_PATH) \
+		--environment MOSOBL_ACCOUNT=$(MOSOBL_ACCOUNT) \
+		--environment MOSOBL_TENANT_TOKEN=$(MOSOBL_TENANT_TOKEN) \
+		--environment MOSOBL_LOGIN=$(MOSOBL_LOGIN) \
+		--environment MOSOBL_PASSWORD=$(MOSOBL_PASSWORD) \
 		--environment REQUEST_TIMEOUT=5000 \
 		--source-path ./bill-parser.zip
 	@yc serverless function version create \

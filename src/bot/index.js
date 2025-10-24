@@ -12,7 +12,7 @@ export function init() {
   if (token === undefined) {
     throw new Error('Telegram Bot token is missing!');
   }
-  bot = new Telegraf(process.env['BOT_TOKEN']);
+  const bot = new Telegraf(process.env['BOT_TOKEN']);
   // Enable graceful stop
   process.once('SIGINT', () => bot.stop('SIGINT'));
   process.once('SIGTERM', () => bot.stop('SIGTERM'));
@@ -22,7 +22,7 @@ export function init() {
     ctx.reply(message);
   });
 
-  setVenueActionListeners(botInstance, venueList);
+  setVenueActionListeners(bot, venueList);
 
   bot.command('?', sendVenueSelection);
   bot.hears('?', sendVenueSelection);

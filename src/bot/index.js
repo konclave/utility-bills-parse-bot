@@ -7,9 +7,8 @@ const venueList = [
 ];
 
 const token = process.env.BOT_TOKEN;
-let bot = null;
 
-export async function start() {
+export async function init() {
   if (token === undefined) {
     throw new Error('Telegram Bot token is missing!');
   }
@@ -23,7 +22,7 @@ export async function start() {
     ctx.reply(message);
   });
 
-  setVenueActionListeners({ bot, venueList });
+  setVenueActionListeners(botInstance, venueList);
 
   bot.command('?', sendVenueSelection);
   bot.hears('?', sendVenueSelection);
@@ -31,10 +30,12 @@ export async function start() {
   bot.hears('debug', async (ctx) => {
     await callback(ctx, { debug: true });
   });
+
+  return bot;
 }
 
-function setVenueActionListeners({ bot, venueList }) {
-  venueList.forEach(([name, code]) => {
+function setVenueActionListeners(bot, venueList) {
+  venueList.forEach(([, code]) => {
     bot.action(code, async (ctx) => {
       await callback(ctx, { venue: code });
     });
@@ -47,11 +48,4 @@ function sendVenueSelection(ctx) {
   });
 
   ctx.reply('Показать счёт для:', Markup.inlineKeyboard([venueButtons]));
-}
-
-export async function handleUpdate(message) {
-  if (bot === null) {
-    return;
-  }
-  return bot.handleUpdate(message);
 }

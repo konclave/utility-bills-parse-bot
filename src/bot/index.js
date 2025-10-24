@@ -1,4 +1,4 @@
-import { Telegraf } from 'telegraf';
+import { Telegraf, Markup } from 'telegraf';
 import { callback } from './callback.js';
 
 const venueList = [
@@ -24,8 +24,8 @@ export function init() {
 
   setVenueActionListeners(bot, venueList);
 
-  bot.command('?', sendVenueSelection);
-  bot.hears('?', sendVenueSelection);
+  bot.command('?', (ctx) => sendVenueSelection(ctx, venueList));
+  bot.hears('?', (ctx) => sendVenueSelection(ctx, venueList));
 
   bot.hears('debug', async (ctx) => {
     await callback(ctx, { debug: true });
@@ -42,7 +42,7 @@ function setVenueActionListeners(bot, venueList) {
   });
 }
 
-function sendVenueSelection(ctx) {
+function sendVenueSelection(ctx, venueList) {
   const venueButtons = venueList.map(([name, code]) => {
     return Markup.button.callback(name, code);
   });

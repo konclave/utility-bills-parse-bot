@@ -25,7 +25,7 @@ function sendMessage(message, ctx) {
   const { type, ...payload } = message;
   switch (type) {
     case messageTypeText:
-      return ctx.reply(payload.data, { parse_mode: 'MarkdownV2' });
+      return ctx.reply(payload.data, { parse_mode: 'HTML' });
     case messageTypeFile:
       return ctx.replyWithDocument(payload.data);
     case messageTypeMediaGroup:

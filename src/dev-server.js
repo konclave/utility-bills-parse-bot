@@ -24,6 +24,10 @@ export async function startLocalServer() {
 
   server.on('request', async (req, res) => {
     if (req.method === 'POST') {
+      let bodyData = '';
+      for await (const chunk of req) {
+        bodyData += chunk.toString();
+      }
       res.writeHead(200, {
         'Content-Type': 'application/json',
         'Transfer-Encoding': 'chunked',
@@ -32,7 +36,8 @@ export async function startLocalServer() {
         res.write(chunk);
         res.write('\n');
       });
-      await callback(mockCtx, { debug: true });
+      const body = JSON.parse(bodyData);
+      await callback(mockCtx, { debug: true, value: body.venue });
       res.end();
     } else {
       res.writeHead(405, { 'Content-Type': 'text/plain' });
@@ -80,5 +85,11 @@ class MockTelegramBot {
   #sendMessage(message) {
     const json = JSON.stringify(message);
     this.#onMessage(json);
+  }
+
+  handleUpdate(update) {
+    if (update.message) {
+      this.#messages.push(update.message);
+    }
   }
 }

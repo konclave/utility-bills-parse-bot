@@ -1,6 +1,11 @@
 import { Telegraf } from 'telegraf';
 import { callback } from './callback.js';
 
+const venueList = [
+  ['Одинцово', 'O'],
+  ['Трёхгорка', 'T'],
+];
+
 const token = process.env.BOT_TOKEN;
 let bot = null;
 
@@ -14,15 +19,34 @@ export async function start() {
   process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
   bot.start((ctx) => {
-    let message = `Please use the /? command to receive a bill`;
+    let message = `Отправьте "?", чтобы получить счёт`;
     ctx.reply(message);
   });
 
-  bot.command('?', callback);
-  bot.hears('?', callback);
+  setVenueActionListeners({ bot, venueList });
+
+  bot.command('?', sendVenueSelection);
+  bot.hears('?', sendVenueSelection);
+
   bot.hears('debug', async (ctx) => {
     await callback(ctx, { debug: true });
   });
+}
+
+function setVenueActionListeners({ bot, venueList }) {
+  venueList.forEach(([name, code]) => {
+    bot.action(code, async (ctx) => {
+      await callback(ctx, { venue: code });
+    });
+  });
+}
+
+function sendVenueSelection(ctx) {
+  const venueButtons = venueList.map(([name, code]) => {
+    return Markup.button.callback(name, code);
+  });
+
+  ctx.reply('Показать счёт для:', Markup.inlineKeyboard([venueButtons]));
 }
 
 export async function handleUpdate(message) {

@@ -1,5 +1,3 @@
-import { getTotal } from '../shared/calculations.js';
-
 const SERVICE_NAMES = {
   WATER: [
     'ВОДООТВЕДЕНИЕ',
@@ -33,14 +31,10 @@ export function parseCharges(json) {
 
   const water = sumByNames(SERVICE_NAMES.WATER);
   const electricity = sumByNames(SERVICE_NAMES.ELECTRICITY);
-  const total = getTotal([water, electricity]);
 
-  const text = [
-    '*Одинцово*',
-    `💧: ${water} ₽`,
-    `⚡️: ${electricity} ₽`,
-    `Всего: ${total} ₽`,
-  ].join('\n');
+  const text = ['*Одинцово*', `💧: ${water} ₽`, `⚡️: ${electricity} ₽`].join(
+    '\n',
+  );
 
-  return { text, value: total };
+  return { text, values: [water, electricity] };
 }

@@ -18,7 +18,7 @@ export async function fetch() {
 
   try {
     const date = getTodayISODate();
-    const fromStore = storage.fetch(date);
+    const fromStore = await storage.fetch(date);
     if (fromStore) {
       return fromStore;
     }

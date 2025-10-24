@@ -42,8 +42,11 @@ function bindContext(ctx) {
   };
 }
 
-const processMessage = (ctx) => async (message) => {
-  const formatted = format([message], DEBUG);
+const processMessage = (ctx) => async (messages) => {
+  const formatted = format(
+    Array.isArray(messages) ? messages : [messages],
+    DEBUG,
+  );
   await Promise.all(formatted.map((message) => sendMessage(message, ctx)));
   return formatted;
 };

@@ -32,11 +32,8 @@ export function parseCharges(json) {
   const water = sumByNames(SERVICE_NAMES.WATER);
   const electricity = sumByNames(SERVICE_NAMES.ELECTRICITY);
 
-  const text = [
-    '<b>Одинцово</b>',
-    `💧: ${water} ₽`,
-    `⚡️: ${electricity} ₽`,
-  ].join('\n');
-
-  return { text, values: [water, electricity] };
+  return [
+    { text: `💧: ${water} ₽`, value: water },
+    { text: `⚡️: ${electricity} ₽`, value: electricity },
+  ];
 }

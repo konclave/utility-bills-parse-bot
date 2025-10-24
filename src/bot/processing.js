@@ -17,7 +17,7 @@ export async function getValues({ processMessage, handleError, venue }) {
       billPromises = [water.fetch(), electricity.fetch(), mosobleirc.fetch()];
   }
 
-  const withHandlers = billPromises.map(async (promise) =>
+  const withHandlers = billPromises.map((promise) =>
     promise.then(processMessage).catch(handleError),
   );
 

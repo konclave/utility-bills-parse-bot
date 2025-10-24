@@ -13,7 +13,7 @@ export async function callback(ctx, options) {
   try {
     await ctx.reply('⏳ Wait for it...');
     const { processMessage, handleError } = bindContext(ctx);
-    await getValues({ processMessage, handleError, venue });
+    await getValues({ processMessage, handleError, venue: options?.venue });
   } catch (error) {
     return handleError(error, ctx);
   } finally {

@@ -8,7 +8,7 @@ const venueList = [
 
 const token = process.env.BOT_TOKEN;
 
-export async function init() {
+export function init() {
   if (token === undefined) {
     throw new Error('Telegram Bot token is missing!');
   }

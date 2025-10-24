@@ -70,7 +70,7 @@ jobs:
             YC_S3_SECRET_ACCESS_KEY=${{ secrets.YC_S3_SECRET_ACCESS_KEY }}
             YC_S3_BUCKET=${{ secrets.YC_S3_BUCKET }}
             REQUEST_TIMEOUT=${{ secrets.REQUEST_TIMEOUT }}
-            MOSOBL_ACCOUNT=${{ secrets.MOSENERGO_ACCOUNT }}
-            MOSOBL_TENANT_TOKEN=${{ secrets.MOSENERGO_TENANT_TOKEN }}
-            MOSOBL_LOGIN=${{ secrets.MOSENERGO_LOGIN }}
-            MOSOBL_PASSWORD=${{ secrets.MOSENERGO_PASSWORD }}
+            MOSOBL_ACCOUNT=${{ secrets.MOSOBL_ACCOUNT }}
+            MOSOBL_TENANT_TOKEN=${{ secrets.MOSOBL_TENANT_TOKEN }}
+            MOSOBL_LOGIN=${{ secrets.MOSOBL_LOGIN }}
+            MOSOBL_PASSWORD=${{ secrets.MOSOBL_PASSWORD }}

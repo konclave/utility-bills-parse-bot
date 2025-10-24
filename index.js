@@ -10,7 +10,7 @@ if (process.env.NODE_ENV === 'development') {
 
 export const handler = async function (event) {
   const message = JSON.parse(event.body);
-  botInstance.handleMessage(message);
+  await botInstance.handleUpdate(message);
   return {
     statusCode: 200,
     body: 'Success',

@@ -9,6 +9,8 @@ const SERVICE_NAMES = {
     'ЭЛЕКТРИЧЕСТВО ДЕНЬ ДВУХТАРИФНЫЙ ПУ (Д1)',
     'ЭЛЕКТРИЧЕСТВО НОЧЬ ДВУХТАРИФНЫЙ ПУ (Д1)',
   ],
+  DOMOFON: ['ЗАПИРАЮЩЕЕ УСТРОЙСТВО', 'ОБСЛУЖИВАНИЕ СИСТЕМЫ ВИДЕОНАБЛЮДЕНИЯ'],
+  MAINTENANCE: ['СОДЕРЖАНИЕ ЖИЛОГО ПОМЕЩЕНИЯ'],
 };
 
 function safeNumber(value) {
@@ -31,9 +33,13 @@ export function parseCharges(json) {
 
   const water = sumByNames(SERVICE_NAMES.WATER);
   const electricity = sumByNames(SERVICE_NAMES.ELECTRICITY);
+  const domofon = sumByNames(SERVICE_NAMES.DOMOFON);
+  const maintenance = sumByNames(SERVICE_NAMES.MAINTAINANCE);
 
   return [
     { text: `💧: ${water} ₽`, value: water },
     { text: `⚡️: ${electricity} ₽`, value: electricity },
+    { text: `📞️: ${domofon} ₽`, value: domofon },
+    { text: `🏚️️: ${maintenance} ₽`, value: maintenance },
   ];
 }

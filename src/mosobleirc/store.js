@@ -1,8 +1,8 @@
 import * as s3 from '../shared/s3.js';
 import { getCurrentPeriodFilename } from '../shared/period.js';
+import { filePrefix } from './config.js'
 
 const MOSOBL_STORAGE_FILENAME = 'mosobleirc.json';
-const mosobleircFilenamePrefix = 'mosobleirc-';
 
 export async function store(period, record) {
   const fileBuffer = await s3.fetch(MOSOBL_STORAGE_FILENAME);
@@ -21,6 +21,6 @@ export async function fetch(period) {
 }
 
 export async function fetchPdf() {
-  const pdfFileName = getCurrentPeriodFilename(mosobleircFilenamePrefix);
+  const pdfFileName = getCurrentPeriodFilename(filePrefix);
   return await s3.fetch(pdfFileName);
 }

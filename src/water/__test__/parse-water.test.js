@@ -1,6 +1,6 @@
 import { describe, it, mock, before, after } from 'node:test';
 import { resolve } from 'node:path'
-import assert from 'node:assert/strict';
+import assert from 'node:assert';
 import { pdfStringsMock } from './pdf-strings.mock.js';
 
 describe('parse', async (t) => {

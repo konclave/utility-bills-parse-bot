@@ -5,6 +5,8 @@ import { getFilenameFromPdf, getStringsFromPdf } from '../shared/parse-pdf.js';
 import * as S3 from '../shared/s3.js';
 import { filenamePrefix as electricityPrefix } from '../electricity/fetch-electricity.js';
 import { filenamePrefix as waterPrefix } from '../water/fetch-water.js';
+import { filePrefix as mosobleircPrefix } from '../mosobleirc/config.js';
+import { handleEmailEvent } from './parse-email.js';
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false,
@@ -31,21 +33,18 @@ function handleApiGatewayEvent(event) {
   return Object.values(data)[0];
 }
 
-function handleEmailEvent(event) {
-  const link = event.messages[0]?.message.match(
-    /<a\b[^>]*\bhref\s*=\s*["'](https:\/\/my.mosenergosbyt.ru\/printServ\?[^"']*)["']/i,
-  )?.[1];
-  return decodeURI(link);
-}
-
 export async function webhookCallback(event) {
   let invoiceLinkUrl = '';
+  let type = '';
 
   if (event.body) {
-    invoiceLinkUrl = handleApiGatewayEvent(event);
+    const result = handleApiGatewayEvent(event);
+    invoiceLinkUrl = result.invoiceLinkUrl;
   }
   if (event.messages) {
-    invoiceLinkUrl = handleEmailEvent(event);
+    const result = handleEmailEvent(event);
+    invoiceLinkUrl = result.url;
+    type = result.type;
   }
 
   if (!invoiceLinkUrl) {
@@ -56,7 +55,7 @@ export async function webhookCallback(event) {
   const pdf = await downloadInvoice(invoiceUrl);
 
   const isTgk = await isTrehgorka(pdf);
-  if (!isTgk) {
+  if (!isTgk || type === '') {
     return;
   }
 
@@ -65,7 +64,7 @@ export async function webhookCallback(event) {
     return new Error('Cannot get the filename from the PDF: ' + invoiceLinkUrl);
   }
 
-  await S3.purgeStorage(filename, [waterPrefix, electricityPrefix]);
+  await S3.purgeStorage(filename, [waterPrefix, electricityPrefix, mosobleircPrefix]);
   await S3.store(pdf, filename);
 }
 

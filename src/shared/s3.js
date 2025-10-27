@@ -9,7 +9,7 @@ import {
 const region = process.env['YC_REGION'];
 const bucketName = process.env['YC_S3_BUCKET'];
 
-const KEEP_INVOICES_NUMBER = 3;
+const KEEP_INVOICES_NUMBER = 12;
 
 function getS3Client() {
   const region = process.env['YC_REGION'];

@@ -307,3 +307,7 @@ export async function parseCharges(input) {
     return { text: 'Одинцово: Ошибка обработки данных 😞', value: 0 };
   }
 }
+
+export function appendPdfMessage({ messages: parsed, pdfBuffer }) {
+  return [...parsed, { fileTitle: 'odintsovo_bill.pdf', fileBuffer: pdfBuffer }];
+}

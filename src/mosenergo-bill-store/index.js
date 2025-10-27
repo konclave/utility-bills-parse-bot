@@ -26,9 +26,27 @@ const client = axios.create({
   httpsAgent,
 });
 
-export async function webhookCallback(event) {
+function handleApiGatewayEvent(event) {
   const data = JSON.parse(event.body);
-  const invoiceLinkUrl = Object.values(data)[0];
+  return Object.values(data)[0];
+}
+
+function handleEmailEvent(event) {
+  const link = event.messages[0]?.message.match(
+    /<a\b[^>]*\bhref\s*=\s*["'](https:\/\/my.mosenergosbyt.ru\/printServ\?[^"']*)["']/i,
+  )?.[1];
+  return decodeURI(link);
+}
+
+export async function webhookCallback(event) {
+  let invoiceLinkUrl = '';
+
+  if (event.body) {
+    invoiceLinkUrl = handleApiGatewayEvent(event);
+  }
+  if (event.messages) {
+    invoiceLinkUrl = handleEmailEvent(event);
+  }
 
   if (!invoiceLinkUrl) {
     throw new Error(`Cannot parse Mailparser.io data: ${JSON.stringify(data)}`);

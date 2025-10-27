@@ -8,10 +8,10 @@ export async function fetch() {
   const period = getPeriodString();
 
   try {
-    const pdfBuffer = await storage.fetchPdf(period);
+    const pdfBuffer = await storage.fetchPdf();
     const pdfData = await parsePdfToChargeData(pdfBuffer);
     const parsed = await parseCharges(pdfData);
-    return appendPdfMessage({ messages: parsed, pdfBuffer });
+    return appendPdfMessage({ messages: parsed, pdfBuffer, period });
   } catch (error) {
     console.log(`MosOblEIRC PDF parse for period ${data} failed.`);
   }

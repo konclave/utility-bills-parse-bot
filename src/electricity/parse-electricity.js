@@ -1,4 +1,5 @@
 import { getStringsFromPdf } from '../shared/parse-pdf.js';
+import { getCurrentPeriodFilename } from '../shared/period.js'
 import { filenamePrefix } from './fetch-electricity.js';
 
 export async function parse(binary) {
@@ -7,11 +8,12 @@ export async function parse(binary) {
   }
   const strings = await getStringsFromPdf(binary);
   const value = parseBill(strings);
+  const fileTitle = getCurrentPeriodFilename(`${filenamePrefix}-bill-`);
 
   return {
     text: `⚡️: ${value} ₽`,
     value,
-    fileTitle: filenamePrefix + 'bill.pdf',
+    fileTitle,
     fileBuffer: binary,
   };
 }

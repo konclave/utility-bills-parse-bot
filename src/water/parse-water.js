@@ -1,6 +1,7 @@
 import { getTotal } from '../shared/calculations.js';
 import { getStringsFromPdf } from '../shared/parse-pdf.js';
 import { filenamePrefix } from './fetch-water.js';
+import { getCurrentPeriodFilename } from '../shared/period.js';
 
 const waterBillConfig = [
   { title: 'Hot water', sequence: ['м', '3', 'ГВС', ':', 'компонент'] },
@@ -52,10 +53,11 @@ export async function parse(binary) {
   );
   const total = getTotal(result);
   const intermediate = result.join(' + ');
+  const fileTitle = getCurrentPeriodFilename(`${filenamePrefix}-bill-`);
   return {
     text: `💧: ${total} ₽\n(${intermediate})`,
     value: total,
-    fileTitle: filenamePrefix + 'bill.pdf',
+    fileTitle,
     fileBuffer: binary,
   };
 }

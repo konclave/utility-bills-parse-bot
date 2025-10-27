@@ -14,6 +14,7 @@ const SERVICE_NAMES = {
   ],
   DOMOFON: ['ЗАПИРАЮЩЕЕ УСТРОЙСТВО', 'ОБСЛУЖИВАНИЕ СИСТЕМЫ ВИДЕОНАБЛЮДЕНИЯ'],
   MAINTENANCE: ['СОДЕРЖАНИЕ ЖИЛОГО ПОМЕЩЕНИЯ'],
+  HEATING: ['ОТОПЛЕНИЕ КПУ'],
 };
 
 function safeNumber(value) {
@@ -149,6 +150,17 @@ function extractChargeDetails(strings) {
     }
   });
   
+  // Extract heating services
+  SERVICE_NAMES.HEATING.forEach(serviceName => {
+    const amount = extractServiceAmount(strings, serviceName);
+    if (amount !== null) {
+      chargeDetails.push({
+        nm_service: serviceName,
+        sm_total: amount
+      });
+    }
+  });
+  
   return chargeDetails;
 }
 
@@ -210,6 +222,8 @@ function extractServiceAmount(strings, serviceName) {
       serviceIndex = strings.findIndex(str => str === serviceName);
     } else if (serviceName === 'СОДЕРЖАНИЕ ЖИЛОГО ПОМЕЩЕНИЯ') {
       serviceIndex = strings.findIndex(str => str === serviceName);
+    } else if (serviceName === 'ОТОПЛЕНИЕ КПУ') {
+      serviceIndex = strings.findIndex(str => str === serviceName);
     } else {
       serviceIndex = strings.findIndex(str => str && str.includes(serviceName));
     }
@@ -230,6 +244,10 @@ function extractServiceAmount(strings, serviceName) {
     // Special handling for video surveillance (split across two lines)
     else if (serviceName === 'ОБСЛУЖИВАНИЕ СИСТЕМЫ ВИДЕОНАБЛЮДЕНИЯ') {
       amountIndex = serviceIndex + 9; // The amount is at position +9 from "ОБСЛУЖИВАНИЕ СИСТЕМЫ"
+    }
+    // Special handling for heating - the amount is at position +4
+    else if (serviceName === 'ОТОПЛЕНИЕ КПУ') {
+      amountIndex = serviceIndex + 4;
     }
     
     // Validate amount index bounds
@@ -289,9 +307,10 @@ export async function parseCharges(input) {
     const electricity = sumByNames(SERVICE_NAMES.ELECTRICITY);
     const domofon = sumByNames(SERVICE_NAMES.DOMOFON);
     const maintenance = sumByNames(SERVICE_NAMES.MAINTENANCE);
+    const heating = sumByNames(SERVICE_NAMES.HEATING);
     
     // Validate that we got reasonable values
-    const totalAmount = water + electricity + domofon + maintenance;
+    const totalAmount = water + electricity + domofon + maintenance + heating;
     if (totalAmount === 0) {
       console.warn('All calculated amounts are zero - possible parsing issue');
     }
@@ -301,6 +320,7 @@ export async function parseCharges(input) {
       { text: `⚡️: ${electricity} ₽`, value: electricity },
       { text: `📞️: ${domofon} ₽`, value: domofon },
       { text: `🏚️️: ${maintenance} ₽`, value: maintenance },
+      { text: `♨️: ${heating.toFixed(2)} ₽`, value: heating },
     ];
     
   } catch (error) {

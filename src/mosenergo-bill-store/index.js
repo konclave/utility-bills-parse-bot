@@ -5,7 +5,7 @@ import { getFilenameFromPdf, getStringsFromPdf } from '../shared/parse-pdf.js';
 import * as S3 from '../shared/s3.js';
 import { filenamePrefix as electricityPrefix } from '../electricity/fetch-electricity.js';
 import { filenamePrefix as waterPrefix } from '../water/fetch-water.js';
-import { filePrefix as mosobleircPrefix } from '../mosobleirc/config.js';
+import { filenamePrefix as mosobleircPrefix } from '../mosobleirc/config.js';
 import { handleEmailEvent } from './parse-email.js';
 
 const httpsAgent = new https.Agent({

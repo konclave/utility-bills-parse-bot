@@ -1,1 +1,1 @@
-export const mosobleircPrefix = 'mosobleirc-';
+export const filenamePrefix = 'mosobleirc-';

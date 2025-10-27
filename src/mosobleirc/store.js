@@ -20,7 +20,6 @@ export async function fetch(period) {
 }
 
 export async function fetchPdf(period) {
-  const [year, month] = period.split('-');
-  const pdfFileName = MOSOBL_PDF_FILENAME_TEMPLATE.replace('MM', month).replace('YYYY', year);
+  const pdfFileName = MOSOBL_PDF_FILENAME_TEMPLATE.replace('MM-YYYY', period);
   return await s3.fetch(pdfFileName);
 }

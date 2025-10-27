@@ -5,10 +5,10 @@ import { getTodayISODate } from '../shared/period.js';
 import * as storage from './store.js';
 
 export async function fetch() {
-  const date = getTodayISODate();
+  const period = getPeriodString();
 
   try {
-    const pdfBuffer = await storage.fetchPdf(date);
+    const pdfBuffer = await storage.fetchPdf(period);
     const pdfData = parsePdfToChargeData(pdfBuffer);
     const parsed = parseCharges(pdfData);
     return appendPdfMessage({ messages: parsed, pdfBuffer });
@@ -27,13 +27,14 @@ export async function fetch() {
   }
 
   try {
-    const fromStore = await storage.fetch(date);
+    const fromStore = await storage.fetch(period);
     if (fromStore) {
       return fromStore;
     }
+    const date = getTodayISODate();
     const json = await fetchCharges(date);
     const parsed = parseCharges(json);
-    await storage.store(date, parsed);
+    await storage.store(period, parsed);
     return parsed;
   } catch (error) {
     return { text: getErrorMessage('Одинцово'), error: error.message };

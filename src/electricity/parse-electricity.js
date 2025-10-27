@@ -8,7 +8,7 @@ export async function parse(binary) {
   }
   const strings = await getStringsFromPdf(binary);
   const value = parseBill(strings);
-  const fileTitle = getCurrentPeriodFilename(`${filenamePrefix}-bill-`);
+  const fileTitle = getCurrentPeriodFilename(`${filenamePrefix}bill-`);
 
   return {
     text: `⚡️: ${value} ₽`,

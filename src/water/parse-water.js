@@ -53,7 +53,7 @@ export async function parse(binary) {
   );
   const total = getTotal(result);
   const intermediate = result.join(' + ');
-  const fileTitle = getCurrentPeriodFilename(`${filenamePrefix}-bill-`);
+  const fileTitle = getCurrentPeriodFilename(`${filenamePrefix}bill-`);
   return {
     text: `💧: ${total} ₽\n(${intermediate})`,
     value: total,

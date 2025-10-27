@@ -29,7 +29,9 @@ export function format(messages, DEBUG) {
     : [];
 
   const text = [
-    ...messages.map(
+    ...messages
+      .filter(message => message.text !== undefined)
+      .map(
       (message) =>
         message.text +
         (DEBUG && message.error ? '\n' + JSON.stringify(message.error) : ''),

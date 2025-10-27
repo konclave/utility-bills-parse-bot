@@ -1,7 +1,7 @@
 import { fetchCharges } from './fetch.js';
 import { parseCharges, parsePdfToChargeData, appendPdfMessage } from './parse.js';
 import { getErrorMessage } from '../shared/message.js';
-import { getTodayISODate } from '../shared/period.js';
+import { getTodayISODate, getPeriodString } from '../shared/period.js';
 import * as storage from './store.js';
 
 export async function fetch() {
@@ -9,8 +9,8 @@ export async function fetch() {
 
   try {
     const pdfBuffer = await storage.fetchPdf(period);
-    const pdfData = parsePdfToChargeData(pdfBuffer);
-    const parsed = parseCharges(pdfData);
+    const pdfData = await parsePdfToChargeData(pdfBuffer);
+    const parsed = await parseCharges(pdfData);
     return appendPdfMessage({ messages: parsed, pdfBuffer });
   } catch (error) {
     console.log(`MosOblEIRC PDF parse for period ${data} failed.`);

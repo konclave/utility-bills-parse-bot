@@ -1,4 +1,5 @@
 import * as s3 from '../shared/s3.js';
+import { getCurrentPeriodFilename } from '../shared/period.js';
 
 const MOSOBL_STORAGE_FILENAME = 'mosobleirc.json';
 const mosobleircFilenamePrefix = 'mosobleirc-';

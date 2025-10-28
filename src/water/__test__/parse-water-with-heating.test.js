@@ -3,10 +3,9 @@ import assert from 'node:assert';
 import { readFileSync } from 'fs';
 import { resolve } from 'node:path'
 
-const withoutHeatingMock = JSON.parse(readFileSync(resolve(import.meta.dirname, './water_without_heating.json'), 'utf-8'));
 const withHeatingMock = JSON.parse(readFileSync(resolve(import.meta.dirname, './water_with_heating.json'), 'utf-8'));
 
-describe('parse with mock data - without heating', () => {
+describe('parse with mock data - with heating', () => {
   let parse;
 
   before(async () => {
@@ -15,12 +14,11 @@ describe('parse with mock data - without heating', () => {
       now: new Date('2000-02-01T11:01:58.135Z'),
     });
 
-    // Mock the PDF parser to return data without heating
     mock.module(resolve(import.meta.dirname, '../../shared/parse-pdf.js'), {
-      namedExports: { getStringsFromPdf: async () => withoutHeatingMock },
+      namedExports: { getStringsFromPdf: async () => withHeatingMock },
     });
 
-    mock.module(resolve(import.meta.dirname, '../fetch-water.js'), {
+    mock.module(resolve(import.meta.dirname, '../fetch-water.js'), { 
       namedExports: { filenamePrefix: 'water-' },
     });
 
@@ -32,16 +30,16 @@ describe('parse with mock data - without heating', () => {
     mock.restoreAll();
   });
 
-  it('should return an array of messages without heating when mock data doesn\'t contain heating', async () => {
+  it('should return an array of messages with heating when mock data contains heating', async () => {
     const binary = [1, 0, 1, 0];
     const expected = [
       {
-        text: '💧: 1015.25 ₽\n(112.41 + 421.53 + 172.93 + 308.38)',
-        value: 1015.25,
+        text: '💧: 1684.7 ₽\n(146.99 + 551.22 + 397.75 + 588.74)',
+        value: 1684.7,
       },
       {
-        text: '🔥: 0 ₽',
-        value: 0,
+        text: '🔥: 723.40 ₽',
+        value: 723.40,
       },
       {
         fileTitle: 'water-bill-01-2000.pdf',
@@ -52,16 +50,4 @@ describe('parse with mock data - without heating', () => {
     const result = await parse(binary);
     assert.deepEqual(result, expected);
   });
-
-  it('should return "Счёта пока что нет 🙁" when given an empty binary input', async () => {
-    const binary = [];
-    const expected = { text: '💧: Счёта пока что нет 🙁' };
-    const result = await parse(binary);
-
-    assert.deepEqual(result, expected);
-  });
 });
-
-
-
-

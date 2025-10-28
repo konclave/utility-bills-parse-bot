@@ -1,23 +1,24 @@
-export const fromMosenergosbyt = 'mes_schet@mosenergosbyt.ru';
-export const fromMosobleirc = 'epd@mosobleirc.ru';
+export const emailMosenergo = 'mes_schet@mosenergosbyt.ru';
+export const emailMosobleirc = 'epd@mosobleirc.ru';
 
 export function handleEmailEvent(event) {
   const [entry] = event.messages;
-  const fromHeader = entry.headers.find((entry) => entry.name === 'From');
-  const fromEmail = fromHeader.values[0].match(/.+<(.+)>/)?.[1];
+  const message = entry.message;
 
-  switch (fromEmail) {
-    case fromMosobleirc: {
-      const url = getMosobleircLink(entry.message);
-      return { url, type: 'MOSOBLEIRC' };
-    }
-    case fromMosenergosbyt: {
-      const url = getMosenergoLink(entry.message);
-      return { url, type: 'MOSENERGO' };
-    }
-    default:
-      throw new Error(`Unknown email sender "${fromHeader}"`);
+  if (message.includes(emailMosobleirc)) {
+    const url = getMosobleircLink(entry.message);
+    return { url, type: 'MOSOBLEIRC' };
   }
+  if (message.includes(emailMosenergo)) {
+    const url = getMosenergoLink(entry.message);
+    return { url, type: 'MOSENERGO' };
+  }
+
+  throw new Error(
+    `Unknown email sender "${message
+      .match(/-------- Пересылаемое сообщение --------(.+)Кому:/g)?.[1]
+      ?.replaceAll(/<\/?div>/, '')}"`,
+  );
 }
 
 function getMosenergoLink(message) {

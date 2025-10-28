@@ -106,3 +106,8 @@ test:
 .PHONY: e2e
 e2e:
 	curl -X POST -H "Content-Type: application/json" http://localhost:8000
+
+.PHONY: dump-pdf
+# traget: dump-pdf – dumps PDF file to strings array JSON file. make dump-pdf PDF=./source.pdf JSON=./destenation.json
+dump-pdf:
+	node ./src/dump-pdf.js $(PDF) $(JSON)

@@ -49,14 +49,16 @@ export async function webhookCallback(event) {
   }
 
   if (!invoiceLinkUrl) {
-    throw new Error(`Cannot parse Mailparser.io data: ${JSON.stringify(data)}`);
+    throw new Error(
+      `Cannot parse email body: ${JSON.stringify(event.messages[0].message)}`,
+    );
   }
 
   const invoiceUrl = new URL(invoiceLinkUrl);
   const pdf = await downloadInvoice(invoiceUrl);
 
   const isTgk = await isTrehgorka(pdf);
-  if (!isTgk || type === '') {
+  if (!isTgk && type === '') {
     return;
   }
 

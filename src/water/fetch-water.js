@@ -1,7 +1,11 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import https from 'https';
-import { getMonth, getCurrentPeriodFilename, getYear } from '../shared/period.js';
+import https from 'node:https';
+import {
+  getMonth,
+  getCurrentPeriodFilename,
+  getYear,
+} from '../shared/period.js';
 import * as S3 from '../shared/s3.js';
 
 const client = axios.create({
@@ -17,7 +21,7 @@ const client = axios.create({
   },
   timeout: process.env.REQUEST_TIMEOUT || 0,
   httpsAgent: new https.Agent({
-    rejectUnauthorized: false
+    rejectUnauthorized: false,
   }),
 });
 
@@ -32,7 +36,10 @@ export async function fetch() {
       return persisted;
     }
   } catch (e) {
-    console.log('[water] failed to fetch persisted pdf from cloud storage:', JSON.stringify(e.message))
+    console.log(
+      '[water] failed to fetch persisted pdf from cloud storage:',
+      JSON.stringify(e.message),
+    );
   }
 
   const username = process.env.LOGIN;
@@ -51,7 +58,10 @@ export async function fetch() {
     await S3.purgeStorage(filename, [filenamePrefix]);
     await S3.store(pdf, filename);
   } catch (e) {
-    console.log('[water] failed to store pdf in cloud storage:', JSON.stringify(e.message))
+    console.log(
+      '[water] failed to store pdf in cloud storage:',
+      JSON.stringify(e.message),
+    );
   }
 
   return pdf;
@@ -82,7 +92,7 @@ async function login(username, password) {
 function getPdfRequestParams(html) {
   const $ = cheerio.load(html);
   const $form = $(
-    '#billings > table input[type="submit"]:not(:disabled)'
+    '#billings > table input[type="submit"]:not(:disabled)',
   ).parent();
   const tt = $('input[name="tt"]', $form).attr('value');
   const period = getFetchPeriod();

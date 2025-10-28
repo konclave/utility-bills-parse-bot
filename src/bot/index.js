@@ -10,7 +10,8 @@ const token = process.env.BOT_TOKEN;
 
 export function init() {
   if (token === undefined) {
-    throw new Error('Telegram Bot token is missing!');
+    console.warn('BOT_TOKEN is not set');
+    return;
   }
   const bot = new Telegraf(process.env['BOT_TOKEN']);
   // Enable graceful stop

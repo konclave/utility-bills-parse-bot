@@ -2,7 +2,7 @@ import pdfParser from 'pdf-parser';
 import { getMonthByRusTitle } from './period.js';
 
 export async function getStringsFromPdf(binary) {
-  const buffer = new Buffer.from(binary);
+  const buffer = Buffer.from(binary);
   return await readPdfToArray(buffer);
 }
 
@@ -15,7 +15,7 @@ async function readPdfToArray(buffer) {
         resolve(
           pdf.pages
             .flatMap((page) => page.texts.map(({ text }) => text))
-            .filter((entry) => Boolean(entry.trim()))
+            .filter((entry) => Boolean(entry.trim())),
         );
       }
     });
@@ -57,7 +57,7 @@ async function getMonthYearFromPDF(pdf, prefix) {
   }
 
   const periodString = strings.find((entry) =>
-    entry.includes('ЖИЛИЩНО-КОММУНАЛЬНЫЕ И ИНЫЕ УСЛУГИ ЗА')
+    entry.includes('ЖИЛИЩНО-КОММУНАЛЬНЫЕ И ИНЫЕ УСЛУГИ ЗА'),
   );
   if (periodString) {
     const [month, year] = periodString.trim().split(' ').slice(-3);

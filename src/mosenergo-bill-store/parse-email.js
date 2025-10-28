@@ -3,8 +3,8 @@ export const fromMosobleirc = 'epd@mosobleirc.ru';
 
 export function handleEmailEvent(event) {
   const [entry] = event.messages;
-  const from = entry.headers.find(entry => entry.name === 'From');
-  const fromEmail = from.values[0].match(/.+\<(.+)\>/)?.[1];
+  const fromHeader = entry.headers.find((entry) => entry.name === 'From');
+  const fromEmail = fromHeader.values[0].match(/.+<(.+)>/)?.[1];
 
   switch (fromEmail) {
     case fromMosobleirc: {
@@ -16,18 +16,22 @@ export function handleEmailEvent(event) {
       return { url, type: 'MOSENERGO' };
     }
     default:
-      throw new Error(`Unknown email sender "${from}"`);
+      throw new Error(`Unknown email sender "${fromHeader}"`);
   }
 }
 
 function getMosenergoLink(message) {
-    const link = message.match(
-    /<a\b[^>]*\bhref\s*=\s*["'](https:\/\/my.mosenergosbyt.ru\/printServ\?[^"']*)["']/i,
-  )?.[1] ?? '';
+  const link =
+    message.match(
+      /<a\b[^>]*\bhref\s*=\s*["'](https:\/\/my.mosenergosbyt.ru\/printServ\?[^"']*)["']/i,
+    )?.[1] ?? '';
   return decodeURIComponent(link);
 }
 
 function getMosobleircLink(message) {
-  const link = message.match(/<a\b[^>]*\bhref\s*=\s*["']https:\/\/click.email4customers.com\/Link\?messageId=\S+&amp;linkId=\S+&amp;args=(https%3a%2f%2fepd.mosobleirc.ru%2fjReport%2fsreport-query%2[^"']*)["']/i,)?.[1] ?? '';
-  return decodeURIComponent(link)
+  const link =
+    message.match(
+      /<a\b[^>]*\bhref\s*=\s*["']https:\/\/click.email4customers.com\/Link\?messageId=\S+&amp;linkId=\S+&amp;args=(https%3a%2f%2fepd.mosobleirc.ru%2fjReport%2fsreport-query%2[^"']*)["']/i,
+    )?.[1] ?? '';
+  return decodeURIComponent(link);
 }

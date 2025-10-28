@@ -1,4 +1,4 @@
-import * as https from 'https';
+import * as https from 'node:https';
 import axios from 'axios';
 import { getFilenameFromPdf, getStringsFromPdf } from '../shared/parse-pdf.js';
 
@@ -41,6 +41,7 @@ export async function webhookCallback(event) {
     const result = handleApiGatewayEvent(event);
     invoiceLinkUrl = result.invoiceLinkUrl;
   }
+
   if (event.messages) {
     const result = handleEmailEvent(event);
     invoiceLinkUrl = result.url;
@@ -64,7 +65,11 @@ export async function webhookCallback(event) {
     return new Error('Cannot get the filename from the PDF: ' + invoiceLinkUrl);
   }
 
-  await S3.purgeStorage(filename, [waterPrefix, electricityPrefix, mosobleircPrefix]);
+  await S3.purgeStorage(filename, [
+    waterPrefix,
+    electricityPrefix,
+    mosobleircPrefix,
+  ]);
   await S3.store(pdf, filename);
 }
 

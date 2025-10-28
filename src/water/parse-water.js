@@ -79,7 +79,6 @@ export async function parse(binary) {
   const intermediate = result.join(' + ');
   const fileTitle = getCurrentPeriodFilename(`${filenamePrefix}bill-`);
 
-  // Create the main water message
   const messages = [
     {
       text: `💧: ${total} ₽\n(${intermediate})`,
@@ -87,16 +86,12 @@ export async function parse(binary) {
     }
   ];
 
-  // Check for heating and add as separate message if present
   const heatingValue = getHeatingValue(strings);
-  if (heatingValue) {
-    messages.push({
-      text: `🔥: ${heatingValue} ₽`,
-      value: parseFloat(heatingValue),
-    });
-  }
+  messages.push({
+    text: `🔥: ${heatingValue} ₽`,
+    value: parseFloat(heatingValue),
+  });
 
-  // Add file message
   messages.push({
     fileTitle,
     fileBuffer: binary,

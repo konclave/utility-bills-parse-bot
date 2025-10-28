@@ -291,36 +291,42 @@ export async function parseCharges(input) {
       return { text: 'Одинцово: Данные о начислениях не найдены 🙁', value: 0 };
     }
 
-    const sumByNames = (names) => {
+    const sumByNamesWithDetails = (names) => {
       try {
-        return items
-          .filter((i) => i && names.includes(i.nm_service))
-          .map((i) => safeNumber(i.sm_total))
-          .reduce((a, b) => a + b, 0);
+        const filteredItems = items.filter((i) => i && names.includes(i.nm_service));
+        const values = filteredItems.map((i) => safeNumber(i.sm_total));
+        const total = values.reduce((a, b) => a + b, 0);
+        const intermediate = values.length > 1 ? values.join(' + ') : '';
+        return { total, intermediate };
       } catch (error) {
         console.error('Error calculating sum for names:', names, error);
-        return 0;
+        return { total: 0, intermediate: '' };
       }
     };
 
-    const water = sumByNames(SERVICE_NAMES.WATER);
-    const electricity = sumByNames(SERVICE_NAMES.ELECTRICITY);
-    const domofon = sumByNames(SERVICE_NAMES.DOMOFON);
-    const maintenance = sumByNames(SERVICE_NAMES.MAINTENANCE);
-    const heating = sumByNames(SERVICE_NAMES.HEATING);
+    const water = sumByNamesWithDetails(SERVICE_NAMES.WATER);
+    const electricity = sumByNamesWithDetails(SERVICE_NAMES.ELECTRICITY);
+    const domofon = sumByNamesWithDetails(SERVICE_NAMES.DOMOFON);
+    const maintenance = sumByNamesWithDetails(SERVICE_NAMES.MAINTENANCE);
+    const heating = sumByNamesWithDetails(SERVICE_NAMES.HEATING);
     
     // Validate that we got reasonable values
-    const totalAmount = water + electricity + domofon + maintenance + heating;
+    const totalAmount = water.total + electricity.total + domofon.total + maintenance.total + heating.total;
     if (totalAmount === 0) {
       console.warn('All calculated amounts are zero - possible parsing issue');
     }
 
+    const formatMessage = (emoji, data) => {
+      const baseText = `${emoji}: ${data.total} ₽`;
+      return data.intermediate ? `${baseText}\n(${data.intermediate})` : baseText;
+    };
+
     return [
-      { text: `💧: ${water} ₽`, value: water },
-      { text: `⚡️: ${electricity} ₽`, value: electricity },
-      { text: `📞️: ${domofon} ₽`, value: domofon },
-      { text: `🏚️️: ${maintenance} ₽`, value: maintenance },
-      { text: `🔥: ${heating.toFixed(2)} ₽`, value: heating },
+      { text: formatMessage('💧', water), value: water.total },
+      { text: formatMessage('⚡️', electricity), value: electricity.total },
+      { text: formatMessage('📞️', domofon), value: domofon.total },
+      { text: formatMessage('🏚️️', maintenance), value: maintenance.total },
+      { text: `🔥: ${heating.total.toFixed(2)} ₽`, value: heating.total },
     ];
     
   } catch (error) {

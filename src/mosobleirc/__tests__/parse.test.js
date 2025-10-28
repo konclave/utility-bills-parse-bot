@@ -17,7 +17,7 @@ describe('mosobleirc', () => {
       assert.strictEqual(result[3].value, 1166.43);
       assert.strictEqual(result[4].value, 0.00);
 
-      assert.strictEqual(result[4].text, '♨️: 0.00 ₽');
+      assert.strictEqual(result[4].text, '🔥: 0.00 ₽');
     });
   });
 });

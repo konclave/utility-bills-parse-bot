@@ -43,6 +43,30 @@ function getValueBySequence(text, sequence) {
   return text[idx - i + 1].replace(' ', '');
 }
 
+// Extracts heating value from PDF strings if present
+function getHeatingValue(strings) {
+  const heatingIndex = strings.findIndex(str => str === 'Отопление');
+  if (heatingIndex === -1) {
+    return null;
+  }
+
+  // Look backwards from "Отопление" to find the heating amount
+  // Based on the PDF structure, the amount appears several positions before "Отопление"
+  for (let i = heatingIndex - 1; i >= Math.max(0, heatingIndex - 10); i--) {
+    const value = strings[i];
+    // Check if this looks like a monetary amount (contains decimal point and is numeric)
+    if (value && value.includes('.') && !isNaN(parseFloat(value))) {
+      const numValue = parseFloat(value);
+      // Reasonable range for heating costs (between 100 and 2000 rubles)
+      if (numValue >= 100 && numValue <= 2000) {
+        return value;
+      }
+    }
+  }
+
+  return null;
+}
+
 export async function parse(binary) {
   if (binary?.length === 0) {
     return { text: '💧: Счёта пока что нет 🙁' };
@@ -54,10 +78,29 @@ export async function parse(binary) {
   const total = getTotal(result);
   const intermediate = result.join(' + ');
   const fileTitle = getCurrentPeriodFilename(`${filenamePrefix}bill-`);
-  return {
-    text: `💧: ${total} ₽\n(${intermediate})`,
-    value: total,
+
+  // Create the main water message
+  const messages = [
+    {
+      text: `💧: ${total} ₽\n(${intermediate})`,
+      value: total,
+    }
+  ];
+
+  // Check for heating and add as separate message if present
+  const heatingValue = getHeatingValue(strings);
+  if (heatingValue) {
+    messages.push({
+      text: `🔥: ${heatingValue} ₽`,
+      value: parseFloat(heatingValue),
+    });
+  }
+
+  // Add file message
+  messages.push({
     fileTitle,
     fileBuffer: binary,
-  };
+  });
+
+  return messages;
 }

@@ -320,7 +320,7 @@ export async function parseCharges(input) {
       { text: `⚡️: ${electricity} ₽`, value: electricity },
       { text: `📞️: ${domofon} ₽`, value: domofon },
       { text: `🏚️️: ${maintenance} ₽`, value: maintenance },
-      { text: `♨️: ${heating.toFixed(2)} ₽`, value: heating },
+      { text: `🔥: ${heating.toFixed(2)} ₽`, value: heating },
     ];
     
   } catch (error) {

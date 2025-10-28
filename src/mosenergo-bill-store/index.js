@@ -62,7 +62,10 @@ export async function webhookCallback(event) {
     return;
   }
 
-  const filename = await getFilenameFromPdf(pdf, electricityPrefix);
+  const filenamePrefix =
+    type === 'MOSOBLEIRC' ? mosobleircPrefix : electricityPrefix;
+
+  const filename = await getFilenameFromPdf(pdf, filenamePrefix);
   if (!filename) {
     return new Error('Cannot get the filename from the PDF: ' + invoiceLinkUrl);
   }

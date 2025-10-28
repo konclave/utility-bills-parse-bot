@@ -4,12 +4,15 @@ export const emailMosobleirc = 'epd@mosobleirc.ru';
 export function handleEmailEvent(event) {
   const [entry] = event.messages;
   const message = entry.message;
+  const from = entry.headers.find((header) => header.name === 'From')
+    ?.values[0];
 
-  if (message.includes(emailMosobleirc)) {
+  if (message.includes(emailMosobleirc) || from.includes(emailMosobleirc)) {
     const url = getMosobleircLink(entry.message);
     return { url, type: 'MOSOBLEIRC' };
   }
-  if (message.includes(emailMosenergo)) {
+
+  if (message.includes(emailMosenergo) || from.includes(emailMosenergo)) {
     const url = getMosenergoLink(entry.message);
     return { url, type: 'MOSENERGO' };
   }

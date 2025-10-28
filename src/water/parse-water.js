@@ -47,7 +47,7 @@ function getValueBySequence(text, sequence) {
 function getHeatingValue(strings) {
   const heatingIndex = strings.findIndex(str => str === 'Отопление');
   if (heatingIndex === -1) {
-    return null;
+    return 0;
   }
 
   // Look backwards from "Отопление" to find the heating amount
@@ -64,7 +64,7 @@ function getHeatingValue(strings) {
     }
   }
 
-  return null;
+  return 0;
 }
 
 export async function parse(binary) {

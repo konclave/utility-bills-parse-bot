@@ -55,7 +55,7 @@ export async function fetch() {
   const pdf = await fetchPdf(username, params);
 
   try {
-    await S3.purgeStorage(filename, [filenamePrefix]);
+    await S3.purgeStorage([filenamePrefix]);
     await S3.store(pdf, filename);
   } catch (e) {
     console.log(

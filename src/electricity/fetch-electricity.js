@@ -63,7 +63,7 @@ export async function fetch() {
   }
 
   try {
-    await S3.purgeStorage(pdfFilename, [filenamePrefix]);
+    await S3.purgeStorage([filenamePrefix]);
     await S3.store(pdf, pdfFilename);
   } catch (e) {
     console.log(

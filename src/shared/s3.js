@@ -5,6 +5,7 @@ import {
   DeleteObjectsCommand,
   GetObjectCommand,
 } from '@aws-sdk/client-s3';
+import { getCurrentPeriodFilename, getPeriodString } from './period.js';
 
 const region = process.env['YC_REGION'];
 const bucketName = process.env['YC_S3_BUCKET'];
@@ -88,10 +89,10 @@ export async function purge(predicate) {
   }
 }
 
-function getFilenamesToKeep(filename, prefixes) {
-  const chunks = filename.split('.')[0].split('-');
+export function getFilenamesToKeep(prefixes) {
+  const chunks = getPeriodString().split('-');
   const year = Number(chunks[chunks.length - 1]);
-  const month = Number(chunks[chunks.length - 2]);
+  const month = Number(chunks[chunks.length - 2]) + 1;
 
   const keep = [];
 
@@ -113,8 +114,8 @@ function getFilenamesToKeep(filename, prefixes) {
   return keep;
 }
 
-export async function purgeStorage(filename, prefixes) {
-  const keep = getFilenamesToKeep(filename, prefixes);
+export async function purgeStorage(prefixes) {
+  const keep = getFilenamesToKeep(prefixes);
   const predicate = (object) =>
     prefixes.some((prefix) => object['Key'].startsWith(prefix)) &&
     !keep.includes(object['Key']);

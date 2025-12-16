@@ -29,7 +29,7 @@ function getMosenergoLink(message) {
     message.match(
       /<a\b[^>]*\bhref\s*=\s*["'](https:\/\/my.mosenergosbyt.ru\/printServ\?[^"']*)["']/i,
     )?.[1] ?? '';
-  return decodeURIComponent(link);
+  return decodeLink(link);
 }
 
 function getMosobleircLink(message) {
@@ -37,5 +37,9 @@ function getMosobleircLink(message) {
     message.match(
       /<a\b[^>]*\bhref\s*=\s*["']https:\/\/click.email4customers.com\/Link\?messageId=\S+&amp;linkId=\S+&amp;args=(https%3a%2f%2fepd.mosobleirc.ru%2fjReport%2fsreport-query%2[^"']*)["']/i,
     )?.[1] ?? '';
-  return decodeURIComponent(link);
+  return decodeLink(link);
+}
+
+function decodeLink(link) {
+  return decodeURIComponent(link.replaceAll('&amp;', '&'));
 }

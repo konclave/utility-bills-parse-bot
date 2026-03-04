@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "NODE_ENV=development node --watch --env-file .env index.js",
-    "test": "node --test --experimental-test-module-mocks"
+    "test": "node scripts/fetch-test-fixtures.js && node --test --experimental-test-module-mocks"
   },
   "author": "",
   "license": "ISC",

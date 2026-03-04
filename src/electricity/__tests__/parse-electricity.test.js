@@ -6,7 +6,7 @@ import { parse } from '../parse-electricity.js';
 describe('electricity', () => {
   describe('parse', () => {
     const pdfBuffer = readFileSync(
-      `${import.meta.dirname}/../../__mocks__/mosenergo_test.pdf`,
+      `${import.meta.dirname}/../../__fixtures__/mosenergo_test.pdf`,
     );
     it('should get invoice value from PDF', async () => {
       const result = await parse(pdfBuffer);

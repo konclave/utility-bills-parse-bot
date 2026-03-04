@@ -1,5 +1,5 @@
 SHELL = /bin/bash
-include .env
+-include .env
 
 # ============================
 # Auxiliary targets.
@@ -90,8 +90,9 @@ cleanup:
 .PHONY: update-github-secrets
 # target: update-github-secrets – update Github secrets from .env file
 update-github-secrets:
-	@gh secret set --env-file .env && \
-  	echo "✅ Github action secrets updated"
+	@test -f .env && gh secret set --env-file .env && \
+		echo "✅ Github action secrets updated" || \
+		echo "⚠️  .env file not found, skipping Github secrets update"
 
 .PHONY: dev
 # target: dev - start development server

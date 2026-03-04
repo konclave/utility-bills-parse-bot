@@ -29,7 +29,7 @@ export async function webhookCallback(event) {
 
   if (!invoiceLinkUrl) {
     throw new Error(
-      `Cannot parse email body: ${JSON.stringify(event.messages[0].message)}`,
+      `Cannot parse email body from event: ${JSON.stringify(event)}`,
     );
   }
 

@@ -14,3 +14,8 @@ jobs:
           node-version: '22.13.0'
       - run: npm ci
       - run: NODE_ENV=test npm test
+        env:
+          YC_REGION: ${{ secrets.YC_REGION }}
+          YC_S3_BUCKET: ${{ secrets.YC_S3_BUCKET }}
+          YC_S3_ACCESS_KEY: ${{ secrets.YC_S3_ACCESS_KEY }}
+          YC_S3_SECRET_ACCESS_KEY: ${{ secrets.YC_S3_SECRET_ACCESS_KEY }}

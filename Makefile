@@ -49,7 +49,7 @@ unregister:
 deploy-yc:
 	@yc serverless function version create \
 		--function-id $(YC_LAMBDA_ID) \
-		--runtime nodejs18 \
+		--runtime nodejs22 \
 		--entrypoint index.handler \
 		--execution-timeout 45s \
 		--service-account-id $(YC_SERVICE_ACCOUNT_ID)\

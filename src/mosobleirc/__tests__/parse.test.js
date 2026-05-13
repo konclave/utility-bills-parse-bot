@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import { resolve } from 'node:path';
 import { readFileSync } from 'fs';
 import assert from 'node:assert';
-import { parseCharges } from '../parse.js';
+import { parseCharges, extractChargeDetails } from '../parse.js';
 
 const mosoblEircInvoiceMock = JSON.parse(
   readFileSync(
@@ -12,42 +12,69 @@ const mosoblEircInvoiceMock = JSON.parse(
 );
 
 describe('mosobleirc', () => {
-  describe('parseCharges with mock data', () => {
-    it('should get invoice value from mock PDF data', async () => {
-      // Create mock charge data that would be extracted from the PDF
-      const mockChargeData = {
-        chargeDetails: [
-          { nm_service: 'ВОДООТВЕДЕНИЕ', sm_total: '398,78' },
-          { nm_service: 'ГОРЯЧЕЕ В/С (НОСИТЕЛЬ)', sm_total: '141,32' },
-          { nm_service: 'ГОРЯЧЕЕ В/С (ЭНЕРГИЯ)', sm_total: '561,70' },
-          { nm_service: 'ХОЛОДНОЕ В/С', sm_total: '227,65' },
-          {
-            nm_service: 'ЭЛЕКТРИЧЕСТВО ДЕНЬ ДВУХТАРИФНЫЙ ПУ (Д1)',
-            sm_total: '802,26',
-          },
-          {
-            nm_service: 'ЭЛЕКТРИЧЕСТВО НОЧЬ ДВУХТАРИФНЫЙ ПУ (Д1)',
-            sm_total: '0,00',
-          },
-          { nm_service: 'ЗАПИРАЮЩЕЕ УСТРОЙСТВО', sm_total: '46,01' },
-          {
-            nm_service: 'ОБСЛУЖИВАНИЕ СИСТЕМЫ ВИДЕОНАБЛЮДЕНИЯ',
-            sm_total: '79,55',
-          },
-          { nm_service: 'СОДЕРЖАНИЕ ЖИЛОГО ПОМЕЩЕНИЯ', sm_total: '1166,43' },
-          { nm_service: 'ОТОПЛЕНИЕ КПУ', sm_total: '0,00' },
-        ],
-      };
+  describe('extractChargeDetails with JSON dump data', () => {
+    it('extracts all 10 services from the invoice', () => {
+      const result = extractChargeDetails(mosoblEircInvoiceMock);
+      assert.strictEqual(result.length, 10);
+    });
 
-      const result = await parseCharges(mockChargeData);
-      assert.strictEqual(result.length, 5);
-      assert.strictEqual(result[0].value, 1329.45);
-      assert.strictEqual(result[1].value, 802.26);
-      assert.strictEqual(result[2].value, 125.56);
-      assert.strictEqual(result[3].value, 1166.43);
-      assert.strictEqual(result[4].value, 0.0);
+    it('extracts water service amounts', () => {
+      const result = extractChargeDetails(mosoblEircInvoiceMock);
+      const find = (nm) => result.find((r) => r.nm_service === nm);
 
-      assert.strictEqual(result[4].text, '🔥: 0.00 ₽');
+      assert.strictEqual(find('ВОДООТВЕДЕНИЕ').sm_total, 514.57);
+      assert.strictEqual(find('ГОРЯЧЕЕ В/С (НОСИТЕЛЬ)').sm_total, 171.54);
+      assert.strictEqual(find('ГОРЯЧЕЕ В/С (ЭНЕРГИЯ)').sm_total, 681.76);
+      assert.strictEqual(find('ХОЛОДНОЕ В/С').sm_total, 304.58);
+    });
+
+    it('extracts electricity service amounts', () => {
+      const result = extractChargeDetails(mosoblEircInvoiceMock);
+      const find = (nm) => result.find((r) => r.nm_service === nm);
+
+      assert.strictEqual(
+        find('ЭЛЕКТРИЧЕСТВО ДЕНЬ ДВУХТАРИФНЫЙ ПУ (Д1)').sm_total,
+        972.32,
+      );
+      assert.strictEqual(
+        find('ЭЛЕКТРИЧЕСТВО НОЧЬ ДВУХТАРИФНЫЙ ПУ (Д1)').sm_total,
+        106.2,
+      );
+    });
+
+    it('extracts domofon service amounts', () => {
+      const result = extractChargeDetails(mosoblEircInvoiceMock);
+      const find = (nm) => result.find((r) => r.nm_service === nm);
+
+      assert.strictEqual(find('ЗАПИРАЮЩЕЕ УСТРОЙСТВО').sm_total, 48);
+      assert.strictEqual(
+        find('ОБСЛУЖИВАНИЕ СИСТЕМЫ ВИДЕОНАБЛЮДЕНИЯ').sm_total,
+        83,
+      );
+    });
+
+    it('extracts maintenance service amount', () => {
+      const result = extractChargeDetails(mosoblEircInvoiceMock);
+      const maintenance = result.find(
+        (r) => r.nm_service === 'СОДЕРЖАНИЕ ЖИЛОГО ПОМЕЩЕНИЯ',
+      );
+      assert.strictEqual(maintenance.sm_total, 1216.94);
+    });
+
+    it('extracts heating service amount', () => {
+      const result = extractChargeDetails(mosoblEircInvoiceMock);
+      const heating = result.find((r) => r.nm_service === 'ОТОПЛЕНИЕ КПУ');
+      assert.strictEqual(heating.sm_total, 4317.11);
+    });
+
+    it('returns empty array for empty input', () => {
+      const result = extractChargeDetails([]);
+      assert.deepStrictEqual(result, []);
+    });
+
+    it('returns empty array when no known services found', () => {
+      const result = extractChargeDetails(['some', 'unrelated', 'strings']);
+      assert.deepStrictEqual(result, []);
     });
   });
 
@@ -57,25 +84,25 @@ describe('mosobleirc', () => {
       // by manually creating the charge details that would be found in the JSON strings
       const mockChargeDataFromJsonDump = {
         chargeDetails: [
-          { nm_service: 'ВОДООТВЕДЕНИЕ', sm_total: '398,78' },
-          { nm_service: 'ГОРЯЧЕЕ В/С (НОСИТЕЛЬ)', sm_total: '141,32' },
-          { nm_service: 'ГОРЯЧЕЕ В/С (ЭНЕРГИЯ)', sm_total: '561,70' },
-          { nm_service: 'ХОЛОДНОЕ В/С', sm_total: '227,65' },
+          { nm_service: 'ВОДООТВЕДЕНИЕ', sm_total: '514,57' },
+          { nm_service: 'ГОРЯЧЕЕ В/С (НОСИТЕЛЬ)', sm_total: '171,54' },
+          { nm_service: 'ГОРЯЧЕЕ В/С (ЭНЕРГИЯ)', sm_total: '681,76' },
+          { nm_service: 'ХОЛОДНОЕ В/С', sm_total: '304,58' },
           {
             nm_service: 'ЭЛЕКТРИЧЕСТВО ДЕНЬ ДВУХТАРИФНЫЙ ПУ (Д1)',
-            sm_total: '802,26',
+            sm_total: '972,32',
           },
           {
             nm_service: 'ЭЛЕКТРИЧЕСТВО НОЧЬ ДВУХТАРИФНЫЙ ПУ (Д1)',
-            sm_total: '0,00',
+            sm_total: '106,20',
           },
-          { nm_service: 'ЗАПИРАЮЩЕЕ УСТРОЙСТВО', sm_total: '42,43' },
+          { nm_service: 'ЗАПИРАЮЩЕЕ УСТРОЙСТВО', sm_total: '48,00' },
           {
             nm_service: 'ОБСЛУЖИВАНИЕ СИСТЕМЫ ВИДЕОНАБЛЮДЕНИЯ',
-            sm_total: '73,36',
+            sm_total: '83,00',
           },
-          { nm_service: 'СОДЕРЖАНИЕ ЖИЛОГО ПОМЕЩЕНИЯ', sm_total: '1166,43' },
-          { nm_service: 'ОТОПЛЕНИЕ КПУ', sm_total: '0,00' },
+          { nm_service: 'СОДЕРЖАНИЕ ЖИЛОГО ПОМЕЩЕНИЯ', sm_total: '1216,94' },
+          { nm_service: 'ОТОПЛЕНИЕ КПУ', sm_total: '4317,11' },
         ],
       };
 
@@ -83,21 +110,22 @@ describe('mosobleirc', () => {
 
       // Verify the parsing results match expected values from the JSON dump
       assert.strictEqual(result.length, 5);
-      assert.strictEqual(result[0].value, 1329.45); // Water services: 398.78 + 141.32 + 561.70 + 227.65
-      assert.strictEqual(result[1].value, 802.26); // Electricity: 802.26 + 0.00
-      assert.strictEqual(result[2].value, 115.79); // Domofon services: 42.43 + 73.36
-      assert.strictEqual(result[3].value, 1166.43); // Maintenance: 1166.43
-      assert.strictEqual(result[4].value, 0.0); // Heating: 0.00
+      assert.strictEqual(result[0].value, 1672.45); // Water services: 514,57 + 171,54 + 681,76 + 304,58
+      assert.strictEqual(result[1].value, 1078.52); // Electricity: 972,32 + 106,20
+      assert.strictEqual(result[2].value, 131); // Domofon services: 48,00 + 83,00
+      assert.strictEqual(result[3].value, 1216.94); // Maintenance: 1216,94
+      assert.strictEqual(result[4].value, 4317.11); // Heating: 4317,11
 
+      assert.strictEqual(result[4].text, '🔥: 4317.11 ₽');
       // Check text formatting includes intermediate values
       assert.strictEqual(
         result[0].text,
-        '💧: 1329.45 ₽\n(398.78 + 141.32 + 561.7 + 227.65)',
+        '💧: 1672.45 ₽\n(514.57 + 171.54 + 681.76 + 304.58)',
       );
-      assert.strictEqual(result[1].text, '⚡️: 802.26 ₽\n(802.26 + 0)');
-      assert.strictEqual(result[2].text, '📞️: 115.79 ₽\n(42.43 + 73.36)');
-      assert.strictEqual(result[3].text, '🏚️️: 1166.43 ₽');
-      assert.strictEqual(result[4].text, '🔥: 0.00 ₽');
+      assert.strictEqual(result[1].text, '⚡️: 1078.52 ₽\n(972.32 + 106.20)');
+      assert.strictEqual(result[2].text, '📞️: 131 ₽\n(48.00 + 83.00)');
+      assert.strictEqual(result[3].text, '🏚️️: 1216.94 ₽');
+      assert.strictEqual(result[4].text, '🔥: 4317.11 ₽');
     });
 
     it('should verify JSON dump contains expected service data', () => {
@@ -124,11 +152,6 @@ describe('mosobleirc', () => {
 
       // Check for heating services
       assert.ok(mosoblEircInvoiceMock.includes('ОТОПЛЕНИЕ КПУ'));
-
-      // Check for expected amounts (these should be found in the JSON)
-      assert.ok(mosoblEircInvoiceMock.includes('398,78'));
-      assert.ok(mosoblEircInvoiceMock.includes('802,26'));
-      assert.ok(mosoblEircInvoiceMock.includes('1 166,43')); // Note: has space in JSON
 
       // Verify private data has been cleaned up
       assert.ok(mosoblEircInvoiceMock.includes('[ИМЯ] [ФАМИЛИЯ] [ОТЧЕСТВО]'));

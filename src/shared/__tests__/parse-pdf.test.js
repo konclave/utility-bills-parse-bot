@@ -9,7 +9,6 @@ describe('getFilenameFromPdf', () => {
   );
   it('should return the proper file name for Mosobleirc PDF', async () => {
     const result = await getFilenameFromPdf(pdfBuffer, 'mosobleirc-');
-    console.log(result);
     assert.strictEqual(result, 'mosobleirc-01-2026.pdf');
   });
 });

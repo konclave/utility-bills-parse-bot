@@ -104,7 +104,7 @@ export async function parsePdfToChargeData(pdfBuffer) {
   };
 }
 
-function extractChargeDetails(strings) {
+export function extractChargeDetails(strings) {
   const chargeDetails = [];
 
   SERVICE_NAMES.WATER.forEach((serviceName) => {
@@ -248,15 +248,15 @@ function extractServiceAmount(strings, serviceName) {
 
     // Extract the rightmost amount which appears to be the final charge
     // Based on PDF analysis, this is at position +8 from service name for most services
-    let amountIndex = serviceIndex + 8;
+    let amountIndex = serviceIndex + 4;
 
     // Special handling for electricity services - the amount is at position +9
     if (serviceName.includes('ЭЛЕКТРИЧЕСТВО')) {
-      amountIndex = serviceIndex + 9;
+      amountIndex = serviceIndex + 5;
     }
     // Special handling for video surveillance (split across two lines)
     else if (serviceName === 'ОБСЛУЖИВАНИЕ СИСТЕМЫ ВИДЕОНАБЛЮДЕНИЯ') {
-      amountIndex = serviceIndex + 9; // The amount is at position +9 from "ОБСЛУЖИВАНИЕ СИСТЕМЫ"
+      amountIndex = serviceIndex + 5; // The amount is at position +9 from "ОБСЛУЖИВАНИЕ СИСТЕМЫ"
     }
     // Special handling for heating - the amount is at position +4
     else if (serviceName === 'ОТОПЛЕНИЕ КПУ') {
@@ -318,7 +318,8 @@ export async function parseCharges(input) {
             return a + b * 100;
           }, 0) / 100;
         console.log(values, total);
-        const intermediate = values.length > 1 ? values.join(' + ') : '';
+        const intermediate =
+          values.length > 1 ? values.map((v) => v.toFixed(2)).join(' + ') : '';
         return { total, intermediate };
       } catch (error) {
         console.error('Error calculating sum for names:', names, error);

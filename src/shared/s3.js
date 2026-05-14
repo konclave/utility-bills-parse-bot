@@ -5,12 +5,42 @@ import {
   DeleteObjectsCommand,
   GetObjectCommand,
 } from '@aws-sdk/client-s3';
-import { getCurrentPeriodFilename, getPeriodString } from './period.js';
+import { getPeriodString } from './period.js';
 
-const region = process.env['YC_REGION'];
 const bucketName = process.env['YC_S3_BUCKET'];
 
 const KEEP_INVOICES_NUMBER = 12;
+
+function isNotFoundError(err) {
+  return (
+    err?.name === 'NoSuchKey' ||
+    err?.name === 'NotFound' ||
+    err?.Code === 'NoSuchKey' ||
+    err?.Code === 'NotFound'
+  );
+}
+
+async function readBody(body) {
+  if (!body) {
+    return Buffer.alloc(0);
+  }
+
+  if (typeof body.transformToByteArray === 'function') {
+    const bytes = await body.transformToByteArray();
+    return Buffer.from(bytes);
+  }
+
+  return new Promise((resolve, reject) => {
+    const bufs = [];
+    body.on('data', (chunk) => {
+      bufs.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    });
+    body.on('end', () => {
+      resolve(Buffer.concat(bufs));
+    });
+    body.on('error', reject);
+  });
+}
 
 function getS3Client() {
   const region = process.env['YC_REGION'];
@@ -28,30 +58,21 @@ function getS3Client() {
 export async function fetch(filename) {
   const bucketName = process.env['YC_S3_BUCKET'];
   const s3Client = getS3Client();
+  const params = {
+    Bucket: bucketName,
+    Key: filename,
+  };
 
-  const listResponse = await s3Client.send(
-    new ListObjectsV2Command({ Bucket: bucketName }),
-  );
-  const hasFile = listResponse.Contents?.some(({ Key }) => Key === filename);
-
-  if (hasFile) {
-    const params = {
-      Bucket: bucketName,
-      Key: filename,
-    };
+  try {
     const data = await s3Client.send(new GetObjectCommand(params));
-    return new Promise((resolve) => {
-      const bufs = [];
-      data.Body.on('data', (chunk) => {
-        bufs.push(chunk);
-      });
-      data.Body.on('end', () => {
-        resolve(Buffer.concat(bufs));
-      });
-    });
-  }
+    return await readBody(data.Body);
+  } catch (err) {
+    if (isNotFoundError(err)) {
+      return Buffer.alloc(0);
+    }
 
-  return Buffer.concat([]);
+    throw err;
+  }
 }
 
 export async function store(pdf, filename) {
@@ -67,6 +88,7 @@ export async function store(pdf, filename) {
     return await s3Client.send(new PutObjectCommand(params));
   } catch (err) {
     console.log('Error', err);
+    throw err;
   }
 }
 
@@ -79,10 +101,15 @@ export async function purge(predicate) {
   const objects = data.Contents?.map(({ Key }) => ({ Key }));
 
   if (objects?.length) {
+    const objectsToDelete = objects.filter(predicate);
+    if (objectsToDelete.length === 0) {
+      return;
+    }
+
     const options = {
       Bucket: bucketName,
       Delete: {
-        Objects: objects.filter(predicate),
+        Objects: objectsToDelete,
       },
     };
     await s3Client.send(new DeleteObjectsCommand(options));

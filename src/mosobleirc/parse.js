@@ -364,7 +364,7 @@ export async function parseCharges(input) {
   }
 }
 
-export function appendPdfMessage({ messages: parsed, pdfBuffer, period }) {
+export function appendPdfMessage({ messages: parsed, pdfBuffer }) {
   const fileTitle = getCurrentPeriodFilename('odintsovo-bill-');
   return [...parsed, { fileTitle, fileBuffer: pdfBuffer }];
 }

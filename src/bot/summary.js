@@ -7,7 +7,7 @@ function fromCents(value) {
 }
 
 function formatNumber(value) {
-  return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 }).format(value);
+  return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2, useGrouping: false }).format(value);
 }
 
 export function normalizeProviderPayload(provider, venue, payload) {

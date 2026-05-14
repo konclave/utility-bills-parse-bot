@@ -73,7 +73,7 @@ export async function parse(binary) {
 
   return [
     { emoji: '💧', label: 'Вода', value: total, ...(breakdown.length ? { breakdown } : {}) },
-    { emoji: '🔥', label: 'Отопление', value: parseFloat(heatingValue) || 0 },
+    { emoji: '🔥', label: 'Отопление', value: parseFloat(String(heatingValue).replace(/ /g, '')) || 0 },
     { fileTitle, fileBuffer: binary },
   ];
 }

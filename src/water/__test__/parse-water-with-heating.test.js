@@ -42,7 +42,7 @@ describe('parse with mock data - with heating', () => {
       {
         emoji: '🔥',
         label: 'Отопление',
-        value: 723.40,
+        value: 2723.40,
       },
       {
         fileTitle: 'water-bill-01-2000.pdf',

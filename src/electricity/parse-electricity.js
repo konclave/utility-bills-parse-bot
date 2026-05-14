@@ -44,7 +44,7 @@ function parseBill(strings) {
   // const idxNight = strings.indexOf(nightMarker) + nightOffset;
   // const nightBill = Number(strings[idxNight].replace(',', '.'));
   const idxSummary = strings.indexOf(summaryMarker) + summaryOffset;
-  const summary = Number(strings[idxSummary].replace(',', '.'));
+  const summary = Number(strings[idxSummary].replace(/\s/g, '').replace(',', '.'));
 
   return summary;
 }

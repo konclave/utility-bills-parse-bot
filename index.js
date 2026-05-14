@@ -9,6 +9,10 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 export const handler = async function (event) {
+  if (!botInstance) {
+    throw new Error('Telegram bot is not initialized. Set BOT_TOKEN before handling updates.');
+  }
+
   const message = JSON.parse(event.body);
   await botInstance.handleUpdate(message);
   return {

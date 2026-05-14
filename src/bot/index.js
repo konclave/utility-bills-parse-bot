@@ -1,19 +1,22 @@
 import { Telegraf, Markup } from 'telegraf';
 import { callback } from './callback.js';
+import { requiredEnv } from '../shared/config.js';
 
 const venueList = [
   ['Одинцово', 'O'],
   ['Трёхгорка', 'T'],
 ];
 
-const token = process.env.BOT_TOKEN;
-
 export function init() {
-  if (token === undefined) {
-    console.warn('BOT_TOKEN is not set');
-    return;
+  let token;
+  try {
+    token = requiredEnv('BOT_TOKEN');
+  } catch (error) {
+    console.warn(error.message);
+    return null;
   }
-  const bot = new Telegraf(process.env['BOT_TOKEN']);
+
+  const bot = new Telegraf(token);
   // Enable graceful stop
   process.once('SIGINT', () => bot.stop('SIGINT'));
   process.once('SIGTERM', () => bot.stop('SIGTERM'));

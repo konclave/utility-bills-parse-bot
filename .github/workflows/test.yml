@@ -12,6 +12,7 @@ jobs:
         with:
           node-version: '22.22.0'
       - run: npm ci
+      - run: npm run lint
       - run: NODE_ENV=test npm test
         env:
           YC_REGION: ${{ secrets.YC_REGION }}

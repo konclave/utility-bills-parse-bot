@@ -34,17 +34,20 @@ describe('parse with mock data - with heating', () => {
     const binary = [1, 0, 1, 0];
     const expected = [
       {
-        text: '💧: 1684.7 ₽\n(146.99 + 551.22 + 397.75 + 588.74)',
+        emoji: '💧',
+        label: 'Вода',
         value: 1684.7,
+        breakdown: [146.99, 551.22, 397.75, 588.74],
       },
       {
-        text: '🔥: 723.40 ₽',
+        emoji: '🔥',
+        label: 'Отопление',
         value: 723.40,
       },
       {
         fileTitle: 'water-bill-01-2000.pdf',
         fileBuffer: binary,
-      }
+      },
     ];
 
     const result = await parse(binary);

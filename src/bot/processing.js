@@ -7,25 +7,19 @@ import {
 } from './summary.js';
 
 const venueProviders = {
-  O: [{ name: 'mosobleirc', fetch: mosobleirc.fetch }],
+  O: [{ name: 'mosobleirc', fetch: mosobleirc.fetch, venue: 'Одинцово' }],
   T: [
-    { name: 'water', fetch: water.fetch },
-    { name: 'electricity', fetch: electricity.fetch },
+    { name: 'water', fetch: water.fetch, venue: 'Трёхгорка' },
+    { name: 'electricity', fetch: electricity.fetch, venue: 'Трёхгорка' },
   ],
   DEFAULT: [
-    { name: 'water', fetch: water.fetch },
-    { name: 'electricity', fetch: electricity.fetch },
-    { name: 'mosobleirc', fetch: mosobleirc.fetch },
+    { name: 'water', fetch: water.fetch, venue: 'Трёхгорка' },
+    { name: 'electricity', fetch: electricity.fetch, venue: 'Трёхгорка' },
+    { name: 'mosobleirc', fetch: mosobleirc.fetch, venue: 'Одинцово' },
   ],
 };
 
-const venueNames = {
-  O: 'Одинцово',
-  T: 'Трёхгорка',
-  DEFAULT: 'Все счета',
-};
-
-export async function getValues({ venue }) {
+export async function getValues({ venue, format = 'compact' }) {
   const providers = venueProviders[venue] ?? venueProviders.DEFAULT;
   const settled = await Promise.allSettled(
     providers.map((provider) => provider.fetch()),
@@ -34,25 +28,29 @@ export async function getValues({ venue }) {
   const normalized = settled.flatMap((entry, index) => {
     const provider = providers[index];
     if (entry.status === 'fulfilled') {
-      const payload = normalizeProviderPayload(provider.name, entry.value);
+      const payload = normalizeProviderPayload(
+        provider.name,
+        provider.venue,
+        entry.value,
+      );
       return payload.sections.map((section) => ({
         ...section,
         attachments: payload.attachments,
       }));
     }
 
-    return [{
-      provider: provider.name,
-      lines: ['unavailable'],
-      total: 0,
-      attachments: [],
-    }];
+    return [
+      {
+        provider: provider.name,
+        venue: provider.venue,
+        entries: [{ emoji: '⚠️', label: 'unavailable', value: null, message: 'unavailable' }],
+        totalCents: 0,
+        attachments: [],
+      },
+    ];
   });
 
-  const summary = buildVenueSummary(
-    venueNames[venue] ?? venueNames.DEFAULT,
-    normalized,
-  );
+  const summary = buildVenueSummary(normalized, format);
 
   return {
     text: summary.text,

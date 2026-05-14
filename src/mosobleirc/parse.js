@@ -304,63 +304,33 @@ export async function parseCharges(input) {
 
     if (items.length === 0) {
       console.warn('No charge items found');
-      return { text: 'Одинцово: Данные о начислениях не найдены 🙁', value: 0 };
+      return { error: 'Одинцово: Данные о начислениях не найдены 🙁' };
     }
 
-    const sumByNamesWithDetails = (names) => {
-      try {
-        const filteredItems = items.filter(
-          (i) => i && names.includes(i.nm_service),
-        );
-        const values = filteredItems.map((i) => safeNumber(i.sm_total));
-        const total =
-          values.reduce((a, b) => {
-            return a + b * 100;
-          }, 0) / 100;
-        console.log(values, total);
-        const intermediate =
-          values.length > 1 ? values.map((v) => v.toFixed(2)).join(' + ') : '';
-        return { total, intermediate };
-      } catch (error) {
-        console.error('Error calculating sum for names:', names, error);
-        return { total: 0, intermediate: '' };
-      }
+    const sumByNames = (names) => {
+      const filteredItems = items.filter((i) => i && names.includes(i.nm_service));
+      const values = filteredItems.map((i) => safeNumber(i.sm_total));
+      const total = values.reduce((a, b) => a + b * 100, 0) / 100;
+      console.log(values, total);
+      return { total, values };
     };
 
-    const water = sumByNamesWithDetails(SERVICE_NAMES.WATER);
-    const electricity = sumByNamesWithDetails(SERVICE_NAMES.ELECTRICITY);
-    const domofon = sumByNamesWithDetails(SERVICE_NAMES.DOMOFON);
-    const maintenance = sumByNamesWithDetails(SERVICE_NAMES.MAINTENANCE);
-    const heating = sumByNamesWithDetails(SERVICE_NAMES.HEATING);
-
-    // Validate that we got reasonable values
-    const totalAmount =
-      water.total +
-      electricity.total +
-      domofon.total +
-      maintenance.total +
-      heating.total;
-    if (totalAmount === 0) {
-      console.warn('All calculated amounts are zero - possible parsing issue');
-    }
-
-    const formatMessage = (emoji, data) => {
-      const baseText = `${emoji}: ${data.total} ₽`;
-      return data.intermediate
-        ? `${baseText}\n(${data.intermediate})`
-        : baseText;
-    };
+    const water = sumByNames(SERVICE_NAMES.WATER);
+    const electricity = sumByNames(SERVICE_NAMES.ELECTRICITY);
+    const domofon = sumByNames(SERVICE_NAMES.DOMOFON);
+    const maintenance = sumByNames(SERVICE_NAMES.MAINTENANCE);
+    const heating = sumByNames(SERVICE_NAMES.HEATING);
 
     return [
-      { text: formatMessage('💧', water), value: water.total },
-      { text: formatMessage('⚡️', electricity), value: electricity.total },
-      { text: formatMessage('📞️', domofon), value: domofon.total },
-      { text: formatMessage('🏚️️', maintenance), value: maintenance.total },
-      { text: `🔥: ${heating.total.toFixed(2)} ₽`, value: heating.total },
+      { emoji: '💧', label: 'Вода', value: water.total, ...(water.values.length > 1 ? { breakdown: water.values } : {}) },
+      { emoji: '⚡️', label: 'Электричество', value: electricity.total, ...(electricity.values.length > 1 ? { breakdown: electricity.values } : {}) },
+      { emoji: '📞', label: 'Домофон', value: domofon.total, ...(domofon.values.length > 1 ? { breakdown: domofon.values } : {}) },
+      { emoji: '🏚️', label: 'Содержание', value: maintenance.total },
+      { emoji: '🔥', label: 'Отопление', value: heating.total },
     ];
   } catch (error) {
     console.error('Error in parseCharges:', error);
-    return { text: 'Одинцово: Ошибка обработки данных 😞', value: 0 };
+    return { error: 'Одинцово: Ошибка обработки данных 😞' };
   }
 }
 

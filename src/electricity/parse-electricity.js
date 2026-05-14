@@ -4,18 +4,16 @@ import { filenamePrefix } from './fetch-electricity.js';
 
 export async function parse(binary) {
   if (binary === null || binary.length === 0) {
-    return { text: '⚡️: Счёта пока что нет 🙁' };
+    return { emoji: '⚡️', label: 'Электричество', value: null, message: 'Счёта пока что нет 🙁' };
   }
   const strings = await getStringsFromPdf(binary);
   const value = parseBill(strings);
   const fileTitle = getCurrentPeriodFilename(`${filenamePrefix}bill-`);
 
-  return {
-    text: `⚡️: ${value} ₽`,
-    value,
-    fileTitle,
-    fileBuffer: binary,
-  };
+  return [
+    { emoji: '⚡️', label: 'Электричество', value },
+    { fileTitle, fileBuffer: binary },
+  ];
 }
 
 function parseBill(strings) {

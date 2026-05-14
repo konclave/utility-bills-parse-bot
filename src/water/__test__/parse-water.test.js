@@ -35,17 +35,20 @@ describe('parse with mock data - without heating', () => {
     const binary = [1, 0, 1, 0];
     const expected = [
       {
-        text: '💧: 1015.25 ₽\n(112.41 + 421.53 + 172.93 + 308.38)',
+        emoji: '💧',
+        label: 'Вода',
         value: 1015.25,
+        breakdown: [112.41, 421.53, 172.93, 308.38],
       },
       {
-        text: '🔥: 0 ₽',
+        emoji: '🔥',
+        label: 'Отопление',
         value: 0,
       },
       {
         fileTitle: 'water-bill-01-2000.pdf',
         fileBuffer: binary,
-      }
+      },
     ];
 
     const result = await parse(binary);
@@ -54,9 +57,8 @@ describe('parse with mock data - without heating', () => {
 
   it('should return "Счёта пока что нет 🙁" when given an empty binary input', async () => {
     const binary = [];
-    const expected = { text: '💧: Счёта пока что нет 🙁' };
+    const expected = { emoji: '💧', label: 'Вода', value: null, message: 'Счёта пока что нет 🙁' };
     const result = await parse(binary);
-
     assert.deepEqual(result, expected);
   });
 });

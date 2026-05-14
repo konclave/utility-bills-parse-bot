@@ -15,7 +15,7 @@ describe('getValues', () => {
   it('continues processing when one provider rejects', async () => {
     mock.module(waterModulePath, {
       namedExports: {
-        fetch: async () => [{ text: '💧: 100 ₽', value: 100 }],
+        fetch: async () => [{ emoji: '💧', label: 'Вода', value: 100 }],
       },
     });
     mock.module(electricityModulePath, {
@@ -27,16 +27,17 @@ describe('getValues', () => {
     });
     mock.module(mosobleircModulePath, {
       namedExports: {
-        fetch: async () => [{ text: 'Одинцово: 200 ₽', value: 200 }],
+        fetch: async () => [{ emoji: '💧', label: 'Вода', value: 200 }],
       },
     });
 
     const { getValues } = await import(`${processingModulePath}?all-settled`);
-    const result = await getValues({ venue: undefined });
+    const result = await getValues({ venue: undefined, format: 'compact' });
 
-    assert.match(result.text, /Total: 300 ₽/);
-    assert.match(result.text, /electricity/i);
+    assert.match(result.text, /Итого: 300 ₽/);
     assert.match(result.text, /unavailable/i);
+    assert.match(result.text, /💧 100 ₽/);
+    assert.match(result.text, /💧 200 ₽/);
     assert.equal(Array.isArray(result.attachments), true);
   });
 });

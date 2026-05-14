@@ -67,6 +67,7 @@ deploy-yc:
 		--environment MOSOBL_LOGIN=$(MOSOBL_LOGIN) \
 		--environment MOSOBL_PASSWORD=$(MOSOBL_PASSWORD) \
 		--environment REQUEST_TIMEOUT=5000 \
+		--environment MESSAGE_FORMAT=$(MESSAGE_FORMAT) \
 		--source-path ./bill-parser.zip
 	@yc serverless function version create \
 		--function-id $(YC_STORE_LAMBDA_ID) \

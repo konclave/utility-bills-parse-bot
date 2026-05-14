@@ -2,10 +2,11 @@ import { getValues } from './processing.js';
 
 export async function callback(ctx, options) {
   const debug = options?.debug ?? false;
+  const format = process.env.MESSAGE_FORMAT === 'detailed' ? 'detailed' : 'compact';
 
   try {
     await ctx.reply('⏳ Wait for it...');
-    const summary = await getValues({ venue: options?.venue });
+    const summary = await getValues({ venue: options?.venue, format });
     await ctx.reply(summary.text, { parse_mode: 'HTML' });
 
     if (summary.attachments.length > 0) {

@@ -6,14 +6,37 @@ import * as storage from './store.js';
 
 export async function fetch() {
   const period = getPeriodString();
+  let pdfBuffer;
 
   try {
-    const pdfBuffer = await storage.fetchPdf();
-    const pdfData = await parsePdfToChargeData(pdfBuffer);
-    const parsed = await parseCharges(pdfData);
-    return appendPdfMessage({ messages: parsed, pdfBuffer, period });
+    pdfBuffer = await storage.fetchPdf();
   } catch (error) {
-    console.log(`MosOblEIRC PDF parse for period ${data} failed.`);
+    console.log(
+      `MosOblEIRC persisted PDF fetch for period ${period} failed.`,
+      error,
+    );
+  }
+
+  if (pdfBuffer?.length) {
+    try {
+      const pdfData = await parsePdfToChargeData(pdfBuffer);
+      const parsed = await parseCharges(pdfData);
+      return appendPdfMessage({ messages: parsed, pdfBuffer, period });
+    } catch (error) {
+      console.log(
+        `MosOblEIRC persisted PDF parse/render for period ${period} failed.`,
+        error,
+      );
+    }
+  }
+
+  try {
+    const fromStore = await storage.fetch(period);
+    if (fromStore) {
+      return fromStore;
+    }
+  } catch (error) {
+    console.log(`MosOblEIRC cache read for period ${period} failed.`, error);
   }
 
   // if the time is between 20:00 UTC and 03:00 UTC, reply with a message "Одинцово: данные доступны только в период с 03:00 до 20:00 UTC"
@@ -27,14 +50,17 @@ export async function fetch() {
   }
 
   try {
-    const fromStore = await storage.fetch(period);
-    if (fromStore) {
-      return fromStore;
-    }
     const date = getTodayISODate();
     const json = await fetchCharges(date);
-    const parsed = parseCharges(json);
-    await storage.store(period, parsed);
+    const parsed = await parseCharges(json);
+    try {
+      await storage.store(period, parsed);
+    } catch (error) {
+      console.log(
+        `MosOblEIRC cache store for period ${period} failed.`,
+        error,
+      );
+    }
     return parsed;
   } catch (error) {
     return { text: getErrorMessage('Одинцово'), error: error.message };

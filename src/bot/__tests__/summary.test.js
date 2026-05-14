@@ -14,7 +14,11 @@ describe('normalizeProviderPayload', () => {
     ]);
 
     assert.deepEqual(result.sections, [
-      { provider: 'water', lines: ['💧: 100 ₽', '🔥: 50 ₽'], total: 150 },
+      {
+        provider: 'water',
+        lines: ['💧: 100 ₽', '🔥: 50 ₽', '        '],
+        totalCents: 15000,
+      },
     ]);
     assert.equal(result.attachments.length, 1);
   });
@@ -26,7 +30,7 @@ describe('normalizeProviderPayload', () => {
     });
 
     assert.deepEqual(result.sections, [
-      { provider: 'electricity', lines: ['unavailable'], total: 0 },
+      { provider: 'electricity', lines: ['unavailable'], totalCents: 0 },
     ]);
   });
 });
@@ -36,20 +40,40 @@ describe('buildVenueSummary', () => {
     const result = buildVenueSummary('Трёхгорка', [
       {
         provider: 'water',
-        lines: ['💧: 100 ₽', '🔥: 50 ₽'],
-        total: 150,
+        lines: ['💧: 100 ₽', '🔥: 50 ₽', '        '],
+        totalCents: 15000,
       },
       {
         provider: 'electricity',
         lines: ['unavailable'],
-        total: 0,
+        totalCents: 0,
       },
     ]);
 
     assert.match(result.text, /Трёхгорка/);
-    assert.match(result.text, /water/i);
-    assert.match(result.text, /electricity/i);
+    assert.match(result.text, /--------------/);
+    assert.match(result.text, /💧: 100 ₽/);
+    assert.match(result.text, /unavailable/);
     assert.match(result.text, /Total: 150 ₽/);
     assert.equal(result.total, 150);
+  });
+
+  it('rounds the displayed total to avoid floating point artifacts', () => {
+    const result = buildVenueSummary('Трёхгорка', [
+      {
+        provider: 'water',
+        lines: ['💧: 0.1 ₽'],
+        totalCents: 10,
+      },
+      {
+        provider: 'electricity',
+        lines: ['⚡️: 0.2 ₽'],
+        totalCents: 20,
+      },
+    ]);
+
+    assert.match(result.text, /Total: 0.3 ₽/);
+    assert.doesNotMatch(result.text, /0\.30000000000000004/);
+    assert.equal(result.total, 0.3);
   });
 });

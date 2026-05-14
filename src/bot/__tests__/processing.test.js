@@ -35,8 +35,9 @@ describe('getValues', () => {
     const result = await getValues({ venue: undefined });
 
     assert.match(result.text, /Total: 300 ₽/);
-    assert.match(result.text, /electricity/i);
     assert.match(result.text, /unavailable/i);
+    assert.match(result.text, /💧: 100 ₽/);
+    assert.match(result.text, /Одинцово: 200 ₽/);
     assert.equal(Array.isArray(result.attachments), true);
   });
 });

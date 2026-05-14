@@ -1,5 +1,3 @@
-import { message } from 'telegraf/filters';
-
 export const messageTypeText = 'TEXT';
 export const messageTypeFile = 'FILE';
 export const messageTypeMediaGroup = 'MEDIA_GROUP';

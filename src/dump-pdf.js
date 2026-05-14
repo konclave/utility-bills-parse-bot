@@ -5,7 +5,7 @@ import { argv } from 'node:process';
 async function main() {
   if (argv.length < 4) {
     console.log('PDF and dump files name with path are required.');
-    exit(0);
+    process.exit(0);
   }
   const pdfFilename = argv[2];
   const dumpFilename = argv[3];

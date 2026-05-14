@@ -4,7 +4,6 @@ import { readFileSync } from 'fs';
 import { resolve } from 'node:path'
 
 const withoutHeatingMock = JSON.parse(readFileSync(resolve(import.meta.dirname, './water_without_heating.json'), 'utf-8'));
-const withHeatingMock = JSON.parse(readFileSync(resolve(import.meta.dirname, './water_with_heating.json'), 'utf-8'));
 
 describe('parse with mock data - without heating', () => {
   let parse;
@@ -61,7 +60,6 @@ describe('parse with mock data - without heating', () => {
     assert.deepEqual(result, expected);
   });
 });
-
 
 
 

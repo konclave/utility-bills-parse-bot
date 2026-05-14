@@ -7,7 +7,7 @@ const MOSOBL_STORAGE_FILENAME = 'mosobleirc.json';
 export async function store(period, record) {
   const fileBuffer = await s3.fetch(MOSOBL_STORAGE_FILENAME);
   const values = fileBuffer.length ? JSON.parse(fileBuffer.toString()) : {};
-  values[period] = record;
+  values[period] = await record;
   await s3.store(JSON.stringify(values), MOSOBL_STORAGE_FILENAME);
 }
 

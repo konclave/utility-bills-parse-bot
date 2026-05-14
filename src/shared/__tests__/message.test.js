@@ -1,7 +1,6 @@
 import { describe, it } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { format, getErrorMessage, messageTypeText } from '../message.js';
-import { getPeriodString } from '../period.js';
 
 describe('getErrorMessage', () => {
   it('should return error message', () => {

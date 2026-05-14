@@ -46,7 +46,7 @@ export async function webhookCallback(event) {
 
   const filename = await getFilenameFromPdf(pdf, filenamePrefix);
   if (!filename) {
-    return new Error('Cannot get the filename from the PDF: ' + invoiceLinkUrl);
+    throw new Error('Cannot get the filename from the PDF: ' + invoiceLinkUrl);
   }
 
   await S3.purgeStorage([waterPrefix, electricityPrefix, mosobleircPrefix]);

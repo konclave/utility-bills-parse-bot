@@ -3,7 +3,7 @@ import { callback } from './bot/callback.js';
 export async function startLocalServer() {
   const http = await import('node:http');
   const server = http.createServer();
-  const port = process.argv.find((arg) => arg === '--port') ?? 8000;
+  const port = getPortFromArgs(process.argv);
 
   // const { promise, resolve } = Promise.withResolvers();
 
@@ -37,7 +37,7 @@ export async function startLocalServer() {
         res.write('\n');
       });
       const body = JSON.parse(bodyData);
-      await callback(mockCtx, { debug: true, value: body.venue });
+      await callback(mockCtx, { debug: true, venue: body.venue });
       res.end();
     } else {
       res.writeHead(405, { 'Content-Type': 'text/plain' });
@@ -51,6 +51,56 @@ export async function startLocalServer() {
 
   process.on('SIGTERM', () => {
     server.close();
+  });
+}
+
+export function getPortFromArgs(argv) {
+  const portFlagIndex = argv.indexOf('--port');
+
+  if (portFlagIndex !== -1) {
+    return normalizePort(argv[portFlagIndex + 1]);
+  }
+
+  const inlinePortArg = argv.find((arg) => arg.startsWith('--port='));
+
+  if (inlinePortArg) {
+    return normalizePort(inlinePortArg.slice('--port='.length));
+  }
+
+  return 8000;
+}
+
+function normalizePort(value) {
+  if (typeof value !== 'string' || !/^\d+$/.test(value)) {
+    return 8000;
+  }
+
+  const port = Number(value);
+
+  if (Number.isInteger(port) && port >= 1 && port <= 65535) {
+    return port;
+  }
+
+  return 8000;
+}
+
+export function createMediaGroupPayload(mediaGroup) {
+  return mediaGroup.map((item) => {
+    if (
+      item.media &&
+      typeof item.media === 'object' &&
+      Object.hasOwn(item.media, 'source')
+    ) {
+      return {
+        ...item,
+        media: {
+          ...item.media,
+          source: '***',
+        },
+      };
+    }
+
+    return item;
   });
 }
 
@@ -73,12 +123,8 @@ class MockTelegramBot {
   }
 
   replyWithMediaGroup(mediaGroup) {
-    console.log(mediaGroup);
-    const cleaned = mediaGroup.map((item) => {
-      if (item.media?.source) {
-        item.media.source = '***';
-      }
-    });
+    const cleaned = createMediaGroupPayload(mediaGroup);
+    console.log(cleaned);
     this.#sendMessage(cleaned);
   }
 

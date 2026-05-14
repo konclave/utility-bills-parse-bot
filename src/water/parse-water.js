@@ -60,33 +60,20 @@ function getHeatingValue(strings) {
 
 export async function parse(binary) {
   if (binary?.length === 0) {
-    return { text: '💧: Счёта пока что нет 🙁' };
+    return { emoji: '💧', label: 'Вода', value: null, message: 'Счёта пока что нет 🙁' };
   }
   const strings = await getStringsFromPdf(binary);
   const result = waterBillConfig.map((entry) =>
     getValueBySequence(strings, entry.sequence),
   );
   const total = getTotal(result);
-  const intermediate = result.join(' + ');
+  const breakdown = result.map(Number).filter((v) => !isNaN(v) && v > 0);
   const fileTitle = getCurrentPeriodFilename(`${filenamePrefix}bill-`);
-
-  const messages = [
-    {
-      text: `💧: ${total} ₽\n(${intermediate})`,
-      value: total,
-    }
-  ];
-
   const heatingValue = getHeatingValue(strings);
-  messages.push({
-    text: `🔥: ${heatingValue} ₽`,
-    value: parseFloat(heatingValue),
-  });
 
-  messages.push({
-    fileTitle,
-    fileBuffer: binary,
-  });
-
-  return messages;
+  return [
+    { emoji: '💧', label: 'Вода', value: total, ...(breakdown.length ? { breakdown } : {}) },
+    { emoji: '🔥', label: 'Отопление', value: parseFloat(heatingValue) || 0 },
+    { fileTitle, fileBuffer: binary },
+  ];
 }

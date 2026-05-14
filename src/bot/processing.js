@@ -1,30 +1,61 @@
 import * as water from '../water/index.js';
 import * as electricity from '../electricity/index.js';
 import * as mosobleirc from '../mosobleirc/index.js';
-import { getTotal } from '../shared/calculations.js';
-import { getPeriodString } from '../shared/period.js';
+import {
+  buildVenueSummary,
+  normalizeProviderPayload,
+} from './summary.js';
 
-export async function getValues({ processMessage, handleError, venue }) {
-  let billPromises;
-  switch (venue) {
-    case 'O':
-      billPromises = [mosobleirc.fetch()];
-      break;
-    case 'T':
-      billPromises = [water.fetch(), electricity.fetch()];
-      break;
-    default:
-      billPromises = [water.fetch(), electricity.fetch(), mosobleirc.fetch()];
-  }
+const venueProviders = {
+  O: [{ name: 'mosobleirc', fetch: mosobleirc.fetch }],
+  T: [
+    { name: 'water', fetch: water.fetch },
+    { name: 'electricity', fetch: electricity.fetch },
+  ],
+  DEFAULT: [
+    { name: 'water', fetch: water.fetch },
+    { name: 'electricity', fetch: electricity.fetch },
+    { name: 'mosobleirc', fetch: mosobleirc.fetch },
+  ],
+};
 
-  const withHandlers = billPromises.map((promise) =>
-    promise.then(processMessage).catch(handleError),
+const venueNames = {
+  O: 'Одинцово',
+  T: 'Трёхгорка',
+  DEFAULT: 'Все счета',
+};
+
+export async function getValues({ venue }) {
+  const providers = venueProviders[venue] ?? venueProviders.DEFAULT;
+  const settled = await Promise.allSettled(
+    providers.map((provider) => provider.fetch()),
   );
 
-  return Promise.all(withHandlers).then((messages) => {
-    const total = getTotal(
-      messages.flat().flatMap((message) => message.values || 0),
-    );
-    return processMessage({ text: `Всего за ${getPeriodString()}: ${total}₽` });
+  const normalized = settled.flatMap((entry, index) => {
+    const provider = providers[index];
+    if (entry.status === 'fulfilled') {
+      const payload = normalizeProviderPayload(provider.name, entry.value);
+      return payload.sections.map((section) => ({
+        ...section,
+        attachments: payload.attachments,
+      }));
+    }
+
+    return [{
+      provider: provider.name,
+      lines: ['unavailable'],
+      total: 0,
+      attachments: [],
+    }];
   });
+
+  const summary = buildVenueSummary(
+    venueNames[venue] ?? venueNames.DEFAULT,
+    normalized,
+  );
+
+  return {
+    text: summary.text,
+    attachments: normalized.flatMap((section) => section.attachments || []),
+  };
 }

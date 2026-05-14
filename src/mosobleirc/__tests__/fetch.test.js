@@ -8,7 +8,7 @@ const fetchModulePath = resolve(import.meta.dirname, '../fetch.js');
 const parseModulePath = resolve(import.meta.dirname, '../parse.js');
 const storageModulePath = resolve(import.meta.dirname, '../store.js');
 const periodModulePath = resolve(import.meta.dirname, '../../shared/period.js');
-const messageModulePath = resolve(import.meta.dirname, '../../shared/message.js');
+const messageModulePath = resolve(import.meta.dirname, '../../shared/error-message.js');
 const s3ModulePath = resolve(import.meta.dirname, '../../shared/s3.js');
 
 async function importMosOblFetch(

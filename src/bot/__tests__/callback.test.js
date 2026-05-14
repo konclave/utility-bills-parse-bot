@@ -45,6 +45,52 @@ afterEach(() => {
 });
 
 describe('callback', () => {
+  it('sends one wait message, one summary reply, and one media group for attachments', async () => {
+    const { callback } = await importCallback(
+      {
+        getValues: async () => ({
+          text: '🏠 Трёхгорка\nTotal: 100 ₽',
+          attachments: [
+            { fileTitle: 'water.pdf', fileBuffer: Buffer.from('1') },
+            { fileTitle: 'electricity.pdf', fileBuffer: Buffer.from('2') },
+          ],
+        }),
+      },
+      'aggregated-delivery',
+    );
+
+    const ctx = createCtx();
+    await callback(ctx, { venue: 'T' });
+
+    assert.deepEqual(ctx.replies, [
+      { method: 'reply', message: '⏳ Wait for it...', options: undefined },
+      {
+        method: 'reply',
+        message: '🏠 Трёхгорка\nTotal: 100 ₽',
+        options: { parse_mode: 'HTML' },
+      },
+      {
+        method: 'replyWithMediaGroup',
+        media: [
+          {
+            type: 'document',
+            media: {
+              filename: 'water.pdf',
+              source: Buffer.from('1'),
+            },
+          },
+          {
+            type: 'document',
+            media: {
+              filename: 'electricity.pdf',
+              source: Buffer.from('2'),
+            },
+          },
+        ],
+      },
+    ]);
+  });
+
   it('replies with the generic error for uncaught getValues failures and includes useful debug details only for that request', async () => {
     const error = new Error('boom');
     const { callback } = await importCallback(

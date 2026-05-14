@@ -1,6 +1,6 @@
 import { fetch as fetchElectricity } from './fetch-electricity.js';
 import { parse } from './parse-electricity.js';
-import { getErrorMessage } from '../shared/message.js';
+import { getErrorMessage } from '../shared/error-message.js';
 
 export async function fetch() {
   try {

@@ -1,6 +1,6 @@
 import { fetchCharges } from './fetch.js';
 import { parseCharges, parsePdfToChargeData, appendPdfMessage } from './parse.js';
-import { getErrorMessage } from '../shared/message.js';
+import { getErrorMessage } from '../shared/error-message.js';
 import { getTodayISODate, getPeriodString } from '../shared/period.js';
 import * as storage from './store.js';
 

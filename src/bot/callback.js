@@ -3,10 +3,13 @@ import { getValues } from './processing.js';
 export async function callback(ctx, options) {
   const debug = options?.debug ?? false;
   const format = process.env.MESSAGE_FORMAT === 'detailed' ? 'detailed' : 'compact';
+  const proxyUrl = process.env.YC_PROXY_URL;
 
   try {
     await ctx.reply('⏳ Wait for it...');
-    const summary = await getValues({ venue: options?.venue, format });
+    const summary = proxyUrl
+      ? await fetchFromProxy(proxyUrl, options?.venue, format)
+      : await getValues({ venue: options?.venue, format });
     await ctx.reply(summary.text, { parse_mode: 'HTML' });
 
     if (summary.attachments.length > 0) {
@@ -26,6 +29,27 @@ export async function callback(ctx, options) {
       await ctx.reply(serializeError(error));
     }
   }
+}
+
+async function fetchFromProxy(proxyUrl, venue, format) {
+  const res = await fetch(`${proxyUrl}/bills`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ venue, format }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Proxy responded with ${res.status}`);
+  }
+
+  const data = await res.json();
+  return {
+    text: data.text,
+    attachments: data.attachments.map((a) => ({
+      fileTitle: a.fileTitle,
+      fileBuffer: Buffer.from(a.fileData, 'base64'),
+    })),
+  };
 }
 
 function serializeError(error) {

@@ -18,6 +18,16 @@ all: help
 # target: deploy – archive source code, register Telegram bot webhook and deploy archive to Yandex Cloud Functions
 deploy: pack register deploy-yc
 
+.PHONY: deploy-vercel
+# target: deploy-vercel – deploy bot to Vercel and register Telegram webhook to Vercel URL
+deploy-vercel: register-vercel
+	@vercel --prod
+
+.PHONY: register-vercel
+# target: register-vercel – register Telegram webhook to Vercel URL
+register-vercel:
+	@curl "https://api.telegram.org/bot$(BOT_TOKEN)/setWebHook?url=$(VERCEL_HOOK_URL)$(BOT_HOOK_PATH)&drop_pending_updates=True"
+
 .PHONY: upload
 # target: upload – upload existing archive to AWS Lambda
 upload:
@@ -43,6 +53,30 @@ register:
 unregister:
 	@curl "https://api.telegram.org/bot$(BOT_TOKEN)/deleteWebHook?url=$(YANDEX_HOOK_URL)$(BOT_HOOK_PATH)&drop_pending_updates=True"
 
+
+.PHONY: deploy-yc-proxy
+# target: deploy-yc-proxy – deploy provider proxy function to Yandex Cloud
+deploy-yc-proxy:
+	@yc serverless function version create \
+		--function-id $(YC_PROXY_LAMBDA_ID) \
+		--runtime nodejs22 \
+		--entrypoint proxy.handler \
+		--execution-timeout 45s \
+		--service-account-id $(YC_SERVICE_ACCOUNT_ID) \
+		--environment LOGIN=$(LOGIN) \
+		--environment PASSWORD=$(PASSWORD) \
+		--environment MOSENERGO_LOGIN=$(MOSENERGO_LOGIN) \
+		--environment MOSENERGO_PASSWORD=$(MOSENERGO_PASSWORD) \
+		--environment MOSENERGO_ACCOUNT=$(MOSENERGO_ACCOUNT) \
+		--environment MOSENERGO_ID_KNG=$(MOSENERGO_ID_KNG) \
+		--environment MOSENERGO_NM_ABN=$(MOSENERGO_NM_ABN) \
+		--environment MOSOBL_ACCOUNT=$(MOSOBL_ACCOUNT) \
+		--environment MOSOBL_TENANT_TOKEN=$(MOSOBL_TENANT_TOKEN) \
+		--environment MOSOBL_LOGIN=$(MOSOBL_LOGIN) \
+		--environment MOSOBL_PASSWORD=$(MOSOBL_PASSWORD) \
+		--environment REQUEST_TIMEOUT=5000 \
+		--environment MESSAGE_FORMAT=$(MESSAGE_FORMAT) \
+		--source-path ./bill-parser.zip
 
 .PHONY: deploy-yc
 # target: deploy-yc – deploy existing archive to Yandex Cloud

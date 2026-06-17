@@ -13,6 +13,10 @@ export const handler = async function (event) {
     throw new Error('Telegram bot is not initialized. Set BOT_TOKEN before handling updates.');
   }
 
+  if (!event.body) {
+    return { statusCode: 200, body: 'OK' };
+  }
+
   const message = JSON.parse(event.body);
   await botInstance.handleUpdate(message);
   return {

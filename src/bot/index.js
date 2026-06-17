@@ -17,19 +17,15 @@ export function init() {
   }
 
   const bot = new Telegraf(token);
-  // Enable graceful stop
-  process.once('SIGINT', () => bot.stop('SIGINT'));
-  process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
-  bot.start((ctx) => {
-    let message = `Отправьте "?", чтобы получить счёт`;
-    ctx.reply(message);
+  bot.start(async (ctx) => {
+    await ctx.reply(`Отправьте "?", чтобы получить счёт`);
   });
 
   setVenueActionListeners(bot, venueList);
 
   bot.command('?', (ctx) => sendVenueSelection(ctx, venueList));
-  bot.hears('?', (ctx) => sendVenueSelection(ctx, venueList));
+  bot.hears('?', async (ctx) => sendVenueSelection(ctx, venueList));
 
   bot.hears('debug', async (ctx) => {
     await callback(ctx, { debug: true });
@@ -46,10 +42,10 @@ function setVenueActionListeners(bot, venueList) {
   });
 }
 
-function sendVenueSelection(ctx, venueList) {
+async function sendVenueSelection(ctx, venueList) {
   const venueButtons = venueList.map(([name, code]) => {
     return Markup.button.callback(name, code);
   });
 
-  ctx.reply('Показать счёт для:', Markup.inlineKeyboard([venueButtons]));
+  await ctx.reply('Показать счёт для:', Markup.inlineKeyboard([venueButtons]));
 }

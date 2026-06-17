@@ -26,7 +26,7 @@ upload:
 .PHONY: pack
 # target: pack – archive sources
 pack: cleanup
-	@zip -r9q bill-parser.zip ./
+	@zip -r9q bill-parser.zip ./ -x ".git/*" -x ".git" -x ".DS_Store" -x ".remember/*" -x ".superpowers/*" -x ".worktrees/*" -x "docs/*" -x "superpowers/*"
 
 .PHONY: status
 # target: status – print Telegram bot status

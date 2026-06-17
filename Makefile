@@ -56,7 +56,7 @@ unregister:
 
 .PHONY: deploy-yc-proxy
 # target: deploy-yc-proxy – deploy provider proxy function to Yandex Cloud
-deploy-yc-proxy:
+deploy-yc-proxy: pack
 	@yc serverless function version create \
 		--function-id $(YC_PROXY_LAMBDA_ID) \
 		--runtime nodejs22 \

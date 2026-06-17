@@ -54,6 +54,11 @@ unregister:
 	@curl "https://api.telegram.org/bot$(BOT_TOKEN)/deleteWebHook?url=$(YANDEX_HOOK_URL)$(BOT_HOOK_PATH)&drop_pending_updates=True"
 
 
+.PHONY: deploy-gateway
+# target: deploy-gateway – update Yandex Cloud API Gateway from api-gateway.yaml
+deploy-gateway:
+	@yc serverless api-gateway update d5dvbvaselvn2d30mv6v --spec api-gateway.yaml
+
 .PHONY: deploy-yc-proxy
 # target: deploy-yc-proxy – deploy provider proxy function to Yandex Cloud
 deploy-yc-proxy: pack

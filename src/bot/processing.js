@@ -94,9 +94,7 @@ async function fetchAndParse(proxyUrl, providerName) {
 
   const buffer = Buffer.from(data, 'base64');
 
-  store(buffer, filename).catch((e) =>
-    console.log(`[${providerName}] Blob store failed:`, e.message),
-  );
+  store(buffer, filename).catch(console.error);
 
   if (providerName === 'water') return parseWater(buffer);
   if (providerName === 'electricity') return parseElectricity(buffer);

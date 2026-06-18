@@ -7,12 +7,17 @@ const fetchModulePath = resolve(import.meta.dirname, '../../src/mosenergo-bill-s
 const parsePdfModulePath = resolve(import.meta.dirname, '../../src/shared/parse-pdf.js');
 const blobModulePath = resolve(import.meta.dirname, '../../src/shared/blob.js');
 
-afterEach(() => mock.restoreAll());
+afterEach(() => {
+  mock.restoreAll();
+  delete process.env.STORE_PDF_SECRET;
+});
+
+const TEST_SECRET = 'test-secret';
 
 function makeReq(body, authHeader) {
   return {
     method: 'POST',
-    headers: { authorization: authHeader ?? '' },
+    headers: { authorization: authHeader ?? `Bearer ${TEST_SECRET}` },
     body,
   };
 }
@@ -36,6 +41,7 @@ async function importHandler(
   } = {},
   suffix,
 ) {
+  process.env.STORE_PDF_SECRET = TEST_SECRET;
   mock.module(fetchModulePath, { namedExports: { downloadInvoice } });
   mock.module(parsePdfModulePath, { namedExports: { getFilenameFromPdf, getStringsFromPdf } });
   mock.module(blobModulePath, { namedExports: { store } });
@@ -60,7 +66,6 @@ describe('store-pdf handler', () => {
     const req = makeReq({ url: 'https://example.com/x.pdf', type: 'MOSOBLEIRC' }, 'Bearer wrong');
     const res = makeRes();
     await handler(req, res);
-    delete process.env.STORE_PDF_SECRET;
     assert.deepEqual(res.calls, [
       { type: 'status', code: 401 },
       { type: 'json', body: { error: 'Unauthorized' } },
@@ -139,6 +144,19 @@ describe('store-pdf handler', () => {
     assert.deepEqual(res.calls, [
       { type: 'status', code: 422 },
       { type: 'json', body: { error: 'Cannot extract filename from PDF' } },
+    ]);
+  });
+
+  it('returns 500 when downloadInvoice throws unexpectedly', async () => {
+    const { default: handler } = await importHandler(
+      { downloadInvoice: async () => { throw new Error('network failure'); } },
+      'download-throws',
+    );
+    const res = makeRes();
+    await handler(makeReq({ url: 'https://example.com/x.pdf', type: 'MOSOBLEIRC' }), res);
+    assert.deepEqual(res.calls, [
+      { type: 'status', code: 500 },
+      { type: 'json', body: { ok: false, error: 'network failure' } },
     ]);
   });
 });

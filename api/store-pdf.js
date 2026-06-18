@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   }
 
   const secret = process.env.STORE_PDF_SECRET;
-  if (secret && req.headers['authorization'] !== `Bearer ${secret}`) {
+  if (req.headers['authorization'] !== `Bearer ${secret}`) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -47,6 +47,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, filename });
   } catch (error) {
     console.error('[store-pdf] error:', error.message);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ ok: false, error: error.message });
   }
 }

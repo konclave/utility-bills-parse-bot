@@ -1,17 +1,21 @@
-import { getFilenameFromPdf, getStringsFromPdf } from '../shared/parse-pdf.js';
-
-import * as S3 from '../shared/s3.js';
-import { filenamePrefix as electricityPrefix } from '../electricity/fetch-electricity.js';
-import { filenamePrefix as waterPrefix } from '../water/fetch-water.js';
-import { filenamePrefix as mosobleircPrefix } from '../mosobleirc/config.js';
 import { handleEmailEvent } from './parse-email.js';
-import { downloadInvoice } from './fetch.js';
 
+/**
+ * Extracts the invoice link URL from a YC API Gateway event body.
+ * @param {{body: string}} event - YC API Gateway event
+ * @returns {{invoiceLinkUrl: string}}
+ */
 function handleApiGatewayEvent(event) {
   const data = JSON.parse(event.body);
   return Object.values(data)[0];
 }
 
+/**
+ * Handles an email webhook or API Gateway event by extracting the invoice PDF URL
+ * and delegating download and storage to the Vercel store-pdf endpoint.
+ * @param {{body?: string, messages?: Array<Object>}} event - YC trigger event
+ * @returns {Promise<void>}
+ */
 export async function webhookCallback(event) {
   let invoiceLinkUrl = '';
   let type = '';
@@ -28,32 +32,27 @@ export async function webhookCallback(event) {
   }
 
   if (!invoiceLinkUrl) {
-    throw new Error(
-      `Cannot parse email body from event: ${JSON.stringify(event)}`,
-    );
+    throw new Error(`Cannot parse email body from event: ${JSON.stringify(event)}`);
   }
 
-  const invoiceUrl = new URL(invoiceLinkUrl);
-  const pdf = await downloadInvoice(invoiceUrl);
-
-  const isTgk = await isTrehgorka(pdf);
-  if (!isTgk && type === '') {
-    return;
+  const storePdfUrl = process.env.VERCEL_STORE_PDF_URL;
+  if (!storePdfUrl) {
+    throw new Error('VERCEL_STORE_PDF_URL is not configured');
   }
 
-  const filenamePrefix =
-    type === 'MOSOBLEIRC' ? mosobleircPrefix : electricityPrefix;
-
-  const filename = await getFilenameFromPdf(pdf, filenamePrefix);
-  if (!filename) {
-    throw new Error('Cannot get the filename from the PDF: ' + invoiceLinkUrl);
+  const headers = { 'Content-Type': 'application/json' };
+  if (process.env.STORE_PDF_SECRET) {
+    headers['Authorization'] = `Bearer ${process.env.STORE_PDF_SECRET}`;
   }
 
-  await S3.purgeStorage([waterPrefix, electricityPrefix, mosobleircPrefix]);
-  await S3.store(pdf, filename);
-}
+  const res = await fetch(storePdfUrl, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ url: invoiceLinkUrl, type }),
+  });
 
-async function isTrehgorka(pdf) {
-  const strings = await getStringsFromPdf(pdf);
-  return strings.some((entry) => entry.toUpperCase().includes('023221017850'));
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`store-pdf endpoint failed: ${res.status} ${body}`);
+  }
 }

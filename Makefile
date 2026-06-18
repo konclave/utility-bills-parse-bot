@@ -70,10 +70,7 @@ pack-proxy:
 		src/electricity/fetch-electricity.js \
 		src/mosobleirc/fetch.js \
 		src/mosobleirc/auth.js \
-		src/mosobleirc/store.js \
 		src/mosobleirc/config.js \
-		src/shared/s3.js \
-		src/shared/parse-pdf.js \
 		src/shared/period.js
 
 .PHONY: deploy-yc-proxy
@@ -127,15 +124,13 @@ deploy-yc:
 		--source-path ./bill-parser.zip
 	@yc serverless function version create \
 		--function-id $(YC_STORE_LAMBDA_ID) \
-		--runtime nodejs18 \
+		--runtime nodejs22 \
 		--entrypoint index.storeHandler \
 		--execution-timeout 45s \
-		--service-account-id $(YC_SERVICE_ACCOUNT_ID)\
-		--async
-		--environment YC_REGION=ru-central1 \
-		--environment YC_S3_BUCKET=electricity-invoices \
-		--environment YC_S3_ACCESS_KEY=$(YC_S3_ACCESS_KEY) \
-		--environment YC_S3_SECRET_ACCESS_KEY=$(YC_S3_SECRET_ACCESS_KEY) \
+		--service-account-id $(YC_SERVICE_ACCOUNT_ID) \
+		--async \
+		--environment VERCEL_STORE_PDF_URL=$(VERCEL_STORE_PDF_URL) \
+		--environment STORE_PDF_SECRET="$$(grep '^STORE_PDF_SECRET=' .env | cut -d= -f2-)" \
 		--source-path ./bill-parser.zip
 
 .PHONY: cleanup

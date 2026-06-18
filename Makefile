@@ -69,17 +69,17 @@ deploy-yc-proxy: pack
 		--execution-timeout 45s \
 		--service-account-id $(YC_SERVICE_ACCOUNT_ID) \
 		--environment LOGIN=$(LOGIN) \
-		--environment PASSWORD=$(PASSWORD) \
+		--environment PASSWORD="$$(grep '^PASSWORD=' .env | cut -d= -f2-)" \
 		--environment MOSENERGO_LOGIN=$(MOSENERGO_LOGIN) \
-		--environment MOSENERGO_PASSWORD=$(MOSENERGO_PASSWORD) \
+		--environment MOSENERGO_PASSWORD="$$(grep '^MOSENERGO_PASSWORD=' .env | cut -d= -f2-)" \
 		--environment MOSENERGO_ACCOUNT=$(MOSENERGO_ACCOUNT) \
 		--environment MOSENERGO_ID_KNG=$(MOSENERGO_ID_KNG) \
 		--environment MOSENERGO_NM_ABN=$(MOSENERGO_NM_ABN) \
 		--environment MOSOBL_ACCOUNT=$(MOSOBL_ACCOUNT) \
 		--environment MOSOBL_TENANT_TOKEN=$(MOSOBL_TENANT_TOKEN) \
 		--environment MOSOBL_LOGIN=$(MOSOBL_LOGIN) \
-		--environment MOSOBL_PASSWORD=$(MOSOBL_PASSWORD) \
-		--environment REQUEST_TIMEOUT=5000 \
+		--environment MOSOBL_PASSWORD="$$(grep '^MOSOBL_PASSWORD=' .env | cut -d= -f2-)" \
+		--environment REQUEST_TIMEOUT=30000 \
 		--environment MESSAGE_FORMAT=$(MESSAGE_FORMAT) \
 		--source-path ./bill-parser.zip
 

@@ -26,7 +26,7 @@ deploy-vercel: register-vercel
 .PHONY: register-vercel
 # target: register-vercel – register Telegram webhook to Vercel URL
 register-vercel:
-	@curl "https://api.telegram.org/bot$(BOT_TOKEN)/setWebHook?url=$(VERCEL_HOOK_URL)$(BOT_HOOK_PATH)&drop_pending_updates=True"
+	@curl "https://api.telegram.org/bot$(BOT_TOKEN)/setWebHook?url=$(VERCEL_HOOK_URL)api/webhook&drop_pending_updates=True"
 
 .PHONY: upload
 # target: upload – upload existing archive to AWS Lambda

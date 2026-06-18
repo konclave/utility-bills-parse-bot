@@ -32,7 +32,7 @@ export async function callback(ctx, options) {
 }
 
 async function fetchFromProxy(proxyUrl, venue, format) {
-  const res = await fetch(`${proxyUrl}/bills`, {
+  const res = await fetch(proxyUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ venue, format }),

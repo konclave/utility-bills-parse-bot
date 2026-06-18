@@ -23,6 +23,7 @@ export async function webhookCallback(event) {
   if (event.body) {
     const result = handleApiGatewayEvent(event);
     invoiceLinkUrl = result.invoiceLinkUrl;
+    type = 'MOSENERGO';
   }
 
   if (event.messages) {

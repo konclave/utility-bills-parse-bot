@@ -18,6 +18,9 @@ export default async function handler(req, res) {
   }
 
   const secret = process.env.STORE_PDF_SECRET;
+  if (!secret) {
+    return res.status(500).json({ error: 'STORE_PDF_SECRET is not configured' });
+  }
   if (req.headers['authorization'] !== `Bearer ${secret}`) {
     return res.status(401).json({ error: 'Unauthorized' });
   }

@@ -50,7 +50,7 @@ describe('webhookCallback', () => {
     assert.strictEqual(fetchCalls[0].url, 'https://app.vercel.app/api/store-pdf');
     assert.deepEqual(JSON.parse(fetchCalls[0].options.body), {
       url: 'https://example.com/invoice.pdf',
-      type: '',
+      type: 'MOSENERGO',
     });
     assert.strictEqual(fetchCalls[0].options.headers['Authorization'], 'Bearer secret123');
   });

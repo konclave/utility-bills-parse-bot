@@ -2,6 +2,12 @@ import * as bot from '../src/bot/index.js';
 
 const botInstance = bot.init();
 
+/**
+ * Vercel webhook handler — receives Telegram updates and forwards them to the bot instance.
+ * @param {import('http').IncomingMessage & {body: object}} req
+ * @param {import('http').ServerResponse} res
+ * @returns {Promise<void>}
+ */
 export default async function handler(req, res) {
   if (!botInstance) {
     return res.status(500).json({ error: 'Bot not initialized' });

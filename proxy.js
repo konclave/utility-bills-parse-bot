@@ -1,6 +1,7 @@
 import { fetch as fetchWater } from './src/water/fetch-water.js';
 import { fetch as fetchElectricity } from './src/electricity/fetch-electricity.js';
 import { fetchCharges } from './src/mosobleirc/fetch.js';
+import { fetchPdf as fetchMosoblPdf } from './src/mosobleirc/store.js';
 import { getTodayISODate } from './src/shared/period.js';
 
 const providers = {
@@ -13,6 +14,14 @@ const providers = {
     return { encoding: 'base64', data: Buffer.from(pdf).toString('base64') };
   },
   mosobleirc: async () => {
+    try {
+      const pdf = await fetchMosoblPdf();
+      if (pdf?.length) {
+        return { encoding: 'base64', data: Buffer.from(pdf).toString('base64') };
+      }
+    } catch (e) {
+      console.log('[mosobleirc] failed to fetch stored PDF:', e.message);
+    }
     const json = await fetchCharges(getTodayISODate());
     return { encoding: 'json', data: json };
   },

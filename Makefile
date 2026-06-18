@@ -59,9 +59,26 @@ unregister:
 deploy-gateway:
 	@yc serverless api-gateway update d5dvbvaselvn2d30mv6v --spec api-gateway.yaml
 
+.PHONY: pack-proxy
+# target: pack-proxy – archive only proxy source files (excludes bot, tests, fixtures)
+pack-proxy:
+	@rm -f ./proxy.zip
+	@zip -r9q proxy.zip \
+		proxy.js \
+		package.json \
+		src/water/fetch-water.js \
+		src/electricity/fetch-electricity.js \
+		src/mosobleirc/fetch.js \
+		src/mosobleirc/auth.js \
+		src/mosobleirc/store.js \
+		src/mosobleirc/config.js \
+		src/shared/s3.js \
+		src/shared/parse-pdf.js \
+		src/shared/period.js
+
 .PHONY: deploy-yc-proxy
 # target: deploy-yc-proxy – deploy provider proxy function to Yandex Cloud
-deploy-yc-proxy: pack
+deploy-yc-proxy: pack-proxy
 	@yc serverless function version create \
 		--function-id $(YC_PROXY_LAMBDA_ID) \
 		--runtime nodejs22 \
@@ -81,7 +98,7 @@ deploy-yc-proxy: pack
 		--environment MOSOBL_PASSWORD="$$(grep '^MOSOBL_PASSWORD=' .env | cut -d= -f2-)" \
 		--environment REQUEST_TIMEOUT=30000 \
 		--environment MESSAGE_FORMAT=$(MESSAGE_FORMAT) \
-		--source-path ./bill-parser.zip
+		--source-path ./proxy.zip
 
 .PHONY: deploy-yc
 # target: deploy-yc – deploy existing archive to Yandex Cloud

@@ -3,7 +3,7 @@ import * as electricity from '../electricity/index.js';
 import * as mosobleirc from '../mosobleirc/index.js';
 import { parse as parseWater } from '../water/parse-water.js';
 import { parse as parseElectricity } from '../electricity/parse-electricity.js';
-import { parseCharges } from '../mosobleirc/parse.js';
+import { parsePdfToChargeData, parseCharges, appendPdfMessage } from '../mosobleirc/parse.js';
 import {
   buildVenueSummary,
   normalizeProviderPayload,
@@ -57,6 +57,11 @@ async function fetchAndParse(proxyUrl, providerName) {
     const buffer = Buffer.from(data, 'base64');
     if (providerName === 'water') return parseWater(buffer);
     if (providerName === 'electricity') return parseElectricity(buffer);
+    if (providerName === 'mosobleirc') {
+      const pdfData = await parsePdfToChargeData(buffer);
+      const parsed = await parseCharges(pdfData);
+      return appendPdfMessage({ messages: parsed, pdfBuffer: buffer });
+    }
   }
 
   if (providerName === 'mosobleirc') return parseCharges(data);

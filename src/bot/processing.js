@@ -113,9 +113,13 @@ async function fetchMosobleirc(proxyUrl) {
   const cached = await fetchByName(filename);
 
   if (cached?.length) {
-    const pdfData = await parsePdfToChargeData(cached);
-    const parsed = await parseCharges(pdfData);
-    return appendPdfMessage({ messages: parsed, pdfBuffer: cached });
+    try {
+      const pdfData = await parsePdfToChargeData(cached);
+      const parsed = await parseCharges(pdfData);
+      return appendPdfMessage({ messages: parsed, pdfBuffer: cached });
+    } catch (error) {
+      console.error('[fetchMosobleirc] PDF parse failed, falling back to proxy:', error.message);
+    }
   }
 
   const res = await fetch(proxyUrl, {

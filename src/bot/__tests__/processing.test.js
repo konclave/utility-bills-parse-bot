@@ -59,6 +59,31 @@ describe('getValuesViaProxy — mosobleirc', () => {
     assert.match(result.text, /500 ₽/);
   });
 
+  it('falls back to proxy JSON when Blob PDF parse throws', async () => {
+    const proxyFetchCalls = [];
+    mock.module(blobModulePath, {
+      namedExports: { fetchByName: async () => Buffer.from('bad pdf'), store: async () => {} },
+    });
+    mock.module(mosobleircParsePath, {
+      namedExports: {
+        parsePdfToChargeData: async () => { throw new Error('Invalid PDF header'); },
+        parseCharges: async () => [{ emoji: '🏠', label: 'Одинцово', value: 400 }],
+        appendPdfMessage: ({ messages }) => messages,
+      },
+    });
+    mock.method(globalThis, 'fetch', async (url, options) => {
+      proxyFetchCalls.push(JSON.parse(options.body));
+      return { ok: true, json: async () => ({ encoding: 'json', data: { chargeDetails: [] } }) };
+    });
+
+    const { getValuesViaProxy } = await import(`${processingModulePath}?mosobl-pdf-parse-fail`);
+    const result = await getValuesViaProxy('https://proxy.yc/bills', { venue: 'O' });
+
+    assert.strictEqual(proxyFetchCalls.length, 1);
+    assert.deepEqual(proxyFetchCalls[0], { provider: 'mosobleirc' });
+    assert.match(result.text, /400 ₽/);
+  });
+
   it('falls back to proxy JSON when Blob has no mosobleirc PDF', async () => {
     const proxyFetchCalls = [];
     mock.module(blobModulePath, {

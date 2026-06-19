@@ -22,7 +22,6 @@ graph TD
     subgraph YC["Yandex Cloud"]
         PROXY[proxy.js\nProvider proxy]
         EMAIL[mosenergo-bill-store\nEmail trigger]
-        S3[(YC S3\nMosobleirc JSON cache)]
     end
 
     WATER_SVC[Тройка Water API]
@@ -48,7 +47,7 @@ graph TD
 
     MOSOBL_SVC -->|JSON charges| PROXY
     PROXY -->|JSON| BOT
-    BOT <-->|JSON cache| S3
+    BOT <-->|JSON charges cache| BLOB
 ```
 
 ---
@@ -147,7 +146,7 @@ sequenceDiagram
 | Water | Vercel Blob | `water-MM-YYYY.pdf` | Proxy response (fire-and-forget) |
 | Electricity | Vercel Blob | `electricity-MM-YYYY.pdf` | Proxy response (fire-and-forget) |
 | Mosobleirc PDF | Vercel Blob | `mosobleirc-MM-YYYY.pdf` | Email trigger → `store-pdf` |
-| Mosobleirc charges | YC S3 | `mosobleirc.json` → `{ "MM-YYYY": [...] }` | Direct API fetch (fallback) |
+| Mosobleirc charges | Vercel Blob | `mosobleirc-charges-MM-YYYY.json` | Direct API fetch (fallback) |
 
 The current billing period key is always the **previous calendar month** (e.g. in June 2026 → `05-2026`).
 

@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 const handlerPath = resolve(import.meta.dirname, '../store-pdf.js');
 const fetchModulePath = resolve(import.meta.dirname, '../../src/mosenergo-bill-store/fetch.js');
 const parsePdfModulePath = resolve(import.meta.dirname, '../../src/shared/parse-pdf.js');
-const blobModulePath = resolve(import.meta.dirname, '../../src/shared/blob.js');
+const blobModulePath = resolve(import.meta.dirname, '../../src/shared/storage.js');
 
 afterEach(() => {
   mock.restoreAll();

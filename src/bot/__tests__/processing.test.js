@@ -38,7 +38,7 @@ describe('getValuesViaProxy — mosobleirc', () => {
   it('reads mosobleirc PDF from Vercel Blob when available and skips proxy call', async () => {
     const proxyFetchCalls = [];
     mock.module(storagePath, {
-      namedExports: { fetch: async () => Buffer.from('fake pdf'), store: async () => {} },
+      namedExports: { fetch: async () => Buffer.from('fake pdf'), store: async () => {}, purge: async () => {} },
     });
     mock.module(mosobleircParsePath, {
       namedExports: {
@@ -62,7 +62,7 @@ describe('getValuesViaProxy — mosobleirc', () => {
   it('falls back to proxy JSON when Blob PDF parse throws', async () => {
     const proxyFetchCalls = [];
     mock.module(storagePath, {
-      namedExports: { fetch: async () => Buffer.from('bad pdf'), store: async () => {} },
+      namedExports: { fetch: async () => Buffer.from('bad pdf'), store: async () => {}, purge: async () => {} },
     });
     mock.module(mosobleircParsePath, {
       namedExports: {
@@ -87,7 +87,7 @@ describe('getValuesViaProxy — mosobleirc', () => {
   it('falls back to proxy JSON when Blob has no mosobleirc PDF', async () => {
     const proxyFetchCalls = [];
     mock.module(storagePath, {
-      namedExports: { fetch: async () => null, store: async () => {} },
+      namedExports: { fetch: async () => null, store: async () => {}, purge: async () => {} },
     });
     mock.module(mosobleircParsePath, {
       namedExports: {
@@ -114,7 +114,7 @@ describe('getValuesViaProxy — water', () => {
   it('reads water PDF from Vercel Blob when available and skips proxy call', async () => {
     const proxyFetchCalls = [];
     mock.module(storagePath, {
-      namedExports: { fetch: async () => Buffer.from('water pdf'), store: async () => {} },
+      namedExports: { fetch: async () => Buffer.from('water pdf'), store: async () => {}, purge: async () => {} },
     });
     mock.module(waterParsePath, {
       namedExports: { parse: async () => [{ emoji: '💧', label: 'Вода', value: 120 }] },
@@ -138,6 +138,7 @@ describe('getValuesViaProxy — water', () => {
       namedExports: {
         fetch: async () => null,
         store: async (buf, filename) => stored.push({ filename }),
+        purge: async () => {},
       },
     });
     mock.module(waterParsePath, {

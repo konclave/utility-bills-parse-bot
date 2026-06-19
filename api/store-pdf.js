@@ -1,6 +1,6 @@
 import { downloadInvoice } from '../src/mosenergo-bill-store/fetch.js';
 import { getFilenameFromPdf, getStringsFromPdf } from '../src/shared/parse-pdf.js';
-import { store } from '../src/shared/blob.js';
+import { store } from '../src/shared/storage.js';
 import { filenamePrefix as electricityPrefix } from '../src/electricity/fetch-electricity.js';
 import { filenamePrefix as mosobleircPrefix } from '../src/mosobleirc/config.js';
 

@@ -12,14 +12,14 @@ export async function callback(ctx, options) {
       : await getValues({ venue: options?.venue, format });
     await ctx.reply(summary.text, { parse_mode: 'HTML' });
 
-    if (summary.attachments.length > 0) {
+    if (summary.attachments.length === 1) {
+      const [file] = summary.attachments;
+      await ctx.replyWithDocument({ source: file.fileBuffer, filename: file.fileTitle });
+    } else if (summary.attachments.length > 1) {
       await ctx.replyWithMediaGroup(
         summary.attachments.map((file) => ({
           type: 'document',
-          media: {
-            filename: file.fileTitle,
-            source: file.fileBuffer,
-          },
+          media: { source: file.fileBuffer, filename: file.fileTitle },
         })),
       );
     }

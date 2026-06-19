@@ -259,6 +259,31 @@ describe('mosobleirc fetch', () => {
 
     assert.deepEqual(result, parsed);
   });
+
+  it('calls proxy and returns parsed charges when no PDF is cached and YC_PROXY_URL is set', async () => {
+    mock.timers.enable({ apis: ['Date'], now: new Date('2026-05-13T12:00:00.000Z') });
+    const proxyCalls = [];
+    const parsed = [{ text: 'proxy result', value: 999 }];
+    process.env.YC_PROXY_URL = 'https://proxy.yc/bills';
+
+    const { fetch } = await importMosOblFetch(
+      {
+        fetchPdf: async () => null,
+        parseCharges: async () => parsed,
+      },
+      'mosobl-proxy-path',
+    );
+    mock.method(globalThis, 'fetch', async (url, options) => {
+      proxyCalls.push(JSON.parse(options.body));
+      return { ok: true, json: async () => ({ data: { chargeDetails: [] } }) };
+    });
+
+    const result = await fetch();
+
+    assert.deepEqual(proxyCalls, [{ provider: 'mosobleirc' }]);
+    assert.deepEqual(result, parsed);
+    delete process.env.YC_PROXY_URL;
+  });
 });
 
 describe('mosobleirc store', () => {

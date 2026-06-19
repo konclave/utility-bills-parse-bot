@@ -30,6 +30,20 @@ export async function fetch() {
     }
   }
 
+  const proxyUrl = process.env.YC_PROXY_URL;
+  if (proxyUrl) {
+    const res = await globalThis.fetch(proxyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ provider: 'mosobleirc' }),
+    });
+    if (!res.ok) {
+      throw new Error(`Proxy mosobleirc responded with ${res.status}`);
+    }
+    const { data } = await res.json();
+    return parseCharges(data);
+  }
+
   try {
     const fromStore = await storage.fetch(period);
     if (fromStore) {

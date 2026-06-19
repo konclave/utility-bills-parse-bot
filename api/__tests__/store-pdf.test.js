@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 const handlerPath = resolve(import.meta.dirname, '../store-pdf.js');
 const fetchModulePath = resolve(import.meta.dirname, '../../src/mosenergo-bill-store/fetch.js');
 const parsePdfModulePath = resolve(import.meta.dirname, '../../src/shared/parse-pdf.js');
-const blobModulePath = resolve(import.meta.dirname, '../../src/shared/storage.js');
+const storageModulePath = resolve(import.meta.dirname, '../../src/shared/storage.js');
 
 afterEach(() => {
   mock.restoreAll();
@@ -44,7 +44,7 @@ async function importHandler(
   process.env.STORE_PDF_SECRET = TEST_SECRET;
   mock.module(fetchModulePath, { namedExports: { downloadInvoice } });
   mock.module(parsePdfModulePath, { namedExports: { getFilenameFromPdf, getStringsFromPdf } });
-  mock.module(blobModulePath, { namedExports: { store } });
+  mock.module(storageModulePath, { namedExports: { store } });
   return import(`${handlerPath}?${suffix}`);
 }
 

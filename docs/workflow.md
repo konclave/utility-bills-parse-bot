@@ -83,7 +83,7 @@ sequenceDiagram
     WH->>BOT: callback(ctx, { venue: 'O' })
     BOT->>TG: "⏳ Wait for it..."
 
-    BOT->>BLOB: fetchByName("mosobleirc-MM-YYYY.pdf")
+    BOT->>BLOB: fetch("mosobleirc-MM-YYYY.pdf")
 
     alt PDF in Blob
         BLOB-->>BOT: Buffer

@@ -19,7 +19,7 @@ if (missingFixtures.length === 0) {
 await Promise.all(
   missingFixtures.map(async (fileName) => {
     const file = await fetch(fileName);
-    writeFileSync(file, MOCKS_DIR);
+    writeFileSync(resolve(MOCKS_DIR, fileName), file);
   }),
 );
 

@@ -25,10 +25,7 @@ function createCtx() {
 
 async function importCallback(namedExports, suffix) {
   mock.module(processingModulePath, {
-    namedExports: {
-      getValuesViaProxy: async () => { throw new Error('getValuesViaProxy not mocked'); },
-      ...namedExports,
-    },
+    namedExports,
   });
   return import(`${callbackModulePath}?${suffix}`);
 }

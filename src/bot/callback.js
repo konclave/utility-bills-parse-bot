@@ -1,15 +1,12 @@
-import { getValues, getValuesViaProxy } from './processing.js';
+import { getValues } from './processing.js';
 
 export async function callback(ctx, options) {
   const debug = options?.debug ?? false;
   const format = process.env.MESSAGE_FORMAT === 'detailed' ? 'detailed' : 'compact';
-  const proxyUrl = process.env.YC_PROXY_URL;
 
   try {
     await ctx.reply('⏳ Wait for it...');
-    const summary = proxyUrl
-      ? await getValuesViaProxy(proxyUrl, { venue: options?.venue, format })
-      : await getValues({ venue: options?.venue, format });
+    const summary = await getValues({ venue: options?.venue, format });
     await ctx.reply(summary.text, { parse_mode: 'HTML' });
 
     if (summary.attachments.length === 1) {

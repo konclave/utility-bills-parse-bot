@@ -1,6 +1,7 @@
-import { existsSync } from 'node:fs';
+import { existsSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { fetch } from '../src/shared/storage.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -15,8 +16,11 @@ if (missingFixtures.length === 0) {
   process.exit(0);
 }
 
-console.warn(
-  `Warning: missing test fixtures in src/__fixtures__/: ${missingFixtures.join(', ')}.\n` +
-    'Add the PDF fixture files manually to run the full test suite.',
+await Promise.all(
+  missingFixtures.map(async (fileName) => {
+    const file = await fetch(fileName);
+    writeFileSync(file, MOCKS_DIR);
+  }),
 );
+
 process.exit(0);

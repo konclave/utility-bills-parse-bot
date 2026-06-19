@@ -4,12 +4,12 @@ import { resolve } from 'node:path';
 
 const indexModulePath = resolve(import.meta.dirname, '../index.js');
 const storeModulePath = resolve(import.meta.dirname, '../store.js');
+const sharedStoragePath = resolve(import.meta.dirname, '../../shared/storage.js');
 const fetchModulePath = resolve(import.meta.dirname, '../fetch.js');
 const parseModulePath = resolve(import.meta.dirname, '../parse.js');
 const storageModulePath = resolve(import.meta.dirname, '../store.js');
 const periodModulePath = resolve(import.meta.dirname, '../../shared/period.js');
 const messageModulePath = resolve(import.meta.dirname, '../../shared/error-message.js');
-const s3ModulePath = resolve(import.meta.dirname, '../../shared/s3.js');
 
 async function importMosOblFetch(
   {
@@ -262,14 +262,18 @@ describe('mosobleirc fetch', () => {
 });
 
 describe('mosobleirc store', () => {
-  it('persists resolved JSON records instead of promise placeholders', async () => {
-    const s3Calls = [];
+  it('stores resolved JSON data as a per-period Blob file and triggers purge', async () => {
+    const storeCalls = [];
+    const purgeCalls = [];
 
-    mock.module(s3ModulePath, {
+    mock.module(sharedStoragePath, {
       namedExports: {
-        fetch: async () => Buffer.from('{}'),
-        store: async (body, filename) => {
-          s3Calls.push({ body, filename });
+        fetch: async () => null,
+        store: async (buffer, filename) => {
+          storeCalls.push({ body: buffer.toString(), filename });
+        },
+        purge: async (prefix, keep) => {
+          purgeCalls.push({ prefix, keep });
         },
       },
     });
@@ -279,11 +283,69 @@ describe('mosobleirc store', () => {
 
     await store('04-2026', Promise.resolve(record));
 
-    assert.deepEqual(s3Calls, [
-      {
-        body: JSON.stringify({ '04-2026': record }),
-        filename: 'mosobleirc.json',
+    assert.deepEqual(storeCalls, [{
+      body: JSON.stringify(record),
+      filename: 'mosobleirc-charges-04-2026.json',
+    }]);
+    assert.deepEqual(purgeCalls, [{ prefix: 'mosobleirc-charges-', keep: 12 }]);
+  });
+
+  it('returns parsed JSON for the given period from Blob', async () => {
+    const record = [{ text: 'cached', value: 42 }];
+
+    mock.module(sharedStoragePath, {
+      namedExports: {
+        fetch: async (filename) => {
+          if (filename === 'mosobleirc-charges-04-2026.json') {
+            return Buffer.from(JSON.stringify(record));
+          }
+          return null;
+        },
+        store: async () => {},
+        purge: async () => {},
       },
-    ]);
+    });
+
+    const { fetch } = await import(`${storeModulePath}?fetch-returns-json`);
+    const result = await fetch('04-2026');
+
+    assert.deepEqual(result, record);
+  });
+
+  it('returns undefined when no Blob exists for the period', async () => {
+    mock.module(sharedStoragePath, {
+      namedExports: {
+        fetch: async () => null,
+        store: async () => {},
+        purge: async () => {},
+      },
+    });
+
+    const { fetch } = await import(`${storeModulePath}?fetch-returns-undefined`);
+    const result = await fetch('04-2026');
+
+    assert.strictEqual(result, undefined);
+  });
+
+  it('fetchPdf returns PDF buffer from Blob using current period filename', async () => {
+    const pdfBuffer = Buffer.from('fake pdf bytes');
+
+    mock.module(sharedStoragePath, {
+      namedExports: {
+        fetch: async (filename) => {
+          if (filename.startsWith('mosobleirc-') && filename.endsWith('.pdf')) {
+            return pdfBuffer;
+          }
+          return null;
+        },
+        store: async () => {},
+        purge: async () => {},
+      },
+    });
+
+    const { fetchPdf } = await import(`${storeModulePath}?fetch-pdf`);
+    const result = await fetchPdf();
+
+    assert.deepEqual(result, pdfBuffer);
   });
 });

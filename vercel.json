@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "api/webhook.js": {
+      "maxDuration": 45
+    },
+    "api/store-pdf.js": {
+      "maxDuration": 45
+    }
+  }
+}

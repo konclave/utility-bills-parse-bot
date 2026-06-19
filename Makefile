@@ -18,6 +18,16 @@ all: help
 # target: deploy – archive source code, register Telegram bot webhook and deploy archive to Yandex Cloud Functions
 deploy: pack register deploy-yc
 
+.PHONY: deploy-vercel
+# target: deploy-vercel – deploy bot to Vercel and register Telegram webhook to Vercel URL
+deploy-vercel: register-vercel
+	@vercel --prod
+
+.PHONY: register-vercel
+# target: register-vercel – register Telegram webhook to Vercel URL
+register-vercel:
+	@curl "https://api.telegram.org/bot$(BOT_TOKEN)/setWebHook?url=$(VERCEL_HOOK_URL)api/webhook&drop_pending_updates=True"
+
 .PHONY: upload
 # target: upload – upload existing archive to AWS Lambda
 upload:
@@ -43,6 +53,49 @@ register:
 unregister:
 	@curl "https://api.telegram.org/bot$(BOT_TOKEN)/deleteWebHook?url=$(YANDEX_HOOK_URL)$(BOT_HOOK_PATH)&drop_pending_updates=True"
 
+
+.PHONY: deploy-gateway
+# target: deploy-gateway – update Yandex Cloud API Gateway from api-gateway.yaml
+deploy-gateway:
+	@yc serverless api-gateway update d5dvbvaselvn2d30mv6v --spec api-gateway.yaml
+
+.PHONY: pack-proxy
+# target: pack-proxy – archive only proxy source files (excludes bot, tests, fixtures)
+pack-proxy:
+	@rm -f ./proxy.zip
+	@zip -r9q proxy.zip \
+		proxy.js \
+		package.json \
+		src/water/fetch-water.js \
+		src/electricity/fetch-electricity.js \
+		src/mosobleirc/fetch.js \
+		src/mosobleirc/auth.js \
+		src/mosobleirc/config.js \
+		src/shared/period.js
+
+.PHONY: deploy-yc-proxy
+# target: deploy-yc-proxy – deploy provider proxy function to Yandex Cloud
+deploy-yc-proxy: pack-proxy
+	@yc serverless function version create \
+		--function-id $(YC_PROXY_LAMBDA_ID) \
+		--runtime nodejs22 \
+		--entrypoint proxy.handler \
+		--execution-timeout 45s \
+		--service-account-id $(YC_SERVICE_ACCOUNT_ID) \
+		--environment LOGIN=$(LOGIN) \
+		--environment PASSWORD="$$(grep '^PASSWORD=' .env | cut -d= -f2-)" \
+		--environment MOSENERGO_LOGIN=$(MOSENERGO_LOGIN) \
+		--environment MOSENERGO_PASSWORD="$$(grep '^MOSENERGO_PASSWORD=' .env | cut -d= -f2-)" \
+		--environment MOSENERGO_ACCOUNT=$(MOSENERGO_ACCOUNT) \
+		--environment MOSENERGO_ID_KNG=$(MOSENERGO_ID_KNG) \
+		--environment MOSENERGO_NM_ABN=$(MOSENERGO_NM_ABN) \
+		--environment MOSOBL_ACCOUNT=$(MOSOBL_ACCOUNT) \
+		--environment MOSOBL_TENANT_TOKEN=$(MOSOBL_TENANT_TOKEN) \
+		--environment MOSOBL_LOGIN=$(MOSOBL_LOGIN) \
+		--environment MOSOBL_PASSWORD="$$(grep '^MOSOBL_PASSWORD=' .env | cut -d= -f2-)" \
+		--environment REQUEST_TIMEOUT=30000 \
+		--environment MESSAGE_FORMAT=$(MESSAGE_FORMAT) \
+		--source-path ./proxy.zip
 
 .PHONY: deploy-yc
 # target: deploy-yc – deploy existing archive to Yandex Cloud
@@ -71,15 +124,13 @@ deploy-yc:
 		--source-path ./bill-parser.zip
 	@yc serverless function version create \
 		--function-id $(YC_STORE_LAMBDA_ID) \
-		--runtime nodejs18 \
+		--runtime nodejs22 \
 		--entrypoint index.storeHandler \
 		--execution-timeout 45s \
-		--service-account-id $(YC_SERVICE_ACCOUNT_ID)\
-		--async
-		--environment YC_REGION=ru-central1 \
-		--environment YC_S3_BUCKET=electricity-invoices \
-		--environment YC_S3_ACCESS_KEY=$(YC_S3_ACCESS_KEY) \
-		--environment YC_S3_SECRET_ACCESS_KEY=$(YC_S3_SECRET_ACCESS_KEY) \
+		--service-account-id $(YC_SERVICE_ACCOUNT_ID) \
+		--async \
+		--environment VERCEL_STORE_PDF_URL=$(VERCEL_STORE_PDF_URL) \
+		--environment STORE_PDF_SECRET="$$(grep '^STORE_PDF_SECRET=' .env | cut -d= -f2-)" \
 		--source-path ./bill-parser.zip
 
 .PHONY: cleanup

@@ -1,26 +1,26 @@
-import * as s3 from '../shared/s3.js';
+import { fetch as fetchBlob, store as storeBlob, purge as purgeBlob } from '../shared/storage.js';
 import { getCurrentPeriodFilename } from '../shared/period.js';
-import { filenamePrefix } from './config.js'
+import { filenamePrefix } from './config.js';
 
-const MOSOBL_STORAGE_FILENAME = 'mosobleirc.json';
+const CHARGES_PREFIX = 'mosobleirc-charges-';
+const CHARGES_KEEP = 12;
+
+function chargesFilename(period) {
+  return `${CHARGES_PREFIX}${period}.json`;
+}
 
 export async function store(period, record) {
-  const fileBuffer = await s3.fetch(MOSOBL_STORAGE_FILENAME);
-  const values = fileBuffer.length ? JSON.parse(fileBuffer.toString()) : {};
-  values[period] = await record;
-  await s3.store(JSON.stringify(values), MOSOBL_STORAGE_FILENAME);
+  const data = await record;
+  await storeBlob(Buffer.from(JSON.stringify(data)), chargesFilename(period));
+  purgeBlob(CHARGES_PREFIX, CHARGES_KEEP).catch(console.error);
 }
 
 export async function fetch(period) {
-  const fileBuffer = await s3.fetch(MOSOBL_STORAGE_FILENAME);
-  if (!fileBuffer?.length) {
-    return;
-  }
-  const values = JSON.parse(fileBuffer.toString());
-  return values[period];
+  const buffer = await fetchBlob(chargesFilename(period));
+  if (!buffer) return undefined;
+  return JSON.parse(buffer.toString());
 }
 
 export async function fetchPdf() {
-  const pdfFileName = getCurrentPeriodFilename(filenamePrefix);
-  return await s3.fetch(pdfFileName);
+  return fetchBlob(getCurrentPeriodFilename(filenamePrefix));
 }

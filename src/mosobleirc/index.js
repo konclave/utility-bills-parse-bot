@@ -1,5 +1,9 @@
 import { fetchCharges } from './fetch.js';
-import { parseCharges, parsePdfToChargeData, appendPdfMessage } from './parse.js';
+import {
+  parseCharges,
+  parsePdfToChargeData,
+  appendPdfMessage,
+} from './parse.js';
 import { getErrorMessage } from '../shared/error-message.js';
 import { getTodayISODate, getPeriodString } from '../shared/period.js';
 import * as storage from './store.js';
@@ -30,6 +34,20 @@ export async function fetch() {
     }
   }
 
+  const proxyUrl = process.env.YC_PROXY_URL;
+  if (proxyUrl) {
+    const res = await globalThis.fetch(proxyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ provider: 'mosobleirc' }),
+    });
+    if (!res.ok) {
+      throw new Error(`Proxy mosobleirc responded with ${res.status}`);
+    }
+    const { data } = await res.json();
+    return parseCharges(data);
+  }
+
   try {
     const fromStore = await storage.fetch(period);
     if (fromStore) {
@@ -56,10 +74,7 @@ export async function fetch() {
     try {
       await storage.store(period, parsed);
     } catch (error) {
-      console.log(
-        `MosOblEIRC cache store for period ${period} failed.`,
-        error,
-      );
+      console.log(`MosOblEIRC cache store for period ${period} failed.`, error);
     }
     return parsed;
   } catch (error) {

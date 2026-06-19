@@ -1,0 +1,35 @@
+openapi: 3.0.0
+info:
+  title: Sample API
+  version: 1.0.0
+servers:
+- url: https://d5dvbvaselvn2d30mv6v.apigw.yandexcloud.net
+paths:
+  /how-much:
+    get:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4eqjg1celfs0na7fjvc
+        service_account_id: aje0vd31sf53hdtinamg
+    post:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4eqjg1celfs0na7fjvc
+        service_account_id: aje0vd31sf53hdtinamg
+  /store-it-please:
+    post:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4e49epdculi9i2moe8j
+        service_account_id: aje0vd31sf53hdtinamg
+  /bills:
+    post:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4e0mia9jomjm5ltv733
+        service_account_id: aje0vd31sf53hdtinamg
+    get:
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4e0mia9jomjm5ltv733
+        service_account_id: aje0vd31sf53hdtinamg

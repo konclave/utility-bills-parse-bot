@@ -3,101 +3,98 @@ import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
 
 const storeModulePath = resolve(import.meta.dirname, '../index.js');
-const fetchModulePath = resolve(import.meta.dirname, '../fetch.js');
-const parsePdfModulePath = resolve(import.meta.dirname, '../../shared/parse-pdf.js');
-const s3ModulePath = resolve(import.meta.dirname, '../../shared/s3.js');
 const rootModulePath = resolve(import.meta.dirname, '../../../index.js');
 const botModulePath = resolve(import.meta.dirname, '../../bot/index.js');
 const devServerModulePath = resolve(import.meta.dirname, '../../dev-server.js');
 
-async function importWebhookCallback(
-  {
-    downloadInvoice = async () => Buffer.from('pdf'),
-    getFilenameFromPdf = async () => '',
-    getStringsFromPdf = async () => ['mosenergo invoice'],
-    purgeStorage = async () => undefined,
-    store = async () => undefined,
-  } = {},
-  suffix,
-) {
-  mock.module(fetchModulePath, {
-    namedExports: { downloadInvoice },
-  });
-  mock.module(parsePdfModulePath, {
-    namedExports: { getFilenameFromPdf, getStringsFromPdf },
-  });
-  mock.module(s3ModulePath, {
-    namedExports: { purgeStorage, store },
-  });
+afterEach(() => mock.restoreAll());
 
+async function importWebhookCallback(fetchImpl, suffix) {
+  mock.method(globalThis, 'fetch', fetchImpl);
   return import(`${storeModulePath}?${suffix}`);
 }
 
 async function importStoreHandler(webhookCallback, suffix) {
-  mock.module(resolve(import.meta.dirname, '../index.js'), {
-    namedExports: { webhookCallback },
-  });
+  mock.module(storeModulePath, { namedExports: { webhookCallback } });
   mock.module(botModulePath, {
-    namedExports: {
-      init: () => ({
-        handleUpdate: async () => undefined,
-      }),
-    },
+    namedExports: { init: () => ({ handleUpdate: async () => undefined }) },
   });
   mock.module(devServerModulePath, {
-    namedExports: {
-      startLocalServer: async () => undefined,
-    },
+    namedExports: { startLocalServer: async () => undefined },
   });
-
   return import(`${rootModulePath}?${suffix}`);
 }
 
-afterEach(() => {
-  mock.restoreAll();
-});
-
 describe('webhookCallback', () => {
-  it('rejects when filename detection fails instead of resolving with an Error object', async () => {
-    const s3Calls = [];
+  it('POSTs the invoice URL and type to the Vercel store-pdf endpoint', async () => {
+    process.env.VERCEL_STORE_PDF_URL = 'https://app.vercel.app/api/store-pdf';
+    process.env.STORE_PDF_SECRET = 'secret123';
+
+    const fetchCalls = [];
     const { webhookCallback } = await importWebhookCallback(
-      {
-        getStringsFromPdf: async () => ['023221017850'],
-        purgeStorage: async (...args) => {
-          s3Calls.push({ method: 'purgeStorage', args });
-        },
-        store: async (...args) => {
-          s3Calls.push({ method: 'store', args });
-        },
+      async (url, options) => {
+        fetchCalls.push({ url, options });
+        return { ok: true, text: async () => '{"ok":true}' };
       },
-      'webhook-filename-failure',
+      'posts-to-vercel',
+    );
+
+    await webhookCallback({
+      body: JSON.stringify({ payload: { invoiceLinkUrl: 'https://example.com/invoice.pdf' } }),
+    });
+
+    delete process.env.VERCEL_STORE_PDF_URL;
+    delete process.env.STORE_PDF_SECRET;
+
+    assert.strictEqual(fetchCalls.length, 1);
+    assert.strictEqual(fetchCalls[0].url, 'https://app.vercel.app/api/store-pdf');
+    assert.deepEqual(JSON.parse(fetchCalls[0].options.body), {
+      url: 'https://example.com/invoice.pdf',
+      type: 'MOSENERGO',
+    });
+    assert.strictEqual(fetchCalls[0].options.headers['Authorization'], 'Bearer secret123');
+  });
+
+  it('throws when VERCEL_STORE_PDF_URL is not set', async () => {
+    delete process.env.VERCEL_STORE_PDF_URL;
+    const { webhookCallback } = await importWebhookCallback(
+      async () => ({ ok: true }),
+      'no-url-env-var',
     );
 
     await assert.rejects(
       webhookCallback({
-        body: JSON.stringify({
-          payload: { invoiceLinkUrl: 'https://example.com/invoice.pdf' },
-        }),
+        body: JSON.stringify({ payload: { invoiceLinkUrl: 'https://example.com/invoice.pdf' } }),
       }),
-      {
-        message: 'Cannot get the filename from the PDF: https://example.com/invoice.pdf',
-      },
+      { message: 'VERCEL_STORE_PDF_URL is not configured' },
+    );
+  });
+
+  it('throws when the store-pdf endpoint returns an error', async () => {
+    process.env.VERCEL_STORE_PDF_URL = 'https://app.vercel.app/api/store-pdf';
+    const { webhookCallback } = await importWebhookCallback(
+      async () => ({ ok: false, status: 500, text: async () => 'Internal error' }),
+      'endpoint-error',
     );
 
-    assert.deepEqual(s3Calls, []);
+    await assert.rejects(
+      webhookCallback({
+        body: JSON.stringify({ payload: { invoiceLinkUrl: 'https://example.com/invoice.pdf' } }),
+      }),
+      { message: 'store-pdf endpoint failed: 500 Internal error' },
+    );
+
+    delete process.env.VERCEL_STORE_PDF_URL;
   });
 });
 
 describe('storeHandler', () => {
-  it('propagates webhook ingestion failures instead of returning a success response', async () => {
-    const error = new Error('Cannot get the filename from the PDF: https://example.com/invoice.pdf');
+  it('propagates webhook ingestion failures', async () => {
+    const error = new Error('store-pdf endpoint failed: 500 Internal error');
     const { storeHandler } = await importStoreHandler(
-      async () => {
-        throw error;
-      },
-      'store-handler-propagates-webhook-error',
+      async () => { throw error; },
+      'store-handler-propagates-error',
     );
-
     await assert.rejects(storeHandler({ body: '{}' }), error);
   });
 });

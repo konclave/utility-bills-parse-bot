@@ -1,11 +1,5 @@
 import axios from 'axios';
-import * as S3 from '../shared/s3.js';
-import {
-  getCurrentPeriodFilename,
-  getMonth,
-  getYear,
-} from '../shared/period.js';
-import { getFilenameFromPdf } from '../shared/parse-pdf.js';
+import { getMonth, getYear } from '../shared/period.js';
 
 export const filenamePrefix = 'electricity-';
 
@@ -23,57 +17,32 @@ const client = axios.create({
   timeout: process.env.REQUEST_TIMEOUT || 0,
 });
 
+/**
+ * Fetches the current-period electricity bill PDF from the Mosenergosbyt API.
+ * @returns {Promise<Buffer>} Raw PDF binary
+ */
 export async function fetch() {
-  const filename = getCurrentPeriodFilename(filenamePrefix);
-
-  try {
-    const fromStorage = await S3.fetch(filename); // Fetch from the Object Storage
-    if (fromStorage?.length) {
-      return fromStorage;
-    }
-  } catch (e) {
-    console.log(
-      '[electricity] failed to fetch persisted pdf from cloud storage:',
-      JSON.stringify(e.message),
-    );
-  }
-
   const username = process.env.MOSENERGO_LOGIN;
   const password = process.env.MOSENERGO_PASSWORD;
-  if (!username) {
-    throw new Error('Username is missing!');
-  }
-  if (!password) {
-    throw new Error('Password is missing!');
-  }
+  if (!username) throw new Error('Username is missing!');
+  if (!password) throw new Error('Password is missing!');
 
   const loginData = await login(username, password);
   const { session } = loginData;
-
   if (session === undefined) {
     throw new Error(`Login to Mosenergosbyt failed: ${loginData.nm_result}`);
   }
 
   const { vl_params } = await fetchPdfRequestParams(session);
-  const pdf = await fetchPdf(vl_params);
-
-  const pdfFilename = await getFilenameFromPdf(pdf, filenamePrefix);
-  if (!pdfFilename) {
-    throw new Error('Cannot get the filename from the PDF');
-  }
-
-  try {
-    await S3.purgeStorage([filenamePrefix]);
-    await S3.store(pdf, pdfFilename);
-  } catch (e) {
-    console.log(
-      '[electricity] failed to store pdf in cloud storage:',
-      JSON.stringify(e.message),
-    );
-  }
-  return pdf;
+  return fetchPdf(vl_params);
 }
 
+/**
+ * Authenticates with the Mosenergosbyt API and returns the session object.
+ * @param {string} username - Mosenergosbyt account login
+ * @param {string} password - Mosenergosbyt account password
+ * @returns {Promise<{session?: string, nm_result?: string}>}
+ */
 async function login(username, password) {
   const response = await client.get('/auth');
   let cookies = response.headers['set-cookie']?.join('; ');
@@ -94,14 +63,17 @@ async function login(username, password) {
     data,
     params: { action: 'auth', query: 'login' },
     url: '/gate_lkcomu',
-    headers: {
-      Referer: 'https://my.mosenergosbyt.ru/auth',
-    },
+    headers: { Referer: 'https://my.mosenergosbyt.ru/auth' },
   };
   const loginResponse = await client(options);
   return loginResponse.data.data[0];
 }
 
+/**
+ * Fetches the print-bill link parameters for the current billing period.
+ * @param {string} session - Active Mosenergosbyt session token
+ * @returns {Promise<{vl_params: string}>}
+ */
 async function fetchPdfRequestParams(session) {
   const period = getFetchPeriod();
   const data = new URLSearchParams();
@@ -128,13 +100,15 @@ async function fetchPdfRequestParams(session) {
   return response.data.data[0];
 }
 
+/**
+ * Submits the print request with the given parameters and returns the PDF binary.
+ * @param {string} dataJson - JSON-encoded PDF request parameters from fetchPdfRequestParams
+ * @returns {Promise<Buffer>} Raw PDF binary
+ */
 async function fetchPdf(dataJson) {
   const dataObject = JSON.parse(dataJson);
   const data = new URLSearchParams();
-
-  Object.entries(dataObject).forEach(([key, value]) => {
-    data.append(key, value);
-  });
+  Object.entries(dataObject).forEach(([key, value]) => data.append(key, value));
 
   const params = { anstype: 'print' };
   const options = {
@@ -153,10 +127,13 @@ async function fetchPdf(dataJson) {
   return response.data;
 }
 
+/**
+ * Returns the billing period string for the current month, formatted as 'YYYY-MM-01 00:00:00'.
+ * @returns {string}
+ */
 function getFetchPeriod() {
   const now = new Date();
   const month = getMonth(now);
   const year = getYear(now);
-
   return `${year}-${month}-01 00:00:00`;
 }

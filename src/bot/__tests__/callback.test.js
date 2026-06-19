@@ -24,7 +24,9 @@ function createCtx() {
 }
 
 async function importCallback(namedExports, suffix) {
-  mock.module(processingModulePath, { namedExports });
+  mock.module(processingModulePath, {
+    namedExports,
+  });
   return import(`${callbackModulePath}?${suffix}`);
 }
 

@@ -1,12 +1,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import https from 'node:https';
-import {
-  getMonth,
-  getCurrentPeriodFilename,
-  getYear,
-} from '../shared/period.js';
-import * as S3 from '../shared/s3.js';
+import { getMonth, getYear } from '../shared/period.js';
 
 const client = axios.create({
   baseURL: 'https://lk.myuk.ru',
@@ -20,53 +15,31 @@ const client = axios.create({
     Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
   },
   timeout: process.env.REQUEST_TIMEOUT || 0,
-  httpsAgent: new https.Agent({
-    rejectUnauthorized: false,
-  }),
+  httpsAgent: new https.Agent({ rejectUnauthorized: false }),
 });
 
 export const filenamePrefix = 'water-';
 
+/**
+ * Fetches the current-period water bill PDF from the provider API.
+ * @returns {Promise<Buffer>} Raw PDF binary
+ */
 export async function fetch() {
-  const filename = getCurrentPeriodFilename(filenamePrefix);
-
-  try {
-    const persisted = await S3.fetch(filename);
-    if (persisted?.length) {
-      return persisted;
-    }
-  } catch (e) {
-    console.log(
-      '[water] failed to fetch persisted pdf from cloud storage:',
-      JSON.stringify(e.message),
-    );
-  }
-
   const username = process.env.LOGIN;
   const password = process.env.PASSWORD;
-  if (!username) {
-    throw new Error('Username is missing!');
-  }
-  if (!password) {
-    throw new Error('Password is missing!');
-  }
+  if (!username) throw new Error('Username is missing!');
+  if (!password) throw new Error('Password is missing!');
   const accountHtml = await login(username, password);
   const params = getPdfRequestParams(accountHtml);
-  const pdf = await fetchPdf(username, params);
-
-  try {
-    await S3.purgeStorage([filenamePrefix]);
-    await S3.store(pdf, filename);
-  } catch (e) {
-    console.log(
-      '[water] failed to store pdf in cloud storage:',
-      JSON.stringify(e.message),
-    );
-  }
-
-  return pdf;
+  return fetchPdf(username, params);
 }
 
+/**
+ * Logs in to the water provider portal and returns the account page HTML.
+ * @param {string} username - Account login
+ * @param {string} password - Account password
+ * @returns {Promise<string>} Account page HTML
+ */
 async function login(username, password) {
   const response = await client.get('/');
   const cookies = response.headers['set-cookie']?.join('; ');
@@ -80,29 +53,33 @@ async function login(username, password) {
   params.append('ehm_sec', password);
   params.append('_csrf', csrf);
 
-  const options = {
-    method: 'POST',
-    data: params,
-    url: '/login',
-  };
+  const options = { method: 'POST', data: params, url: '/login' };
   const { data } = await client(options);
   return data;
 }
 
+/**
+ * Extracts the PDF request parameters (billing period, account token) from the account page HTML.
+ * @param {string} html - Account page HTML
+ * @returns {URLSearchParams}
+ */
 function getPdfRequestParams(html) {
   const $ = cheerio.load(html);
-  const $form = $(
-    '#billings > table input[type="submit"]:not(:disabled)',
-  ).parent();
+  const $form = $('#billings > table input[type="submit"]:not(:disabled)').parent();
   const tt = $('input[name="tt"]', $form).attr('value');
   const period = getFetchPeriod();
   const params = new URLSearchParams();
   params.append('dt', period);
   params.append('tt', tt);
-
   return params;
 }
 
+/**
+ * Submits the invoice request and returns the PDF binary.
+ * @param {string} username - Account login (used to set invoice cookie)
+ * @param {URLSearchParams} data - PDF request parameters
+ * @returns {Promise<Buffer>} Raw PDF binary
+ */
 async function fetchPdf(username, data) {
   const options = {
     method: 'POST',
@@ -126,10 +103,13 @@ async function fetchPdf(username, data) {
   }
 }
 
+/**
+ * Returns the billing period string for the current month, formatted as 'MM-YYYY'.
+ * @returns {string}
+ */
 function getFetchPeriod() {
   const now = new Date();
   const month = getMonth(now);
   const year = getYear(now);
-
   return `${month}-${year}`;
 }

@@ -1,10 +1,7 @@
 import * as water from '../water/index.js';
 import * as electricity from '../electricity/index.js';
 import * as mosobleirc from '../mosobleirc/index.js';
-import {
-  buildVenueSummary,
-  normalizeProviderPayload,
-} from './summary.js';
+import { buildVenueSummary, normalizeProviderPayload } from './summary.js';
 
 const venueProviders = {
   O: [{ name: 'mosobleirc', fetch: mosobleirc.fetch, venue: 'Одинцово' }],
@@ -24,7 +21,10 @@ export async function getValues({ venue, format = 'compact' }) {
   const settled = await Promise.allSettled(
     providers.map((provider) => provider.fetch()),
   );
+  return buildSummaryFromSettled(settled, providers, format);
+}
 
+function buildSummaryFromSettled(settled, providers, format) {
   const normalized = settled.flatMap((entry, index) => {
     const provider = providers[index];
     if (entry.status === 'fulfilled') {
@@ -43,7 +43,14 @@ export async function getValues({ venue, format = 'compact' }) {
       {
         provider: provider.name,
         venue: provider.venue,
-        entries: [{ emoji: '⚠️', label: 'unavailable', value: null, message: 'unavailable' }],
+        entries: [
+          {
+            emoji: '⚠️',
+            label: 'unavailable',
+            value: null,
+            message: 'unavailable',
+          },
+        ],
         totalCents: 0,
         attachments: [],
       },

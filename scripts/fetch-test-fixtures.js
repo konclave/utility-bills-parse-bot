@@ -18,8 +18,10 @@ if (missingFixtures.length === 0) {
 
 await Promise.all(
   missingFixtures.map(async (fileName) => {
-    const file = await fetch(fileName);
-    writeFileSync(resolve(MOCKS_DIR, fileName), file);
+    const file = await fetch(`__fixtures__/${fileName}`);
+    const fullPath = resolve(MOCKS_DIR, fileName);
+    console.log('@@@', fullPath);
+    writeFileSync(fullPath, file);
   }),
 );
 

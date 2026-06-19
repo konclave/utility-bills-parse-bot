@@ -61,6 +61,7 @@ async function importMosOblFetch(
 afterEach(() => {
   mock.restoreAll();
   mock.timers.reset();
+  delete process.env.YC_PROXY_URL;
 });
 
 describe('mosobleirc fetch', () => {
@@ -265,6 +266,10 @@ describe('mosobleirc fetch', () => {
     const proxyCalls = [];
     const parsed = [{ text: 'proxy result', value: 999 }];
     process.env.YC_PROXY_URL = 'https://proxy.yc/bills';
+    mock.method(globalThis, 'fetch', async (url, options) => {
+      proxyCalls.push(JSON.parse(options.body));
+      return { ok: true, json: async () => ({ data: { chargeDetails: [] } }) };
+    });
 
     const { fetch } = await importMosOblFetch(
       {
@@ -273,16 +278,11 @@ describe('mosobleirc fetch', () => {
       },
       'mosobl-proxy-path',
     );
-    mock.method(globalThis, 'fetch', async (url, options) => {
-      proxyCalls.push(JSON.parse(options.body));
-      return { ok: true, json: async () => ({ data: { chargeDetails: [] } }) };
-    });
 
     const result = await fetch();
 
     assert.deepEqual(proxyCalls, [{ provider: 'mosobleirc' }]);
     assert.deepEqual(result, parsed);
-    delete process.env.YC_PROXY_URL;
   });
 });
 

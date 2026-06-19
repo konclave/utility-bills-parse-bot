@@ -113,18 +113,15 @@ class MockTelegramBot {
   }
 
   reply(message) {
-    console.log(message);
     this.#sendMessage(message);
   }
 
   replyWithDocument(document) {
-    console.log(document);
     this.#sendMessage(document);
   }
 
   replyWithMediaGroup(mediaGroup) {
     const cleaned = createMediaGroupPayload(mediaGroup);
-    console.log(cleaned);
     this.#sendMessage(cleaned);
   }
 

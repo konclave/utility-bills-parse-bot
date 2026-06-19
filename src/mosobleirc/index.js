@@ -1,5 +1,9 @@
 import { fetchCharges } from './fetch.js';
-import { parseCharges, parsePdfToChargeData, appendPdfMessage } from './parse.js';
+import {
+  parseCharges,
+  parsePdfToChargeData,
+  appendPdfMessage,
+} from './parse.js';
 import { getErrorMessage } from '../shared/error-message.js';
 import { getTodayISODate, getPeriodString } from '../shared/period.js';
 import * as storage from './store.js';
@@ -70,10 +74,7 @@ export async function fetch() {
     try {
       await storage.store(period, parsed);
     } catch (error) {
-      console.log(
-        `MosOblEIRC cache store for period ${period} failed.`,
-        error,
-      );
+      console.log(`MosOblEIRC cache store for period ${period} failed.`, error);
     }
     return parsed;
   } catch (error) {

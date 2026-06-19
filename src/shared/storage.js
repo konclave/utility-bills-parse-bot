@@ -1,20 +1,20 @@
-import { put, list, del } from '@vercel/blob';
+import { put, list, del, get } from '@vercel/blob';
 
 export async function fetch(filename) {
   try {
-    const { blobs } = await list({ prefix: filename, limit: 1 });
-    const blob = blobs.find((b) => b.pathname === filename);
-    if (!blob) return null;
-    const res = await globalThis.fetch(blob.url);
-    if (!res.ok) return null;
-    return Buffer.from(await res.arrayBuffer());
-  } catch {
+    const result = await get(filename, { access: 'private' });
+    if (!result || result.statusCode !== 200) return null;
+    return Buffer.from(
+      await new globalThis.Response(result.stream).arrayBuffer(),
+    );
+  } catch (err) {
+    console.error('[storage.fetch] failed:', err);
     return null;
   }
 }
 
 export async function store(buffer, filename) {
-  await put(filename, buffer, { access: 'public', addRandomSuffix: false });
+  await put(filename, buffer, { access: 'private', addRandomSuffix: false });
 }
 
 export async function purge(prefix, keep = 12) {

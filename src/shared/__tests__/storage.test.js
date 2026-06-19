@@ -15,6 +15,7 @@ describe('storage.store', () => {
         put: async (filename, buffer, opts) => { puts.push({ filename, buffer, opts }); },
         list: async () => ({ blobs: [] }),
         del: async () => {},
+        get: async () => null,
       },
     });
 
@@ -25,7 +26,7 @@ describe('storage.store', () => {
     assert.deepEqual(puts, [{
       filename: 'mosobleirc-05-2026.pdf',
       buffer: buf,
-      opts: { access: 'public', addRandomSuffix: false },
+      opts: { access: 'private', addRandomSuffix: false },
     }]);
   });
 });
@@ -33,22 +34,20 @@ describe('storage.store', () => {
 describe('storage.fetch', () => {
   it('returns buffer when blob exists', async () => {
     const fakeBuffer = Buffer.from('pdf content');
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(new Uint8Array(fakeBuffer));
+        controller.close();
+      },
+    });
     mock.module(vercelBlobModulePath, {
       namedExports: {
         put: async () => {},
-        list: async ({ prefix }) => ({
-          blobs: [{ pathname: prefix, url: 'https://blob.vercel.com/test.pdf' }],
-        }),
+        list: async () => ({ blobs: [] }),
         del: async () => {},
+        get: async () => ({ statusCode: 200, stream }),
       },
     });
-    mock.method(globalThis, 'fetch', async () => ({
-      ok: true,
-      arrayBuffer: async () => fakeBuffer.buffer.slice(
-        fakeBuffer.byteOffset,
-        fakeBuffer.byteOffset + fakeBuffer.length,
-      ),
-    }));
 
     const { fetch } = await import(`${storageModulePath}?fetch-found`);
     const result = await fetch('mosobleirc-05-2026.pdf');
@@ -62,6 +61,7 @@ describe('storage.fetch', () => {
         put: async () => {},
         list: async () => ({ blobs: [] }),
         del: async () => {},
+        get: async () => null,
       },
     });
 
@@ -71,12 +71,13 @@ describe('storage.fetch', () => {
     assert.strictEqual(result, null);
   });
 
-  it('returns null on any error (e.g. list throws)', async () => {
+  it('returns null on any error (e.g. get throws)', async () => {
     mock.module(vercelBlobModulePath, {
       namedExports: {
         put: async () => {},
-        list: async () => { throw new Error('network error'); },
+        list: async () => ({ blobs: [] }),
         del: async () => {},
+        get: async () => { throw new Error('network error'); },
       },
     });
 
@@ -102,6 +103,7 @@ describe('storage.purge', () => {
           ],
         }),
         del: async (urls) => { deleted.push(...(Array.isArray(urls) ? urls : [urls])); },
+        get: async () => null,
       },
     });
 
@@ -127,6 +129,7 @@ describe('storage.purge', () => {
           ],
         }),
         del: async (urls) => { deleted.push(...(Array.isArray(urls) ? urls : [urls])); },
+        get: async () => null,
       },
     });
 
@@ -147,6 +150,7 @@ describe('storage.purge', () => {
           ],
         }),
         del: async (urls) => { deleted.push(urls); },
+        get: async () => null,
       },
     });
 
@@ -163,6 +167,7 @@ describe('storage.purge', () => {
         put: async () => {},
         list: async () => { throw new Error('network error'); },
         del: async () => {},
+        get: async () => null,
       },
     });
     mock.method(console, 'error', (...args) => errors.push(args));

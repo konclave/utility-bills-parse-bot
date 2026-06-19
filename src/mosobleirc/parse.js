@@ -308,10 +308,11 @@ export async function parseCharges(input) {
     }
 
     const sumByNames = (names) => {
-      const filteredItems = items.filter((i) => i && names.includes(i.nm_service));
+      const filteredItems = items.filter(
+        (i) => i && names.includes(i.nm_service),
+      );
       const values = filteredItems.map((i) => safeNumber(i.sm_total));
       const total = values.reduce((a, b) => a + b * 100, 0) / 100;
-      console.log(values, total);
       return { total, values };
     };
 
@@ -322,9 +323,26 @@ export async function parseCharges(input) {
     const heating = sumByNames(SERVICE_NAMES.HEATING);
 
     return [
-      { emoji: '💧', label: 'Вода', value: water.total, ...(water.values.length > 1 ? { breakdown: water.values } : {}) },
-      { emoji: '⚡️', label: 'Электричество', value: electricity.total, ...(electricity.values.length > 1 ? { breakdown: electricity.values } : {}) },
-      { emoji: '📞', label: 'Домофон', value: domofon.total, ...(domofon.values.length > 1 ? { breakdown: domofon.values } : {}) },
+      {
+        emoji: '💧',
+        label: 'Вода',
+        value: water.total,
+        ...(water.values.length > 1 ? { breakdown: water.values } : {}),
+      },
+      {
+        emoji: '⚡️',
+        label: 'Электричество',
+        value: electricity.total,
+        ...(electricity.values.length > 1
+          ? { breakdown: electricity.values }
+          : {}),
+      },
+      {
+        emoji: '📞',
+        label: 'Домофон',
+        value: domofon.total,
+        ...(domofon.values.length > 1 ? { breakdown: domofon.values } : {}),
+      },
       { emoji: '🏚️', label: 'Содержание', value: maintenance.total },
       { emoji: '🔥', label: 'Отопление', value: heating.total },
     ];

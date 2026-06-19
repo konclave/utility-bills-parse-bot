@@ -28,7 +28,11 @@ function buildSummaryFromSettled(settled, providers, format) {
   const normalized = settled.flatMap((entry, index) => {
     const provider = providers[index];
     if (entry.status === 'fulfilled') {
-      const payload = normalizeProviderPayload(provider.name, provider.venue, entry.value);
+      const payload = normalizeProviderPayload(
+        provider.name,
+        provider.venue,
+        entry.value,
+      );
       return payload.sections.map((section) => ({
         ...section,
         attachments: payload.attachments,
@@ -39,7 +43,14 @@ function buildSummaryFromSettled(settled, providers, format) {
       {
         provider: provider.name,
         venue: provider.venue,
-        entries: [{ emoji: '⚠️', label: 'unavailable', value: null, message: 'unavailable' }],
+        entries: [
+          {
+            emoji: '⚠️',
+            label: 'unavailable',
+            value: null,
+            message: 'unavailable',
+          },
+        ],
         totalCents: 0,
         attachments: [],
       },

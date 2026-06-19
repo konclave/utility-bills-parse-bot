@@ -3,7 +3,10 @@ import { afterEach, describe, it, mock } from 'node:test';
 import { resolve } from 'node:path';
 
 const storageModulePath = resolve(import.meta.dirname, '../storage.js');
-const vercelBlobModulePath = resolve(import.meta.dirname, '../../../node_modules/@vercel/blob/dist/index.js');
+const vercelBlobModulePath = resolve(
+  import.meta.dirname,
+  '../../../node_modules/@vercel/blob/dist/index.js',
+);
 
 afterEach(() => mock.restoreAll());
 
@@ -12,7 +15,9 @@ describe('storage.store', () => {
     const puts = [];
     mock.module(vercelBlobModulePath, {
       namedExports: {
-        put: async (filename, buffer, opts) => { puts.push({ filename, buffer, opts }); },
+        put: async (filename, buffer, opts) => {
+          puts.push({ filename, buffer, opts });
+        },
         list: async () => ({ blobs: [] }),
         del: async () => {},
         get: async () => null,
@@ -23,18 +28,20 @@ describe('storage.store', () => {
     const buf = Buffer.from('pdf data');
     await store(buf, 'mosobleirc-05-2026.pdf');
 
-    assert.deepEqual(puts, [{
-      filename: 'mosobleirc-05-2026.pdf',
-      buffer: buf,
-      opts: { access: 'private', addRandomSuffix: false },
-    }]);
+    assert.deepEqual(puts, [
+      {
+        filename: 'mosobleirc-05-2026.pdf',
+        buffer: buf,
+        opts: { access: 'private', addRandomSuffix: false },
+      },
+    ]);
   });
 });
 
 describe('storage.fetch', () => {
   it('returns buffer when blob exists', async () => {
     const fakeBuffer = Buffer.from('pdf content');
-    const stream = new ReadableStream({
+    const stream = new globalThis.ReadableStream({
       start(controller) {
         controller.enqueue(new Uint8Array(fakeBuffer));
         controller.close();
@@ -77,7 +84,9 @@ describe('storage.fetch', () => {
         put: async () => {},
         list: async () => ({ blobs: [] }),
         del: async () => {},
-        get: async () => { throw new Error('network error'); },
+        get: async () => {
+          throw new Error('network error');
+        },
       },
     });
 
@@ -96,13 +105,27 @@ describe('storage.purge', () => {
         put: async () => {},
         list: async () => ({
           blobs: [
-            { pathname: 'mosobleirc-charges-03-2026.json', url: 'https://blob/03-2026' },
-            { pathname: 'mosobleirc-charges-01-2026.json', url: 'https://blob/01-2026' },
-            { pathname: 'mosobleirc-charges-12-2025.json', url: 'https://blob/12-2025' },
-            { pathname: 'mosobleirc-charges-05-2026.json', url: 'https://blob/05-2026' },
+            {
+              pathname: 'mosobleirc-charges-03-2026.json',
+              url: 'https://blob/03-2026',
+            },
+            {
+              pathname: 'mosobleirc-charges-01-2026.json',
+              url: 'https://blob/01-2026',
+            },
+            {
+              pathname: 'mosobleirc-charges-12-2025.json',
+              url: 'https://blob/12-2025',
+            },
+            {
+              pathname: 'mosobleirc-charges-05-2026.json',
+              url: 'https://blob/05-2026',
+            },
           ],
         }),
-        del: async (urls) => { deleted.push(...(Array.isArray(urls) ? urls : [urls])); },
+        del: async (urls) => {
+          deleted.push(...(Array.isArray(urls) ? urls : [urls]));
+        },
         get: async () => null,
       },
     });
@@ -124,11 +147,19 @@ describe('storage.purge', () => {
         put: async () => {},
         list: async () => ({
           blobs: [
-            { pathname: 'mosobleirc-charges-01-2026.json', url: 'https://blob/01-2026' },
-            { pathname: 'mosobleirc-charges-12-2025.json', url: 'https://blob/12-2025' },
+            {
+              pathname: 'mosobleirc-charges-01-2026.json',
+              url: 'https://blob/01-2026',
+            },
+            {
+              pathname: 'mosobleirc-charges-12-2025.json',
+              url: 'https://blob/12-2025',
+            },
           ],
         }),
-        del: async (urls) => { deleted.push(...(Array.isArray(urls) ? urls : [urls])); },
+        del: async (urls) => {
+          deleted.push(...(Array.isArray(urls) ? urls : [urls]));
+        },
         get: async () => null,
       },
     });
@@ -146,10 +177,15 @@ describe('storage.purge', () => {
         put: async () => {},
         list: async () => ({
           blobs: [
-            { pathname: 'mosobleirc-charges-05-2026.json', url: 'https://blob/05-2026' },
+            {
+              pathname: 'mosobleirc-charges-05-2026.json',
+              url: 'https://blob/05-2026',
+            },
           ],
         }),
-        del: async (urls) => { deleted.push(urls); },
+        del: async (urls) => {
+          deleted.push(urls);
+        },
         get: async () => null,
       },
     });
@@ -165,7 +201,9 @@ describe('storage.purge', () => {
     mock.module(vercelBlobModulePath, {
       namedExports: {
         put: async () => {},
-        list: async () => { throw new Error('network error'); },
+        list: async () => {
+          throw new Error('network error');
+        },
         del: async () => {},
         get: async () => null,
       },
@@ -174,6 +212,8 @@ describe('storage.purge', () => {
 
     const { purge } = await import(`${storageModulePath}?purge-logs-error`);
     await assert.doesNotReject(() => purge('mosobleirc-charges-', 12));
-    assert.ok(errors.some((args) => String(args[0]).includes('[storage.purge]')));
+    assert.ok(
+      errors.some((args) => String(args[0]).includes('[storage.purge]')),
+    );
   });
 });

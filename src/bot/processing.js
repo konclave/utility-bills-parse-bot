@@ -5,7 +5,7 @@ import { parse as parseWater } from '../water/parse-water.js';
 import { parse as parseElectricity } from '../electricity/parse-electricity.js';
 import { parsePdfToChargeData, parseCharges, appendPdfMessage } from '../mosobleirc/parse.js';
 import { buildVenueSummary, normalizeProviderPayload } from './summary.js';
-import { fetchByName, store } from '../shared/blob.js';
+import { fetch as fetchBlob, store } from '../shared/storage.js';
 import { getCurrentPeriodFilename } from '../shared/period.js';
 import { filenamePrefix as mosobleircPrefix } from '../mosobleirc/config.js';
 
@@ -70,7 +70,7 @@ async function fetchAndParse(proxyUrl, providerName) {
 
   const prefix = providerFilenamePrefix[providerName];
   const filename = getCurrentPeriodFilename(prefix);
-  const cached = await fetchByName(filename);
+  const cached = await fetchBlob(filename);
 
   if (cached?.length) {
     if (providerName === 'water') return parseWater(cached);
@@ -110,7 +110,7 @@ async function fetchAndParse(proxyUrl, providerName) {
  */
 async function fetchMosobleirc(proxyUrl) {
   const filename = getCurrentPeriodFilename(mosobleircPrefix);
-  const cached = await fetchByName(filename);
+  const cached = await fetchBlob(filename);
 
   if (cached?.length) {
     try {

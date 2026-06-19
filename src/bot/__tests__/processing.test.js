@@ -6,7 +6,7 @@ const processingModulePath = resolve(import.meta.dirname, '../processing.js');
 const waterModulePath = resolve(import.meta.dirname, '../../water/index.js');
 const electricityModulePath = resolve(import.meta.dirname, '../../electricity/index.js');
 const mosobleircModulePath = resolve(import.meta.dirname, '../../mosobleirc/index.js');
-const blobModulePath = resolve(import.meta.dirname, '../../shared/blob.js');
+const storagePath = resolve(import.meta.dirname, '../../shared/storage.js');
 const mosobleircParsePath = resolve(import.meta.dirname, '../../mosobleirc/parse.js');
 const waterParsePath = resolve(import.meta.dirname, '../../water/parse-water.js');
 const electricityParsePath = resolve(import.meta.dirname, '../../electricity/parse-electricity.js');
@@ -37,8 +37,8 @@ describe('getValues', () => {
 describe('getValuesViaProxy — mosobleirc', () => {
   it('reads mosobleirc PDF from Vercel Blob when available and skips proxy call', async () => {
     const proxyFetchCalls = [];
-    mock.module(blobModulePath, {
-      namedExports: { fetchByName: async () => Buffer.from('fake pdf'), store: async () => {} },
+    mock.module(storagePath, {
+      namedExports: { fetch: async () => Buffer.from('fake pdf'), store: async () => {} },
     });
     mock.module(mosobleircParsePath, {
       namedExports: {
@@ -61,8 +61,8 @@ describe('getValuesViaProxy — mosobleirc', () => {
 
   it('falls back to proxy JSON when Blob PDF parse throws', async () => {
     const proxyFetchCalls = [];
-    mock.module(blobModulePath, {
-      namedExports: { fetchByName: async () => Buffer.from('bad pdf'), store: async () => {} },
+    mock.module(storagePath, {
+      namedExports: { fetch: async () => Buffer.from('bad pdf'), store: async () => {} },
     });
     mock.module(mosobleircParsePath, {
       namedExports: {
@@ -86,8 +86,8 @@ describe('getValuesViaProxy — mosobleirc', () => {
 
   it('falls back to proxy JSON when Blob has no mosobleirc PDF', async () => {
     const proxyFetchCalls = [];
-    mock.module(blobModulePath, {
-      namedExports: { fetchByName: async () => null, store: async () => {} },
+    mock.module(storagePath, {
+      namedExports: { fetch: async () => null, store: async () => {} },
     });
     mock.module(mosobleircParsePath, {
       namedExports: {
@@ -113,8 +113,8 @@ describe('getValuesViaProxy — mosobleirc', () => {
 describe('getValuesViaProxy — water', () => {
   it('reads water PDF from Vercel Blob when available and skips proxy call', async () => {
     const proxyFetchCalls = [];
-    mock.module(blobModulePath, {
-      namedExports: { fetchByName: async () => Buffer.from('water pdf'), store: async () => {} },
+    mock.module(storagePath, {
+      namedExports: { fetch: async () => Buffer.from('water pdf'), store: async () => {} },
     });
     mock.module(waterParsePath, {
       namedExports: { parse: async () => [{ emoji: '💧', label: 'Вода', value: 120 }] },
@@ -134,9 +134,9 @@ describe('getValuesViaProxy — water', () => {
   it('fetches water and electricity PDFs from proxy, stores in Blob, and returns parsed results on Blob miss', async () => {
     const stored = [];
     const fakePdf = Buffer.from('water pdf binary');
-    mock.module(blobModulePath, {
+    mock.module(storagePath, {
       namedExports: {
-        fetchByName: async () => null,
+        fetch: async () => null,
         store: async (buf, filename) => stored.push({ filename }),
       },
     });

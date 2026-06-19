@@ -27,6 +27,6 @@
     "pre-push": "make update-github-secrets"
   },
   "engines": {
-    "node": ">=22.0.0 < 23.0.0"
+    "node": ">=22.0.0 < 26.0.0"
   }
 }
